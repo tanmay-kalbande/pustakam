@@ -206,7 +206,8 @@ function App() {
     setBooks(loadedBooks);
     hasLoadedUserBooksRef.current = true;
 
-    const holdTime = user ? 1500 : 0;
+    // Ensure a smooth transition even for fasting loading landing page
+    const holdTime = user ? 1500 : 1000;
     setTimeout(() => {
       setIsLoadingScreenExiting(true);
       setTimeout(() => {
