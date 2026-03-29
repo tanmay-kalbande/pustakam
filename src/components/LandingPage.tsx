@@ -93,7 +93,7 @@ const renderHome = (
       </motion.h1>
 
       <motion.p
-        className="mx-auto md:mx-0 mb-4 max-w-[620px] px-4 text-[14px] leading-[1.55] text-white/52 md:px-0 md:text-[15px]"
+        className="mx-auto md:mx-0 mb-8 max-w-[620px] px-4 text-[14px] leading-[1.55] text-white/52 md:px-0 md:text-[15px]"
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.18, ease: 'easeOut' }}
@@ -159,7 +159,7 @@ const renderHome = (
     </div>
 
     {/* Testimonial */}
-    <div className="mt-2 h-[84px] w-full max-w-md border-l-2 border-amber-400/25 pl-4 text-left mx-auto md:mx-0">
+    <div className="mt-4 h-[84px] w-full max-w-md mx-auto md:mx-0">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentTestimonialIdx}
@@ -167,6 +167,7 @@ const renderHome = (
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -10 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
+          className="border-l border-amber-400/25 pl-4 text-left"
         >
           <p className="text-[12px] italic leading-relaxed text-white/60">
             "{TESTIMONIALS[currentTestimonialIdx].quote}"
