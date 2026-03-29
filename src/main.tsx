@@ -36,10 +36,22 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </StrictMode>
-);
+import NotFoundPage from './components/NotFoundPage';
+
+const pathname = window.location.pathname;
+
+if (pathname !== '/' && pathname !== '/index.html') {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <NotFoundPage />
+    </StrictMode>
+  );
+} else {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </StrictMode>
+  );
+}

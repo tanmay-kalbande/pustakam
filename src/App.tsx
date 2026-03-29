@@ -33,7 +33,6 @@ import { DisclaimerPage } from './components/DisclaimerPage';
 import BlogPage from './components/BlogPage';
 import { Toast, ToastType } from './components/Toast';
 import { APP_AI_BRANDLINE, ZHIPU_MODELS } from './constants/ai';
-import NotFoundPage from './components/NotFoundPage';
 
 type AppView = 'list' | 'create' | 'detail';
 type Theme = 'light' | 'dark';
@@ -280,14 +279,6 @@ function App() {
     !isLoading &&
     !isAuthTransitioning &&
     ((isSupabaseEnabled && !isAuthenticated) || (!isSupabaseEnabled && showLocalLanding));
-
-  // ============================================================================
-  // ROUTING CHECK
-  // ============================================================================
-  const pathname = window.location.pathname;
-  if (pathname !== '/' && pathname !== '/index.html') {
-    return <NotFoundPage theme={theme} />;
-  }
 
   // ============================================================================
   // HANDLERS
