@@ -541,199 +541,13 @@ function App() {
   // RENDER
   // ============================================================================
 
-  if (shouldShowLanding) {
-    return (
-      <>
-        <LandingPage
-          onLogin={() => { setAuthMode('signin'); setShowAuthModal(true); }}
-          onGetStarted={() => {
-            if (isSupabaseEnabled) { setAuthMode('signup'); setShowAuthModal(true); return; }
-            setShowLocalLanding(false);
-            setView('list');
-          }}
-          onSubscribe={() => { setAuthMode('subscribe'); setShowAuthModal(true); }}
-          onShowAbout={() => setShowAboutPage(true)}
-          onShowTerms={() => setShowTermsPage(true)}
-          onShowPrivacy={() => setShowPrivacyPage(true)}
-          onShowCompliance={() => setShowCompliancePage(true)}
-          onShowDisclaimer={() => setShowDisclaimerPage(true)}
-          onShowBlog={() => setShowBlogPage(true)}
-        />
-        <AuthModal
-          isOpen={isSupabaseEnabled && showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          initialMode={authMode}
-          onSuccess={() => {
-            setIsAuthTransitioning(true);
-            setIsLoadingScreenVisible(true);
-            setShowAuthModal(false);
-            setTimeout(() => {
-              setIsLoadingScreenExiting(true);
-              setTimeout(() => {
-                setIsLoadingScreenVisible(false);
-                setIsLoadingScreenExiting(false);
-                setShowWelcomeModal(true);
-              }, 700);
-            }, 2500);
-          }}
-        />
-        {showAboutPage && <AboutPage onClose={() => setShowAboutPage(false)} />}
-        {showTermsPage && <TermsPage onClose={() => setShowTermsPage(false)} />}
-        {showPrivacyPage && <PrivacyPage onClose={() => setShowPrivacyPage(false)} />}
-        {showAPIDocsPage && <APIDocsPage onClose={() => setShowAPIDocsPage(false)} />}
-        {showUsageGuidePage && <UsageGuidePage onClose={() => setShowUsageGuidePage(false)} />}
-        {showCompliancePage && <CompliancePage onClose={() => setShowCompliancePage(false)} />}
-        {showDisclaimerPage && <DisclaimerPage isOpen={showDisclaimerPage} onClose={() => setShowDisclaimerPage(false)} />}
-        {showBlogPage && <BlogPage onClose={() => setShowBlogPage(false)} />}
-        <Analytics />
-      </>
-    );
-  }
-
   return (
     <div className="app-container">
+      {/* 1. Global Background Layers */}
       {theme === 'dark' ? <NebulaBackground className="z-[-1]" /> : <div className="sun-background" />}
       {theme === 'dark' && !shouldShowLanding && <div className="app-bg-overlay" />}
 
-
-      <TopHeader
-        settings={settings}
-        books={books}
-        currentBookId={currentBookId}
-        onModelChange={handleModelChange}
-        onOpenSettings={() => setSettingsOpen(true)}
-        onOpenDocs={() => setShowUsageGuidePage(true)}
-        onOpenAPIDocs={() => setShowAPIDocsPage(true)}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        onOpenAuth={() => setShowAuthModal(true)}
-        authEnabled={isSupabaseEnabled}
-        isAuthenticated={!!user}
-        user={user}
-        userProfile={profile}
-        onSignOut={signOut}
-        centerContent={
-          showListInMain && !currentBookId
-            ? <h1 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">My Books</h1>
-            : null
-        }
-      />
-
-      <main id="main-scroll-area" className="main-content">
-        {showOfflineMessage && (
-          <div className="fixed top-20 right-4 z-50 content-card p-3 animate-fade-in-up">
-            <div className="flex items-center gap-2 text-yellow-400">
-              <WifiOff size={16} />
-              <span className="text-sm">You're offline. Some features may be unavailable.</span>
-            </div>
-          </div>
-        )}
-
-        <BookView
-          books={books}
-          currentBookId={currentBookId}
-          onCreateBookRoadmap={handleCreateBookRoadmap}
-          onGenerateAllModules={handleGenerateAllModules}
-          onRetryFailedModules={handleRetryFailedModules}
-          onAssembleBook={handleAssembleBook}
-          onSelectBook={handleSelectBook}
-          onDeleteBook={handleDeleteBook}
-          onUpdateBookStatus={handleUpdateBookStatus}
-          hasApiKey={hasApiKey}
-          view={view}
-          setView={setView}
-          onUpdateBookContent={(bookId, content) =>
-            setBooks(prev => prev.map(b => b.id === bookId ? { ...b, finalBook: content, updatedAt: new Date() } : b))
-          }
-          showListInMain={showListInMain}
-          setShowListInMain={setShowListInMain}
-          isMobile={isMobile}
-          generationStatus={generationStatus}
-          generationStats={generationStats}
-          onPauseGeneration={handlePauseGeneration}
-          onResumeGeneration={handleResumeGeneration}
-          isGenerating={isGenerating}
-          onRetryDecision={handleRetryDecision}
-          availableModels={alternativeModels}
-          theme={theme}
-          onOpenSettings={() => setSettingsOpen(true)}
-          showAlertDialog={showAlertDialog}
-          showToast={showToast}
-          onReadingModeChange={setIsReadingMode}
-          settings={settings}
-          onModelChange={handleModelChange}
-        />
-      </main>
-
-      <SettingsModal
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        settings={settings}
-        onSaveSettings={handleSaveSettings}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        onOpenAPIDocs={() => setShowAPIDocsPage(true)}
-        onOpenUsageGuide={() => setShowUsageGuidePage(true)}
-        onOpenCompliance={() => setShowCompliancePage(true)}
-        showAlertDialog={showAlertDialog}
-      />
-
-      {/* Model switch modal */}
-      {showModelSwitch && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-          <div className="card-elevated w-full max-w-sm p-6 animate-fade-in-up">
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">Switch AI Model</h3>
-              <p className="text-xs text-[var(--text-muted)]">Select an alternative model to continue generation.</p>
-            </div>
-            
-            <div className="space-y-2 mb-6">
-              {modelSwitchOptions.map(opt => (
-                <button
-                  key={`${opt.provider}-${opt.model}`}
-                  onClick={() => handleModelSwitch(opt.provider as ModelProvider, opt.model)}
-                  className="w-full p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg hover:border-[var(--brand)]/30 hover:bg-[var(--brand)]/5 transition-all text-left group"
-                >
-                  <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--brand)] transition-colors">{opt.name}</div>
-                  <div className="text-[10px] text-[var(--text-muted)] mt-1 uppercase tracking-widest">{opt.provider} • {opt.model}</div>
-                </button>
-              ))}
-            </div>
-            
-            <button 
-              onClick={() => setShowModelSwitch(false)} 
-              className="btn btn-secondary w-full"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {isInstallable && !isInstalled && (
-        <InstallPrompt onInstall={installApp} onDismiss={dismissInstallPrompt} />
-      )}
-
-      <CustomAlertDialog isOpen={isAlertDialogOpen} onClose={handleAlertDialogClose} {...alertDialogProps} />
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => { setIsAuthTransitioning(true); setShowAuthModal(false); setShowWelcomeModal(true); }}
-      />
-
-      <WelcomeModal isOpen={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} />
-
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
-      {showAboutPage && <AboutPage onClose={() => setShowAboutPage(false)} />}
-      {showTermsPage && <TermsPage onClose={() => setShowTermsPage(false)} />}
-      {showPrivacyPage && <PrivacyPage onClose={() => setShowPrivacyPage(false)} />}
-      {showAPIDocsPage && <APIDocsPage onClose={() => setShowAPIDocsPage(false)} />}
-      {showUsageGuidePage && <UsageGuidePage onClose={() => setShowUsageGuidePage(false)} />}
-      {showCompliancePage && <CompliancePage onClose={() => setShowCompliancePage(false)} />}
-      {showDisclaimerPage && <DisclaimerPage isOpen={showDisclaimerPage} onClose={() => setShowDisclaimerPage(false)} />}
-
+      {/* 2. Loading Phase (Full Screen Portal/Overlay) */}
       {isLoadingScreenVisible && (
         <LoadingScreen
           theme={theme}
@@ -742,9 +556,197 @@ function App() {
         />
       )}
 
+      {/* 3. Authentication & Content Determining Phase */}
+      {/* We wait for auth to settle (isLoading=false) before showing ANY content to prevent FOUC */}
+      {!isLoading && !isAuthTransitioning && (
+        <>
+          {shouldShowLanding ? (
+            /* A. Landing / Auth Entry Path */
+            <>
+              <LandingPage
+                onLogin={() => { setAuthMode('signin'); setShowAuthModal(true); }}
+                onGetStarted={() => {
+                  if (isSupabaseEnabled) { setAuthMode('signup'); setShowAuthModal(true); return; }
+                  setShowLocalLanding(false);
+                  setView('list');
+                }}
+                onSubscribe={() => { setAuthMode('subscribe'); setShowAuthModal(true); }}
+                onShowAbout={() => setShowAboutPage(true)}
+                onShowTerms={() => setShowTermsPage(true)}
+                onShowPrivacy={() => setShowPrivacyPage(true)}
+                onShowCompliance={() => setShowCompliancePage(true)}
+                onShowDisclaimer={() => setShowDisclaimerPage(true)}
+                onShowBlog={() => setShowBlogPage(true)}
+              />
+              <AuthModal
+                isOpen={isSupabaseEnabled && showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+                initialMode={authMode}
+                onSuccess={() => {
+                  setIsAuthTransitioning(true);
+                  setIsLoadingScreenVisible(true);
+                  setShowAuthModal(false);
+                  setTimeout(() => {
+                    setIsLoadingScreenExiting(true);
+                    setTimeout(() => {
+                      setIsLoadingScreenVisible(false);
+                      setIsLoadingScreenExiting(false);
+                      setShowWelcomeModal(true);
+                    }, 700);
+                  }, 2500);
+                }}
+              />
+            </>
+          ) : (
+            /* B. Application Main Path */
+            <>
+              <TopHeader
+                settings={settings}
+                books={books}
+                currentBookId={currentBookId}
+                onModelChange={handleModelChange}
+                onOpenSettings={() => setSettingsOpen(true)}
+                onOpenDocs={() => setShowUsageGuidePage(true)}
+                onOpenAPIDocs={() => setShowAPIDocsPage(true)}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+                onOpenAuth={() => setShowAuthModal(true)}
+                authEnabled={isSupabaseEnabled}
+                isAuthenticated={!!user}
+                user={user}
+                userProfile={profile}
+                onSignOut={signOut}
+                centerContent={
+                  showListInMain && !currentBookId
+                    ? <h1 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">My Books</h1>
+                    : null
+                }
+              />
+
+              <main id="main-scroll-area" className="main-content">
+                {showOfflineMessage && (
+                  <div className="fixed top-20 right-4 z-50 content-card p-3 animate-fade-in-up">
+                    <div className="flex items-center gap-2 text-yellow-400">
+                      <WifiOff size={16} />
+                      <span className="text-sm">You're offline. Some features may be unavailable.</span>
+                    </div>
+                  </div>
+                )}
+
+                <BookView
+                  books={books}
+                  currentBookId={currentBookId}
+                  onCreateBookRoadmap={handleCreateBookRoadmap}
+                  onGenerateAllModules={handleGenerateAllModules}
+                  onRetryFailedModules={handleRetryFailedModules}
+                  onAssembleBook={handleAssembleBook}
+                  onSelectBook={handleSelectBook}
+                  onDeleteBook={handleDeleteBook}
+                  onUpdateBookStatus={handleUpdateBookStatus}
+                  hasApiKey={hasApiKey}
+                  view={view}
+                  setView={setView}
+                  onUpdateBookContent={(bookId, content) =>
+                    setBooks(prev => prev.map(b => b.id === bookId ? { ...b, finalBook: content, updatedAt: new Date() } : b))
+                  }
+                  showListInMain={showListInMain}
+                  setShowListInMain={setShowListInMain}
+                  isMobile={isMobile}
+                  generationStatus={generationStatus}
+                  generationStats={generationStats}
+                  onPauseGeneration={handlePauseGeneration}
+                  onResumeGeneration={handleResumeGeneration}
+                  isGenerating={isGenerating}
+                  onRetryDecision={handleRetryDecision}
+                  availableModels={alternativeModels}
+                  theme={theme}
+                  onOpenSettings={() => setSettingsOpen(true)}
+                  showAlertDialog={showAlertDialog}
+                  showToast={showToast}
+                  onReadingModeChange={setIsReadingMode}
+                  settings={settings}
+                  onModelChange={handleModelChange}
+                />
+              </main>
+
+              <SettingsModal
+                isOpen={settingsOpen}
+                onClose={() => setSettingsOpen(false)}
+                settings={settings}
+                onSaveSettings={handleSaveSettings}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+                onOpenAPIDocs={() => setShowAPIDocsPage(true)}
+                onOpenUsageGuide={() => setShowUsageGuidePage(true)}
+                onOpenCompliance={() => setShowCompliancePage(true)}
+                showAlertDialog={showAlertDialog}
+              />
+
+              {/* Model switch modal */}
+              {showModelSwitch && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+                  <div className="card-elevated w-full max-w-sm p-6 animate-fade-in-up">
+                    <div className="mb-6">
+                      <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">Switch AI Model</h3>
+                      <p className="text-xs text-[var(--text-muted)]">Select an alternative model to continue generation.</p>
+                    </div>
+                    
+                    <div className="space-y-2 mb-6">
+                      {modelSwitchOptions.map(opt => (
+                        <button
+                          key={`${opt.provider}-${opt.model}`}
+                          onClick={() => handleModelSwitch(opt.provider as ModelProvider, opt.model)}
+                          className="w-full p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg hover:border-[var(--brand)]/30 hover:bg-[var(--brand)]/5 transition-all text-left group"
+                        >
+                          <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--brand)] transition-colors">{opt.name}</div>
+                          <div className="text-[10px] text-[var(--text-muted)] mt-1 uppercase tracking-widest">{opt.provider} • {opt.model}</div>
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <button 
+                      onClick={() => setShowModelSwitch(false)} 
+                      className="btn btn-secondary w-full"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {isInstallable && !isInstalled && (
+                <InstallPrompt onInstall={installApp} onDismiss={dismissInstallPrompt} />
+              )}
+
+              <CustomAlertDialog isOpen={isAlertDialogOpen} onClose={handleAlertDialogClose} {...alertDialogProps} />
+
+              <AuthModal
+                isOpen={showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+                onSuccess={() => { setIsAuthTransitioning(true); setShowAuthModal(false); setShowWelcomeModal(true); }}
+              />
+
+              <WelcomeModal isOpen={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} />
+            </>
+          )}
+        </>
+      )}
+
+      {/* 4. Support Modals (Legal Pages) - Rendered over everything else */}
+      {showAboutPage && <AboutPage onClose={() => setShowAboutPage(false)} />}
+      {showTermsPage && <TermsPage onClose={() => setShowTermsPage(false)} />}
+      {showPrivacyPage && <PrivacyPage onClose={() => setShowPrivacyPage(false)} />}
+      {showAPIDocsPage && <APIDocsPage onClose={() => setShowAPIDocsPage(false)} />}
+      {showUsageGuidePage && <UsageGuidePage onClose={() => setShowUsageGuidePage(false)} />}
+      {showCompliancePage && <CompliancePage onClose={() => setShowCompliancePage(false)} />}
+      {showDisclaimerPage && <DisclaimerPage isOpen={showDisclaimerPage} onClose={() => setShowDisclaimerPage(false)} />}
+      {showBlogPage && <BlogPage onClose={() => setShowBlogPage(false)} />}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <Analytics />
     </div>
   );
+
 }
 
 function AppWithProviders() {
