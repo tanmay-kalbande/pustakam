@@ -503,12 +503,12 @@ const BlogPage: React.FC<BlogPageProps> = ({ onClose }) => {
     // --- BLOG DETAIL VIEW ---
     if (selectedPost) {
         return (
-            <div className="fixed inset-0 z-[100] bg-black overflow-auto">
+            <div className="fixed inset-0 z-[100] bg-[#050505] overflow-auto">
                 {/* Subtle gradient accent */}
                 <div className="fixed top-0 left-0 right-0 h-[300px] bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none z-0" />
 
                 {/* Header */}
-                <header className="sticky top-0 z-10 bg-black/90 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+                <header className="sticky top-0 z-10 bg-[#050505]/90 backdrop-blur-xl border-b border-white/5 px-6 py-4">
                     <div className="max-w-3xl mx-auto flex items-center justify-between">
                         <button
                             onClick={() => setSelectedPostId(null)}
@@ -594,12 +594,12 @@ const BlogPage: React.FC<BlogPageProps> = ({ onClose }) => {
 
     // --- BLOG LISTING VIEW ---
     return (
-        <div className="fixed inset-0 z-[100] bg-black overflow-auto">
+        <div className="fixed inset-0 z-[100] bg-[#050505] overflow-auto">
             {/* Decorative gradient */}
             <div className="fixed top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-cyan-500/[0.03] via-purple-500/[0.02] to-transparent pointer-events-none z-0" />
 
             {/* Header */}
-            <header className="sticky top-0 z-10 bg-[var(--bg-base)]/90 backdrop-blur-xl border-b border-[var(--border-subtle)] px-6 py-4">
+            <header className="sticky top-0 z-10 bg-[#050505]/90 backdrop-blur-xl border-b border-[var(--border-subtle)] px-6 py-4">
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
                     <button
                         onClick={onClose}

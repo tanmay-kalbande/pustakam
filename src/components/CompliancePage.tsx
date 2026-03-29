@@ -7,9 +7,9 @@ interface CompliancePageProps {
 
 export function CompliancePage({ onClose }: CompliancePageProps) {
     return (
-        <div className="fixed inset-0 z-[100] bg-[var(--bg-base)] overflow-auto font-sans">
+        <div className="fixed inset-0 z-[100] bg-[#050505] overflow-auto font-sans">
             {/* Header */}
-            <header className="sticky top-0 z-10 bg-[var(--bg-base)]/90 backdrop-blur-xl border-b border-[var(--border-subtle)] px-6 py-4">
+            <header className="sticky top-0 z-10 bg-[#050505]/90 backdrop-blur-xl border-b border-[var(--border-subtle)] px-6 py-4">
                 <div className="max-w-4xl mx-auto flex items-center justify-between">
                     <button
                         onClick={onClose}

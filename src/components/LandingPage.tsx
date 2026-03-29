@@ -159,7 +159,7 @@ const renderHome = (
     </div>
 
     {/* Testimonial */}
-    <div className="mt-2 min-h-[44px] w-full max-w-md border-l-2 border-amber-400/25 pl-4 text-left mx-auto md:mx-0">
+    <div className="mt-2 h-[84px] w-full max-w-md border-l-2 border-amber-400/25 pl-4 text-left mx-auto md:mx-0">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentTestimonialIdx}
