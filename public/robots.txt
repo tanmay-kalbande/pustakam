@@ -1,0 +1,46 @@
+# Pustakam AI — robots.txt
+# https://pustakamai.tanmaysk.in/
+
+# ── Allow all well-behaved crawlers ──────────────────────────
+User-agent: *
+Allow: /
+
+# Block private / server-only paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+
+# Block service worker (not useful to crawl)
+Disallow: /sw.js
+
+# ── Google-specific directives ────────────────────────────────
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+
+# ── Bing-specific directives ──────────────────────────────────
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+
+# ── Block known bad/scraper bots ─────────────────────────────
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# ── Crawl rate (optional — polite hint to crawlers) ──────────
+# Crawl-delay: 2
+
+# ── Sitemap location ─────────────────────────────────────────
+Host: https://pustakamai.tanmaysk.in
+Sitemap: https://pustakamai.tanmaysk.in/sitemap.xml

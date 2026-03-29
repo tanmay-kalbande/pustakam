@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Home / Landing Page — highest priority -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- About Page -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#about</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#blog</loc>
+    <lastmod>2026-02-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: Why I Built Pustakam -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#blog/why-i-built-pustakam</loc>
+    <lastmod>2026-02-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog Post: Street Mode vs Stellar Mode -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#blog/street-vs-stellar</loc>
+    <lastmod>2026-02-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog Post: How Generation Works -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#blog/how-generation-works</loc>
+    <lastmod>2026-02-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog Post: 5 Lessons Building AI -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#blog/five-lessons-building-ai</loc>
+    <lastmod>2026-02-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog Post: Future of Learning -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#blog/future-of-learning</loc>
+    <lastmod>2026-02-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Privacy Policy -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#privacy</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- Terms of Service -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#terms</loc>
+    <lastmod>2026-02-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- Compliance -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#compliance</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- API Documentation -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#api-docs</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Usage Guide -->
+  <url>
+    <loc>https://pustakamai.tanmaysk.in/#usage-guide</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>
