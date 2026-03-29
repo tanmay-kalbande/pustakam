@@ -2,18 +2,27 @@ export const config = { runtime: 'edge' };
 
 type TaskType = 'roadmap' | 'module' | 'enhance' | 'assemble' | 'glossary';
 
-const ALLOWED_MODELS = ['glm-5', 'glm-5-turbo', 'glm-4.7-flashx'] as const;
+type ModelProvider = 'zhipu' | 'mistral';
+
+const ALLOWED_MODELS = [
+  'glm-5', 'glm-5-turbo', 'glm-4.7-flashx',
+  'mistral-small-latest', 'mistral-medium-latest', 'mistral-large-latest',
+] as const;
 type AllowedModel = (typeof ALLOWED_MODELS)[number];
 
 const MODEL_PRICING: Record<AllowedModel, { input: number; output: number }> = {
   'glm-5': { input: 1.0, output: 3.2 },
   'glm-5-turbo': { input: 1.2, output: 4.0 },
   'glm-4.7-flashx': { input: 0.07, output: 0.4 },
+  'mistral-small-latest': { input: 0.1, output: 0.3 },
+  'mistral-large-latest': { input: 1.0, output: 3.0 },
+  'mistral-medium-latest': { input: 0.4, output: 1.2 },
 };
 
 const DAILY_LIMITS = { requests: 150, tokens: 1000000, books: 15 };
 const GLOBAL_DAILY_BUDGET_USD = 600;
 const ZHIPU_URL = 'https://api.z.ai/api/paas/v4/chat/completions';
+const MISTRAL_URL = 'https://api.mistral.ai/v1/chat/completions';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -86,6 +95,7 @@ async function logUsage(
     userId: string;
     taskType: string;
     model: string;
+    provider?: string;
     promptTokens: number;
     outputTokens: number;
     totalTokens: number;
@@ -105,6 +115,7 @@ async function logUsage(
         user_id: params.userId,
         task_type: params.taskType,
         model_used: params.model,
+        provider: params.provider || 'zhipu',
         prompt_tokens: params.promptTokens,
         output_tokens: params.outputTokens,
         total_tokens: params.totalTokens,
@@ -162,12 +173,14 @@ async function runHandler(req: Request): Promise<Response> {
   }
 
   const ZHIPU_API_KEY = process.env.ZHIPU_API_KEY;
+  const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY;
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
   const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   console.log('[ai/api] env check:', {
     ZHIPU_API_KEY: !!ZHIPU_API_KEY,
+    MISTRAL_API_KEY: !!MISTRAL_API_KEY,
     SUPABASE_URL: !!SUPABASE_URL,
     SUPABASE_ANON_KEY: !!SUPABASE_ANON_KEY,
     SERVICE_ROLE_KEY: !!SERVICE_ROLE_KEY,
@@ -227,6 +240,7 @@ async function runHandler(req: Request): Promise<Response> {
     model?: string;
     book_id?: string | null;
     max_tokens?: number;
+    provider?: ModelProvider;
   };
 
   try {
@@ -243,13 +257,30 @@ async function runHandler(req: Request): Promise<Response> {
   const today = new Date().toISOString().split('T')[0];
   const taskType = body.task_type || 'module';
   const bookId = body.book_id || null;
+  const provider: ModelProvider = body.provider === 'mistral' ? 'mistral' : 'zhipu';
 
-  const resolvedModel = resolveModel(taskType, body.model);
+  // For zhipu, resolve model based on task type; for mistral, use whatever the user selected
+  const resolvedModel: AllowedModel = provider === 'mistral'
+    ? (ALLOWED_MODELS as readonly string[]).includes(body.model || '')
+      ? (body.model as AllowedModel)
+      : 'mistral-small-latest'
+    : resolveModel(taskType, body.model);
   const pricing = MODEL_PRICING[resolvedModel];
   const isNewBook = taskType === 'roadmap';
   const isLightTask = ['enhance', 'glossary'].includes(taskType);
 
-  console.log('[ai/api] model:', resolvedModel, '| task:', taskType);
+  // Choose API URL and key based on provider
+  const providerUrl = provider === 'mistral' ? MISTRAL_URL : ZHIPU_URL;
+  const providerApiKey = provider === 'mistral' ? MISTRAL_API_KEY : ZHIPU_API_KEY;
+
+  if (!providerApiKey) {
+    return errorResponse(
+      500,
+      `Missing API key for provider "${provider}". Add ${provider === 'mistral' ? 'MISTRAL_API_KEY' : 'ZHIPU_API_KEY'} in Vercel → Settings → Environment Variables and redeploy.`
+    );
+  }
+
+  console.log('[ai/api] provider:', provider, '| model:', resolvedModel, '| task:', taskType);
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
@@ -392,11 +423,11 @@ async function runHandler(req: Request): Promise<Response> {
 
           let providerRes: Response;
           try {
-            providerRes = await fetch(ZHIPU_URL, {
+            providerRes = await fetch(providerUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${ZHIPU_API_KEY}`,
+                Authorization: `Bearer ${providerApiKey}`,
               },
               body: JSON.stringify({
                 model: resolvedModel,
@@ -450,6 +481,7 @@ async function runHandler(req: Request): Promise<Response> {
               userId,
               taskType,
               model: resolvedModel,
+              provider,
               promptTokens,
               outputTokens,
               totalTokens,

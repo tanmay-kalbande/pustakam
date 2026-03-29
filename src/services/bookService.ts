@@ -289,8 +289,9 @@ User Input: "${userInput}"`;
     if (!this.settings.selectedModel) errors.push('No model selected');
 
     if (useProxy) {
-      // Proxy mode: all non-zhipu providers auto-correct to zhipu
-      if (this.settings.selectedProvider !== ZHIPU_PROVIDER) {
+      // Proxy mode: zhipu and mistral are supported; others auto-correct to zhipu
+      const proxyProviders: ModelProvider[] = ['zhipu', 'mistral'];
+      if (!proxyProviders.includes(this.settings.selectedProvider)) {
         dbg('Auto-correcting provider to zhipu for proxy mode');
         this.settings.selectedProvider = ZHIPU_PROVIDER;
         this.settings.selectedModel = 'glm-5';
@@ -476,7 +477,8 @@ User Input: "${userInput}"`;
       });
 
       try {
-        dbg('Calling generateViaProxy with task:', resolvedTask, 'model:', proxyModel || '[server default]');
+        const provider = this.settings.selectedProvider;
+        dbg('Calling generateViaProxy with task:', resolvedTask, 'model:', proxyModel || '[server default]', 'provider:', provider);
 
         const result = await Promise.race([
           generateViaProxy(
@@ -486,6 +488,7 @@ User Input: "${userInput}"`;
             abortController.signal,
             onChunk,
             bookId,
+            provider,
           ),
           timeoutPromise,
         ]);

@@ -4,6 +4,7 @@ export const AI_SUITE_NAME = 'Injin Stack';
 export const APP_AI_BRANDLINE = 'Pustakam Injin';
 
 export const ZHIPU_PROVIDER: ModelProvider = 'zhipu';
+export const MISTRAL_PROVIDER: ModelProvider = 'mistral';
 
 export const ZHIPU_MODELS: Array<{
   provider: ModelProvider;
@@ -31,6 +32,26 @@ export const ZHIPU_MODELS: Array<{
     },
   ];
 
-export const ALL_MODELS = [...ZHIPU_MODELS];
+export const MISTRAL_MODELS: Array<{
+  provider: ModelProvider;
+  model: 'mistral-small-latest' | 'mistral-large-latest';
+  name: string;
+  tagline: string;
+}> = [
+    {
+      provider: MISTRAL_PROVIDER,
+      model: 'mistral-small-latest',
+      name: 'Mistral Small',
+      tagline: 'Fast and efficient — great for all tasks',
+    },
+    {
+      provider: MISTRAL_PROVIDER,
+      model: 'mistral-large-latest',
+      name: 'Mistral Large',
+      tagline: 'Most capable — best for deep content',
+    },
+  ];
+
+export const ALL_MODELS = [...ZHIPU_MODELS, ...MISTRAL_MODELS];
 
 export const DEFAULT_ZHIPU_MODEL = ZHIPU_MODELS[0].model;

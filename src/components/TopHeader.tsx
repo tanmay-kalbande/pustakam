@@ -4,7 +4,7 @@ import { APISettings, ModelProvider } from '../types';
 import { BookProject } from '../types/book';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { motion } from 'framer-motion';
-import { AI_SUITE_NAME, ZHIPU_PROVIDER, DEFAULT_ZHIPU_MODEL } from '../constants/ai';
+import { AI_SUITE_NAME, ZHIPU_PROVIDER, ZHIPU_MODELS, MISTRAL_MODELS } from '../constants/ai';
 
 interface TopHeaderProps {
     settings: APISettings;
@@ -91,8 +91,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                                 className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--brand)]/30 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                             >
                                 <span className="text-xs font-semibold font-mono tracking-wide">
-                                    {settings.selectedProvider === ZHIPU_PROVIDER ? 'Z.ai' : 
-                                     settings.selectedProvider?.toUpperCase() || 'MODEL'}
+                                    {[...ZHIPU_MODELS, ...MISTRAL_MODELS].find(m => m.model === settings.selectedModel)?.name
+                                      || settings.selectedProvider?.toUpperCase()
+                                      || 'MODEL'}
                                 </span>
                                 <ChevronDown size={14} className={`opacity-50 transition-transform duration-200 ${showModelMenu ? 'rotate-180' : ''}`} />
                             </button>
@@ -100,19 +101,56 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                             {showModelMenu && (
                                 <>
                                     <div className="fixed inset-0 z-50" onClick={() => setShowModelMenu(false)} />
-                                    <div className="absolute top-full right-0 mt-2 w-56 rounded-xl bg-[var(--bg-elevated)] backdrop-blur-xl border border-[var(--border-default)] shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200" style={{ transformOrigin: 'top right' }}>
+                                    <div className="absolute top-full right-0 mt-2 w-64 rounded-xl bg-[var(--bg-elevated)] backdrop-blur-xl border border-[var(--border-default)] shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200" style={{ transformOrigin: 'top right' }}>
                                         <div className="px-4 py-3 border-b border-[var(--border-subtle)]">
-                                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Model</p>
+                                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Select Model</p>
                                         </div>
 
-                                        <div className="py-2">
-                                            <button
-                                                onClick={() => { onModelChange(DEFAULT_ZHIPU_MODEL, ZHIPU_PROVIDER); setShowModelMenu(false); }}
-                                                className={`w-full text-left px-4 py-2 text-sm transition-colors flex items-center justify-between ${settings.selectedProvider === ZHIPU_PROVIDER ? 'text-[var(--brand)] bg-[var(--brand)]/10' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]'}`}
-                                            >
-                                                <span className="font-medium font-mono text-xs">Z.ai (GLM-5)</span>
-                                                {settings.selectedProvider === ZHIPU_PROVIDER && <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] shadow-[0_0_8px_var(--brand)]" />}
-                                            </button>
+                                        <div className="py-1 max-h-80 overflow-y-auto">
+                                            {/* Zhipu GLM Section */}
+                                            <div className="px-4 pt-2.5 pb-1">
+                                                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-[0.15em]">Zhipu GLM</p>
+                                            </div>
+                                            {ZHIPU_MODELS.map((m) => {
+                                                const isActive = settings.selectedModel === m.model && settings.selectedProvider === m.provider;
+                                                return (
+                                                    <button
+                                                        key={m.model}
+                                                        onClick={() => { onModelChange(m.model, m.provider); setShowModelMenu(false); }}
+                                                        className={`w-full text-left px-4 py-2 transition-colors flex items-center justify-between gap-2 ${isActive ? 'text-[var(--brand)] bg-[var(--brand)]/10' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]'}`}
+                                                    >
+                                                        <div className="min-w-0">
+                                                            <span className="font-medium font-mono text-xs block">{m.name}</span>
+                                                            <span className="text-[10px] text-[var(--text-muted)] block truncate">{m.tagline}</span>
+                                                        </div>
+                                                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] shadow-[0_0_8px_var(--brand)] flex-shrink-0" />}
+                                                    </button>
+                                                );
+                                            })}
+
+                                            {/* Separator */}
+                                            <div className="mx-4 my-1.5 border-t border-[var(--border-subtle)]" />
+
+                                            {/* Mistral AI Section */}
+                                            <div className="px-4 pt-1.5 pb-1">
+                                                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-[0.15em]">Mistral AI</p>
+                                            </div>
+                                            {MISTRAL_MODELS.map((m) => {
+                                                const isActive = settings.selectedModel === m.model && settings.selectedProvider === m.provider;
+                                                return (
+                                                    <button
+                                                        key={m.model}
+                                                        onClick={() => { onModelChange(m.model, m.provider); setShowModelMenu(false); }}
+                                                        className={`w-full text-left px-4 py-2 transition-colors flex items-center justify-between gap-2 ${isActive ? 'text-[var(--brand)] bg-[var(--brand)]/10' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]'}`}
+                                                    >
+                                                        <div className="min-w-0">
+                                                            <span className="font-medium font-mono text-xs block">{m.name}</span>
+                                                            <span className="text-[10px] text-[var(--text-muted)] block truncate">{m.tagline}</span>
+                                                        </div>
+                                                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] shadow-[0_0_8px_var(--brand)] flex-shrink-0" />}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </>

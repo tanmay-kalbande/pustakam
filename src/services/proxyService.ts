@@ -1,6 +1,6 @@
 // src/services/proxyService.ts
 import { supabase } from '../lib/supabaseClient';
-import { ModelID } from '../types';
+import { ModelID, ModelProvider } from '../types';
 
 const PROXY_URL = '/api/ai';
 
@@ -12,7 +12,8 @@ export async function generateViaProxy(
   model?: ModelID,
   signal?: AbortSignal,
   onChunk?: (chunk: string) => void,
-  bookId?: string
+  bookId?: string,
+  provider: ModelProvider = 'zhipu'
 ): Promise<string> {
   if (!supabase) {
     throw new Error('Supabase is not configured. Proxy auth cannot start.');
@@ -38,6 +39,7 @@ export async function generateViaProxy(
         task_type: taskType,
         ...(model ? { model } : {}),
         book_id: bookId || null,
+        provider,
         stream: true,
       }),
     });
