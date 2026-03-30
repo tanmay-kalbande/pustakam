@@ -8,7 +8,4 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  esbuild: {
-    drop: ['console', 'debugger'],
-  },
 });

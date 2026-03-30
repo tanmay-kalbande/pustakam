@@ -185,6 +185,24 @@ const StatusLoader = () => (
   </div>
 );
 
+const HighDemandNotice = ({ compact = false }: { compact?: boolean }) => (
+  <div className={`relative overflow-hidden rounded-xl border border-amber-500/30 bg-amber-500/10 ${compact ? 'p-4' : 'p-5'} shadow-[0_0_30px_rgba(245,158,11,0.1)]`}>
+    <div className="absolute -right-6 -top-6 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+    <div className={`flex items-start ${compact ? 'gap-3' : 'gap-4'} relative z-10`}>
+      <div className={`${compact ? 'w-8 h-8' : 'w-10 h-10'} shrink-0 flex items-center justify-center bg-amber-500/20 rounded-full border border-amber-500/30 shadow-inner`}>
+        <Zap className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-amber-500`} />
+      </div>
+      <div>
+        <h4 className={`${compact ? 'text-[13px]' : 'text-[15px]'} font-bold text-amber-500 mb-1 leading-tight tracking-tight`}>Experiencing High Demand</h4>
+        <p className={`${compact ? 'text-[12px]' : 'text-[13px]'} text-amber-500/80 leading-relaxed font-medium`}>
+          Our AI servers are currently processing a large number of requests. We're actively scaling our infrastructure to provide a seamless experience. Feel free to retry!
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
 const AIWaveAnimation = () => {
   return (
     <div className="w-full h-1 mt-2 overflow-hidden rounded-full bg-[var(--border-subtle)]">
@@ -213,23 +231,8 @@ const RetryDecisionPanel = ({
   return (
     <div className="bg-red-500/5 backdrop-blur-xl border border-red-500/20 rounded-lg overflow-hidden animate-fade-in-up">
       <div className="p-6">
-        
-        {/* Capacity Notice Card */}
-        <div className="mb-6 relative overflow-hidden rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
-          <div className="absolute -right-6 -top-6 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="flex items-start gap-4 relative z-10">
-            <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-amber-500/20 rounded-full border border-amber-500/30 shadow-inner">
-              <Zap className="w-5 h-5 text-amber-500" />
-            </div>
-            <div>
-              <h4 className="text-[15px] font-bold text-amber-500 mb-1.5 leading-tight tracking-tight">Experiencing High Demand</h4>
-              <p className="text-[13px] text-amber-500/80 leading-relaxed font-medium">
-                Our AI servers are currently processing a massive number of requests. We are actively working on scaling our capacity and improving the infrastructure to provide a seamless experience. Apologies for the delay—feel free to retry!
-              </p>
-            </div>
-          </div>
+        <div className="mb-6">
+          <HighDemandNotice />
         </div>
 
         <div className="flex items-center gap-3 mb-4">
@@ -648,6 +651,7 @@ const HomeView = ({
   handleCreateRoadmap,
   handleEnhanceWithAI,
   isEnhancing,
+  enhanceError,
   localIsGenerating,
   onOpenSettings,
   settings,
@@ -665,6 +669,7 @@ const HomeView = ({
   handleCreateRoadmap: (data: BookSession) => void;
   handleEnhanceWithAI: () => void;
   isEnhancing: boolean;
+  enhanceError: string | null;
   setIsEnhancing: (val: boolean) => void;
   localIsGenerating: boolean;
   onOpenSettings: () => void;
@@ -750,6 +755,12 @@ const HomeView = ({
             <span className="hidden sm:inline">{isEnhancing ? 'Refining' : 'Enhance'}</span>
           </button>
         </div>
+
+        {enhanceError && (
+          <div className="mt-4 max-w-[620px] mx-auto animate-fade-in-up">
+            <HighDemandNotice compact />
+          </div>
+        )}
 
         {/* Action chips */}
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6 max-w-[620px] mx-auto">
@@ -1001,6 +1012,7 @@ export function BookView({
   const [localIsGenerating, setLocalIsGenerating] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [enhanceError, setEnhanceError] = useState<string | null>(null);
   const [formData, setFormData] = useState<BookSession>({
     goal: '',
     language: settings?.defaultLanguage || 'en',
@@ -1051,6 +1063,7 @@ export function BookView({
     if (!formData.goal.trim()) return;
 
     setIsEnhancing(true);
+    setEnhanceError(null);
     try {
       const enhanced = await bookService.enhanceBookInput(formData.goal, formData.generationMode);
       setFormData({
@@ -1064,7 +1077,9 @@ export function BookView({
       });
       showToast('Idea refined! ✨ Review and adjust as needed.', 'success');
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Refinement failed', 'error');
+      const msg = error instanceof Error ? error.message : 'Refinement failed';
+      setEnhanceError(msg);
+      showToast(msg, 'error');
     } finally {
       setIsEnhancing(false);
     }
@@ -1174,6 +1189,7 @@ export function BookView({
         handleCreateRoadmap={onCreateBookRoadmap}
         handleEnhanceWithAI={handleEnhanceWithAI}
         isEnhancing={isEnhancing}
+        enhanceError={enhanceError}
         setIsEnhancing={setIsEnhancing}
         localIsGenerating={localIsGenerating}
         onOpenSettings={onOpenSettings}
@@ -1407,6 +1423,23 @@ export function BookView({
                 )}
 
                 <div className="space-y-8">
+                  {currentBook.status === 'error' && !isGenerating && !isPaused && generationStatus?.status !== 'waiting_retry' && (
+                    <div className="space-y-4 animate-fade-in-up">
+                      <HighDemandNotice />
+                      <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-5">
+                        <div className="flex items-center gap-3 mb-2">
+                          <AlertCircle className="w-5 h-5 text-red-400" />
+                          <h4 className="text-sm font-bold text-[var(--text-primary)]">Generation Interrupted</h4>
+                        </div>
+                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                          {completedModules.length > 0
+                            ? `${completedModules.length} of ${totalModuleCount} chapters were saved successfully. You can resume from where it stopped.`
+                            : 'The generation process was interrupted before any chapters could be completed. Please try again.'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {(currentBook.status === 'roadmap_completed' || (currentBook.status === 'error' && completedModules.length > 0)) && !areAllModulesDone && !isGenerating && !isPaused && generationStatus?.status !== 'waiting_retry' && (
                     <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm">
                       <h3 className="text-xl font-bold text-[var(--text-primary)]">Generate Chapters</h3>
