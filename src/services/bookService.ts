@@ -142,7 +142,13 @@ IMPORTANT RULES:
 
 User Input: "${userInput}"`;
 
-    const finalPrompt = isDoge ? dogePrompt : standardPrompt;
+    const jsonGuardrails = `Additional JSON rules:
+- Return valid JSON only.
+- All values must be plain JSON strings or booleans.
+- Do not use markdown formatting like **bold**, bullets, or backticks inside any value.
+- Keep "title" under 80 characters.`;
+
+    const finalPrompt = `${isDoge ? dogePrompt : standardPrompt}\n\n${jsonGuardrails}`;
 
     try {
       const response = await this.generateWithAI(finalPrompt, undefined, undefined, undefined, 'enhance');
@@ -188,6 +194,12 @@ User Input: "${userInput}"`;
 
     let jsonStr = jsonMatch[0];
 
+    // Fix common "JSON-like" markdown wrappers inside values before parsing.
+    jsonStr = jsonStr
+      .replace(/:\s*\*\*\s*"([^"]*?)"\s*\*\*/g, ': "$1"')
+      .replace(/:\s*\*\s*"([^"]*?)"\s*\*/g, ': "$1"')
+      .replace(/:\s*`([^`]*)`/g, ': "$1"');
+
     // Remove trailing commas before } or ]
     jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
 
@@ -211,9 +223,29 @@ User Input: "${userInput}"`;
     }
 
     // Last resort: extract fields manually with regex
+    const normalizeExtractedValue = (value: string): string => value
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/```$/i, '')
+      .replace(/^\*\*|\*\*$/g, '')
+      .replace(/^\*|\*$/g, '')
+      .replace(/^`|`$/g, '')
+      .replace(/\\"/g, '"')
+      .replace(/\s+/g, ' ')
+      .trim();
+
     const extract = (field: string): string => {
-      const m = raw.match(new RegExp(`"${field}"\\s*:\\s*"([^"]*)"`));
-      return m?.[1] || '';
+      const patterns = [
+        new RegExp(`"${field}"\\s*:\\s*"([^"]*)"`, 'i'),
+        new RegExp(`"${field}"\\s*:\\s*\\*\\*\\s*"([^"]*)"\\s*\\*\\*`, 'i'),
+        new RegExp(`"${field}"\\s*:\\s*\\*\\s*"([^"]*)"\\s*\\*`, 'i'),
+      ];
+
+      for (const pattern of patterns) {
+        const match = raw.match(pattern);
+        if (match?.[1]) return normalizeExtractedValue(match[1]);
+      }
+
+      return '';
     };
 
     const goal = extract('goal');
