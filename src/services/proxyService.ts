@@ -5,7 +5,13 @@ import { ModelID, ModelProvider } from '../types';
 // ── Points to Render proxy instead of Vercel Edge Function ────────────────────
 // In development:  set VITE_PROXY_URL=http://localhost:3001 in .env
 // In production:   set VITE_PROXY_URL=https://your-proxy.onrender.com in Vercel env vars
-const PROXY_URL = (import.meta.env.VITE_PROXY_URL || '') + '/api/ai';
+function getProxyUrl(): string {
+  const rawBase = import.meta.env.VITE_PROXY_URL?.trim();
+  if (rawBase) return `${rawBase.replace(/\/+$/, '')}/api/ai`;
+  if (import.meta.env.DEV) return '/api/ai';
+
+  throw new Error('Proxy is enabled but VITE_PROXY_URL is missing. Set it to your deployed proxy base URL.');
+}
 
 export type TaskType = 'roadmap' | 'module' | 'enhance' | 'assemble' | 'glossary';
 
@@ -30,7 +36,7 @@ export async function generateViaProxy(
 
   let response: Response;
   try {
-    response = await fetch(PROXY_URL, {
+    response = await fetch(getProxyUrl(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
