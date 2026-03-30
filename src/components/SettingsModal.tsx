@@ -6,7 +6,7 @@ import { APISettings } from '../types';
 import { storageUtils } from '../utils/storage';
 import { DisclaimerPage } from './DisclaimerPage';
 import NebulaBackground from './NebulaBackground';
-import { AI_SUITE_NAME, APP_AI_BRANDLINE, ZHIPU_MODELS } from '../constants/ai';
+import { AI_SUITE_NAME, APP_AI_BRANDLINE, PROVIDERS } from '../constants/ai';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -457,8 +457,8 @@ export function SettingsModal({
                   {/* Stats grid */}
                   <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                     {[
-                      { label: 'Models',      val: `${ZHIPU_MODELS.length} GLM` },
-                      { label: 'Export',      val: 'PDF / Markdown' },
+                      { label: 'AI Framework', val: 'Smart Orchestration' },
+                      { label: 'Providers',    val: `${PROVIDERS.length} (Z AI, Mistral)` },
                       { label: 'Architecture', val: 'Hybrid PWA' },
                       { label: 'Security',    val: 'Client-side Encryption' },
                     ].map(({ label, val }) => (
