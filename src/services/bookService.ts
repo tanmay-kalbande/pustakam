@@ -373,8 +373,8 @@ User Input: "${userInput}"`;
     return ['timeout', 'overloaded', 'unavailable', 'internal error', 'bad gateway'].some(e => msg.includes(e));
   }
 
-  private calculateRetryDelay(attempt: number, isRateLimit: boolean): number {
-    const delays = [30000, 40000, 50000, 60000, 70000];
+  private calculateRetryDelay(attempt: number, _isRateLimit: boolean): number {
+    const delays = [3000, 8000, 15000, 30000, 60000];
     return delays[Math.min(attempt - 1, delays.length - 1)] + Math.random() * 1000;
   }
 
@@ -393,8 +393,10 @@ User Input: "${userInput}"`;
     }
   }
 
-  private getProxyModel(taskType?: string): import('../types').ModelID | undefined {
-    return this.settings.selectedModel;
+  private getProxyModel(_taskType?: string): import('../types').ModelID | undefined {
+    // Server-side orchestration: the API picks the right model tier based on
+    // task_type + provider. We intentionally do NOT pass a model hint.
+    return undefined;
   }
 
   setRetryDecision(bookId: string, decision: 'retry' | 'switch' | 'skip') {
@@ -579,61 +581,25 @@ User Input: "${userInput}"`;
     headers: Record<string, string>;
     body: string;
   } {
+    // NOTE: This path is only reached in non-proxy (direct) mode.
+    // In production (proxy mode), generateWithAI() never reaches here.
+    // Only zhipu and mistral are supported providers.
     const model  = this.settings.selectedModel;
     const apiKey = this.getApiKey();
 
     const ENDPOINTS: Record<string, string> = {
-      google:     `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${apiKey}&alt=sse`,
-      mistral:    'https://api.mistral.ai/v1/chat/completions',
-      groq:       'https://api.groq.com/openai/v1/chat/completions',
-
-      xai:        'https://api.x.ai/v1/chat/completions',
-      openrouter: 'https://openrouter.ai/api/v1/chat/completions',
-      cohere:     'https://api.cohere.com/v2/chat',
+      zhipu:   'https://api.z.ai/api/paas/v4/chat/completions',
+      mistral: 'https://api.mistral.ai/v1/chat/completions',
     };
 
     const url = ENDPOINTS[this.settings.selectedProvider];
     if (!url) throw new Error(`Unsupported provider: ${this.settings.selectedProvider}`);
-
-    if (this.settings.selectedProvider === 'google') {
-      return {
-        url,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 8192 },
-        }),
-      };
-    }
-
-    if (this.settings.selectedProvider === 'cohere') {
-      return {
-        url,
-        headers: {
-          'Content-Type':  'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'X-Client-Name': 'Pustakam AI',
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'user', content: prompt }],
-          stream: true,
-        }),
-      };
-    }
-
-    const extraHeaders: Record<string, string> = {};
-    if (this.settings.selectedProvider === 'openrouter') {
-      extraHeaders['HTTP-Referer'] = window.location.origin;
-      extraHeaders['X-Title']      = 'Pustakam AI';
-    }
 
     return {
       url,
       headers: {
         'Content-Type':  'application/json',
         'Authorization': `Bearer ${apiKey}`,
-        ...extraHeaders,
       },
       body: JSON.stringify({
         model,
@@ -815,7 +781,7 @@ Return ONLY valid JSON:
       currentModule: { id: roadmapModule.id, title: roadmapModule.title, attempt: attemptNumber, progress: 0, generatedText: '' },
       totalProgress: 0,
       status: 'generating',
-      logMessage: `Starting: ${roadmapModule.title}`,
+      logMessage: `Starting: ${roadmapModule.title} (via ${this.settings.selectedProvider === 'mistral' ? 'Mistral' : 'Z AI'})`,
       totalWordsGenerated: totalWordsBefore,
       aiStage: 'analyzing',
     });
@@ -918,7 +884,10 @@ Return ONLY valid JSON:
     }
 
     const contextSummary = !isFirstModule && previousModules.length > 0
-      ? `\n\nPREVIOUS MODULES:\n${previousModules.slice(-2).map(m => `${m.title}: ${m.content.substring(0, 300)}…`).join('\n\n')}`
+      ? `\n\nPREVIOUS MODULES (brief summaries for continuity):\n${previousModules.slice(-3).map(m => {
+          const firstParagraph = m.content.split('\n').find(l => l.trim().length > 50)?.trim() || '';
+          return `- ${m.title}: ${firstParagraph.substring(0, 150)}…`;
+        }).join('\n')}`
       : '';
     const reasoningPrompt = session.reasoning ? `\n- Reasoning: ${session.reasoning}` : '';
 
@@ -932,17 +901,24 @@ CONTEXT:
 - Complexity: ${session.complexityLevel || 'intermediate'}${reasoningPrompt}${contextSummary}
 
 REQUIREMENTS:
-- Write 2000-4000 words
-- ${isFirstModule ? 'Provide introduction' : 'Build upon previous content'}
-- Use ## markdown headers
-- Include bullet points and lists
-${session.preferences?.includeExamples ? '- Include practical examples' : ''}
-${session.preferences?.includePracticalExercises ? '- Add exercises at the end' : ''}
+- Write EXACTLY 2500-4000 words (this is critical — under 2000 words is a failure)
+- ${isFirstModule ? 'Provide a strong introduction to the topic' : 'Build naturally upon previous chapters — do NOT repeat their introductions'}
+- Use ## and ### markdown headers to structure content
+- Include bullet points, numbered lists, and bold key terms
+${session.preferences?.includeExamples ? '- Include 2-3 practical, real-world examples with code/scenarios' : ''}
+${session.preferences?.includePracticalExercises ? '- Add 3-5 practice exercises at the end' : ''}
+
+DO NOT:
+- Start with "In this chapter" or "In this module" — dive straight into the content
+- Use filler phrases like "In conclusion", "As we have seen", "It is worth noting"
+- Repeat information already covered in previous modules
+- Generate fewer than 2000 words
 
 STRUCTURE:
 ## ${roadmapModule.title}
 ### Introduction
 ### Core Concepts
+### Deep Dive
 ### Practical Application
 ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''}
 ### Key Takeaways`;
@@ -1024,7 +1000,9 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
           return;
         }
 
-        if (i < modulesToGenerate.length - 1) await sleep(1000);
+        // Mistral has stricter rate limits — give it more breathing room
+        const cooldown = this.settings.selectedProvider === 'mistral' ? 3000 : 1000;
+        if (i < modulesToGenerate.length - 1) await sleep(cooldown);
 
       } catch (error) {
         if (error instanceof Error) {
@@ -1127,14 +1105,13 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
       const glossary = await this.generateGlossary(book.modules);
 
       const totalWords   = book.modules.reduce((s, m) => s + m.wordCount, 0);
-      const modelName    = this.settings.selectedModel;
       const providerName = this.getProviderDisplayName();
 
       const finalBook = [
         `# ${book.title}\n`,
         `**Generated:** ${new Date().toLocaleDateString()}\n`,
         `**Words:** ${totalWords.toLocaleString()}\n`,
-        `**Provider:** ${providerName} (${modelName})\n\n`,
+        `**Provider:** ${providerName} (Smart Orchestration)\n\n`,
         `---\n\n## Table of Contents\n`,
         this.generateTableOfContents(book.modules),
         `\n\n---\n\n## Introduction\n\n${introduction}\n\n---\n\n`,
@@ -1190,9 +1167,16 @@ Write 600-900 words covering: key learning outcomes, important concepts recap, n
   }
 
   private async generateGlossary(modules: BookModule[]): Promise<string> {
-    const content = modules.map(m => m.content).join('\n\n').substring(0, 12000);
+    // Extract headings and bold terms instead of raw content to avoid truncation
+    const content = modules.map(m => {
+      const lines = m.content.split('\n');
+      return lines
+        .filter(l => l.startsWith('#') || l.startsWith('**') || l.startsWith('- **'))
+        .join('\n');
+    }).join('\n\n');
+
     const prompt  = `Extract key terms from this content and create a glossary:
-${content}
+${content.substring(0, 20000)}
 
 Create 20-30 terms with clear 1-2 sentence definitions, alphabetical order.
 

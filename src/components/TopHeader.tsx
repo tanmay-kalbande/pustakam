@@ -4,7 +4,7 @@ import { APISettings, ModelProvider } from '../types';
 import { BookProject } from '../types/book';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { motion } from 'framer-motion';
-import { AI_SUITE_NAME, ZHIPU_PROVIDER, ZHIPU_MODELS, MISTRAL_MODELS } from '../constants/ai';
+import { AI_SUITE_NAME, PROVIDERS } from '../constants/ai';
 
 interface TopHeaderProps {
     settings: APISettings;
@@ -83,17 +83,20 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
  
                 {/* Right Controls */}
                 <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* Model Selector */}
+                    {/* Provider Selector */}
                     {showModelSelector && (
                         <div className="relative hidden sm:block">
                             <button
+                                id="provider-selector-btn"
                                 onClick={() => setShowModelMenu(!showModelMenu)}
                                 className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--brand)]/30 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                             >
+                                {/* Active provider badge */}
+                                <span className="text-[9px] font-black font-mono tracking-widest px-1.5 py-0.5 rounded bg-[var(--brand)]/15 text-[var(--brand)]">
+                                    {PROVIDERS.find(p => p.id === settings.selectedProvider)?.badge ?? 'AI'}
+                                </span>
                                 <span className="text-xs font-semibold font-mono tracking-wide">
-                                    {[...ZHIPU_MODELS, ...MISTRAL_MODELS].find(m => m.model === settings.selectedModel)?.name
-                                      || settings.selectedProvider?.toUpperCase()
-                                      || 'MODEL'}
+                                    {PROVIDERS.find(p => p.id === settings.selectedProvider)?.name ?? 'AI'}
                                 </span>
                                 <ChevronDown size={14} className={`opacity-50 transition-transform duration-200 ${showModelMenu ? 'rotate-180' : ''}`} />
                             </button>
@@ -101,56 +104,60 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                             {showModelMenu && (
                                 <>
                                     <div className="fixed inset-0 z-50" onClick={() => setShowModelMenu(false)} />
-                                    <div className="absolute top-full right-0 mt-2 w-64 rounded-xl bg-[var(--bg-elevated)] backdrop-blur-xl border border-[var(--border-default)] shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200" style={{ transformOrigin: 'top right' }}>
+                                    <div
+                                        id="provider-dropdown-menu"
+                                        className="absolute top-full right-0 mt-2 w-60 rounded-xl bg-[var(--bg-elevated)] backdrop-blur-xl border border-[var(--border-default)] shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200"
+                                        style={{ transformOrigin: 'top right' }}
+                                    >
                                         <div className="px-4 py-3 border-b border-[var(--border-subtle)]">
-                                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Select Model</p>
+                                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">AI Provider</p>
+                                            <p className="text-[9px] text-[var(--text-muted)] mt-0.5">Model is auto-selected per task</p>
                                         </div>
 
-                                        <div className="py-1 max-h-80 overflow-y-auto">
-                                            {/* Zhipu GLM Section */}
-                                            <div className="px-4 pt-2.5 pb-1">
-                                                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-[0.15em]">Zhipu GLM</p>
-                                            </div>
-                                            {ZHIPU_MODELS.map((m) => {
-                                                const isActive = settings.selectedModel === m.model && settings.selectedProvider === m.provider;
+                                        <div className="p-2 flex flex-col gap-1">
+                                            {PROVIDERS.map((provider) => {
+                                                const isActive = settings.selectedProvider === provider.id;
                                                 return (
                                                     <button
-                                                        key={m.model}
-                                                        onClick={() => { onModelChange(m.model, m.provider); setShowModelMenu(false); }}
-                                                        className={`w-full text-left px-4 py-2 transition-colors flex items-center justify-between gap-2 ${isActive ? 'text-[var(--brand)] bg-[var(--brand)]/10' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]'}`}
+                                                        key={provider.id}
+                                                        id={`provider-option-${provider.id}`}
+                                                        onClick={() => {
+                                                            onModelChange(
+                                                                provider.id === 'zhipu' ? 'glm-5' : 'mistral-medium-latest',
+                                                                provider.id
+                                                            );
+                                                            setShowModelMenu(false);
+                                                        }}
+                                                        className={`w-full text-left px-3 py-2.5 rounded-lg transition-all flex items-center justify-between gap-3 ${
+                                                            isActive
+                                                                ? 'text-[var(--brand)] bg-[var(--brand)]/10 border border-[var(--brand)]/20'
+                                                                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border border-transparent'
+                                                        }`}
                                                     >
-                                                        <div className="min-w-0">
-                                                            <span className="font-medium font-mono text-xs block">{m.name}</span>
-                                                            <span className="text-[10px] text-[var(--text-muted)] block truncate">{m.tagline}</span>
+                                                        <div className="flex items-center gap-2.5 min-w-0">
+                                                            <span className={`text-[9px] font-black font-mono tracking-widest px-1.5 py-0.5 rounded flex-shrink-0 ${
+                                                                isActive ? 'bg-[var(--brand)]/20 text-[var(--brand)]' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]'
+                                                            }`}>
+                                                                {provider.badge}
+                                                            </span>
+                                                            <div className="min-w-0">
+                                                                <span className="font-semibold font-mono text-xs block">{provider.name}</span>
+                                                                <span className="text-[9px] text-[var(--text-muted)] block truncate">{provider.tagline}</span>
+                                                            </div>
                                                         </div>
-                                                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] shadow-[0_0_8px_var(--brand)] flex-shrink-0" />}
+                                                        {isActive && (
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] shadow-[0_0_8px_var(--brand)] flex-shrink-0" />
+                                                        )}
                                                     </button>
                                                 );
                                             })}
+                                        </div>
 
-                                            {/* Separator */}
-                                            <div className="mx-4 my-1.5 border-t border-[var(--border-subtle)]" />
-
-                                            {/* Mistral AI Section */}
-                                            <div className="px-4 pt-1.5 pb-1">
-                                                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-[0.15em]">Mistral AI</p>
-                                            </div>
-                                            {MISTRAL_MODELS.map((m) => {
-                                                const isActive = settings.selectedModel === m.model && settings.selectedProvider === m.provider;
-                                                return (
-                                                    <button
-                                                        key={m.model}
-                                                        onClick={() => { onModelChange(m.model, m.provider); setShowModelMenu(false); }}
-                                                        className={`w-full text-left px-4 py-2 transition-colors flex items-center justify-between gap-2 ${isActive ? 'text-[var(--brand)] bg-[var(--brand)]/10' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]'}`}
-                                                    >
-                                                        <div className="min-w-0">
-                                                            <span className="font-medium font-mono text-xs block">{m.name}</span>
-                                                            <span className="text-[10px] text-[var(--text-muted)] block truncate">{m.tagline}</span>
-                                                        </div>
-                                                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] shadow-[0_0_8px_var(--brand)] flex-shrink-0" />}
-                                                    </button>
-                                                );
-                                            })}
+                                        {/* Orchestration hint */}
+                                        <div className="px-4 pb-3 pt-1 border-t border-[var(--border-subtle)]">
+                                            <p className="text-[9px] text-[var(--text-muted)] leading-relaxed">
+                                                ✦ Smart model selection: fast model for quick tasks, flagship for content
+                                            </p>
                                         </div>
                                     </div>
                                 </>

@@ -26,19 +26,14 @@ const defaultSettings: APISettings = {
   defaultLanguage: 'en',
 };
 
-// Valid providers list
-const validProviders: ModelProvider[] = ['zhipu', 'google', 'mistral', 'xai', 'groq', 'openrouter', 'cohere'];
+// Only two providers are supported — Z AI (Zhipu) and Mistral.
+// Model selection is handled by server-side orchestration; these lists
+// are used only for storage validation (fallback defaults).
+const validProviders: ModelProvider[] = ['zhipu', 'mistral'];
 
-// Valid models per provider
 const validModels: Record<ModelProvider, ModelID[]> = {
-  zhipu: ['glm-5', 'glm-5-turbo', 'glm-4.7', 'glm-4.7-flashx'],
-
-  google: ['gemini-3-flash-preview', 'gemini-2.5-flash', 'gemma-3-27b-it'],
-  mistral: ['mistral-small-latest', 'mistral-medium-latest', 'mistral-large-latest'],
-  xai: ['grok-4.1', 'grok-4.1-fast', 'grok-4-fast'],
-  groq: ['llama-3.3-70b-versatile', 'moonshotai/kimi-k2-instruct-0905', 'groq/compound', 'openai/gpt-oss-20b'],
-  openrouter: ['arcee-ai/trinity-large-preview:free', 'arcee-ai/trinity-mini:free', 'tngtech/deepseek-r1t2-chimera:free', 'cognitivecomputations/dolphin-mistral-24b-venice-edition:free'],
-  cohere: ['command-a-03-2025', 'command-r-plus-08-2024'],
+  zhipu:   ['glm-5', 'glm-5-turbo', 'glm-4.7-flashx'],
+  mistral: ['mistral-small-latest', 'mistral-medium-latest', 'mistral-large-latest', 'labs-mistral-small-creative'],
 };
 
 export const storageUtils = {

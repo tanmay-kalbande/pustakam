@@ -32,7 +32,7 @@ import CompliancePage from './components/CompliancePage';
 import { DisclaimerPage } from './components/DisclaimerPage';
 import BlogPage from './components/BlogPage';
 import { Toast, ToastType } from './components/Toast';
-import { APP_AI_BRANDLINE, ZHIPU_MODELS } from './constants/ai';
+import { APP_AI_BRANDLINE, PROVIDERS } from './constants/ai';
 
 type AppView = 'list' | 'create' | 'detail';
 type Theme = 'light' | 'dark';
@@ -136,12 +136,16 @@ function App() {
     [currentBook?.modules]
   );
 
-  // Memoize alternative models to avoid recalculating on every render
+  // Offer the OTHER provider as an alternative when generation fails
   const alternativeModels = useMemo(
-    () => ZHIPU_MODELS
-      .filter(option => option.model !== settings.selectedModel)
-      .map(({ provider, model, name }) => ({ provider, model, name })),
-    [settings.selectedModel]
+    () => PROVIDERS
+      .filter(p => p.id !== settings.selectedProvider)
+      .map(p => ({
+        provider: p.id,
+        model: p.id === 'zhipu' ? 'glm-5' : 'mistral-medium-latest',
+        name: p.name,
+      })),
+    [settings.selectedProvider]
   );
 
   const generationStats = useGenerationStats(

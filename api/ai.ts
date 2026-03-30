@@ -5,18 +5,24 @@ type TaskType = 'roadmap' | 'module' | 'enhance' | 'assemble' | 'glossary';
 type ModelProvider = 'zhipu' | 'mistral';
 
 const ALLOWED_MODELS = [
+  // Zhipu GLM
   'glm-5', 'glm-5-turbo', 'glm-4.7-flashx',
+  // Mistral
   'mistral-small-latest', 'mistral-medium-latest', 'mistral-large-latest',
+  'labs-mistral-small-creative',
 ] as const;
 type AllowedModel = (typeof ALLOWED_MODELS)[number];
 
 const MODEL_PRICING: Record<AllowedModel, { input: number; output: number }> = {
-  'glm-5': { input: 1.0, output: 3.2 },
-  'glm-5-turbo': { input: 1.2, output: 4.0 },
-  'glm-4.7-flashx': { input: 0.07, output: 0.4 },
-  'mistral-small-latest': { input: 0.1, output: 0.3 },
-  'mistral-large-latest': { input: 1.0, output: 3.0 },
-  'mistral-medium-latest': { input: 0.4, output: 1.2 },
+  // Zhipu GLM pricing (USD per million tokens)
+  'glm-5':                     { input: 1.0,  output: 3.2 },
+  'glm-5-turbo':               { input: 1.2,  output: 4.0 },
+  'glm-4.7-flashx':            { input: 0.07, output: 0.4 },
+  // Mistral pricing (USD per million tokens)
+  'mistral-small-latest':      { input: 0.1,  output: 0.3 },
+  'mistral-medium-latest':     { input: 0.4,  output: 1.2 },
+  'mistral-large-latest':      { input: 1.0,  output: 3.0 },
+  'labs-mistral-small-creative': { input: 0.1, output: 0.3 },
 };
 
 const DAILY_LIMITS = { requests: 150, tokens: 1000000, books: 15 };
@@ -37,20 +43,43 @@ function errorResponse(status: number, message: string): Response {
   });
 }
 
-function resolveModel(taskType: TaskType, requestedModel?: string): AllowedModel {
-  if (requestedModel && (ALLOWED_MODELS as readonly string[]).includes(requestedModel)) {
-    return requestedModel as AllowedModel;
+// ── Smart orchestration — server always decides the model tier ────────────────
+// Client sends only `provider` ('zhipu' | 'mistral') + `task_type`.
+// Any `model` hint from the client is intentionally ignored.
+//
+//  Task      | ZhipuAI               | Mistral
+//  ----------|-----------------------|-----------------------------
+//  enhance   | glm-4.7-flashx        | labs-mistral-small-creative
+//  glossary  | glm-4.7-flashx        | labs-mistral-small-creative
+//  roadmap   | glm-5-turbo           | mistral-large-latest
+//  module    | glm-5                 | mistral-medium-latest
+//  assemble  | glm-5                 | mistral-large-latest
+//
+function resolveModel(taskType: TaskType, provider: ModelProvider): AllowedModel {
+  if (provider === 'mistral') {
+    switch (taskType) {
+      case 'enhance':
+      case 'glossary':
+        return 'labs-mistral-small-creative';
+      case 'roadmap':
+      case 'assemble':
+        return 'mistral-large-latest';
+      case 'module':
+      default:
+        return 'mistral-medium-latest';
+    }
   }
+  // ZhipuAI (default)
   switch (taskType) {
-    case 'module':
-      return 'glm-5';
-    case 'roadmap':
-    case 'assemble':
-      return 'glm-5-turbo';
     case 'enhance':
     case 'glossary':
-    default:
       return 'glm-4.7-flashx';
+    case 'roadmap':
+      return 'glm-5-turbo';
+    case 'module':
+    case 'assemble':
+    default:
+      return 'glm-5';
   }
 }
 
@@ -259,12 +288,8 @@ async function runHandler(req: Request): Promise<Response> {
   const bookId = body.book_id || null;
   const provider: ModelProvider = body.provider === 'mistral' ? 'mistral' : 'zhipu';
 
-  // For zhipu, resolve model based on task type; for mistral, use whatever the user selected
-  const resolvedModel: AllowedModel = provider === 'mistral'
-    ? (ALLOWED_MODELS as readonly string[]).includes(body.model || '')
-      ? (body.model as AllowedModel)
-      : 'mistral-small-latest'
-    : resolveModel(taskType, body.model);
+  // Server-side orchestration: always pick model from the map (client hint is ignored)
+  const resolvedModel: AllowedModel = resolveModel(taskType, provider);
   const pricing = MODEL_PRICING[resolvedModel];
   const isNewBook = taskType === 'roadmap';
   const isLightTask = ['enhance', 'glossary'].includes(taskType);
@@ -356,7 +381,7 @@ async function runHandler(req: Request): Promise<Response> {
         } catch {
           // Ignore close-time races
         }
-      }, 15000);
+      }, 10000);
 
       sendComment('connected');
 
@@ -435,7 +460,8 @@ async function runHandler(req: Request): Promise<Response> {
                 stream: true,
                 max_tokens: maxTokensForTask(taskType, body.max_tokens),
                 temperature: 0.7,
-                stream_options: { include_usage: true },
+                // stream_options is Zhipu/OpenAI-only — Mistral rejects it
+                ...(provider === 'zhipu' ? { stream_options: { include_usage: true } } : {}),
               }),
             });
           } catch (networkError) {
