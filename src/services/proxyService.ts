@@ -13,6 +13,51 @@ function getProxyUrl(): string {
   throw new Error('Proxy is enabled but VITE_PROXY_URL is missing. Set it to your deployed proxy base URL.');
 }
 
+function getStoredAccessToken(): string | null {
+  try {
+    const directAuth = localStorage.getItem('kitaab-auth');
+    if (directAuth) {
+      const parsed = JSON.parse(directAuth);
+      if (typeof parsed?.access_token === 'string' && parsed.access_token) {
+        return parsed.access_token;
+      }
+    }
+
+    const keys = Object.keys(localStorage);
+    const authKey = keys.find(key => key.startsWith('sb-') && key.endsWith('-auth-token'));
+    if (authKey) {
+      const parsed = JSON.parse(localStorage.getItem(authKey) || '{}');
+      if (typeof parsed?.access_token === 'string' && parsed.access_token) {
+        return parsed.access_token;
+      }
+    }
+  } catch (error) {
+    console.warn('[ProxyService] failed to read stored auth token', error);
+  }
+
+  return null;
+}
+
+async function getAccessToken(): Promise<string | null> {
+  const sessionTimeoutMs = 1500;
+
+  try {
+    const sessionResult = await Promise.race([
+      supabase!.auth.getSession(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`Session lookup timed out after ${sessionTimeoutMs}ms`)), sessionTimeoutMs)
+      ),
+    ]);
+
+    const token = sessionResult?.data?.session?.access_token || null;
+    if (token) return token;
+  } catch (error) {
+    console.warn('[ProxyService] getSession fallback triggered', error);
+  }
+
+  return getStoredAccessToken();
+}
+
 export type TaskType = 'roadmap' | 'module' | 'enhance' | 'assemble' | 'glossary';
 
 export async function generateViaProxy(
@@ -35,12 +80,12 @@ export async function generateViaProxy(
     hasProxyUrl: Boolean(import.meta.env.VITE_PROXY_URL?.trim()),
   });
   console.log('[ProxyService] waiting for Supabase session');
-  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = await getAccessToken();
   console.log('[ProxyService] session lookup completed in', Date.now() - requestStartedAt, 'ms', {
-    hasSession: Boolean(session),
+    hasSession: Boolean(accessToken),
   });
 
-  if (!session) {
+  if (!accessToken) {
     throw new Error('User is not authenticated. Please sign in.');
   }
 
@@ -56,7 +101,7 @@ export async function generateViaProxy(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       signal,
       body: JSON.stringify({
