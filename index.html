@@ -242,9 +242,11 @@
   <link rel="dns-prefetch" href="https://api.z.ai" />
 
 
-  <!-- Preload critical logo asset -->
-  <link rel="preload" href="/pustakam-logo.png" as="image" type="image/png" />
+  <!-- Preload logos that render on first paint (LandingPage, TopHeader, AuthModal) -->
   <link rel="preload" href="/white-logo.png" as="image" type="image/png" />
+  <link rel="preload" href="/black-logo.png" as="image" type="image/png" />
+  <!-- pustakam-logo.png is favicon/PWA only — prefetch instead of preload to avoid the "unused preload" warning -->
+  <link rel="prefetch" href="/pustakam-logo.png" as="image" type="image/png" />
 
   <!-- ══════════════════════════════════════════════
        SERVICE WORKER + ERROR RECOVERY

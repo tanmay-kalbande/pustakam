@@ -1,9 +1,9 @@
 // ============================================================================
 // FILE: src/services/bookService.ts
-// FIXES:
+// NOTES:
 //   1. validateSettings() — auto-correct provider; never error-out in proxy mode
-//   2. generateWithAI() proxy — 90s timeout + full console logging so errors
-//      are ALWAYS visible in DevTools, never swallowed silently
+//   2. generateWithAI() — routes through Render proxy (pustakam-proxy.onrender.com)
+//      Timeouts are generous to survive Render free-tier cold starts (~50s wake)
 //   3. getApiKeyForProvider() — zhipu is proxy-only, never needs a local key
 //   4. enhanceBookInput() — wraps errors so isEnhancing always resets
 // ============================================================================
@@ -422,19 +422,19 @@ User Input: "${userInput}"`;
   }
 
   private getProxyTimeoutMs(taskType?: string): number {
+    // Render free tier can cold-start in up to ~50s after 15 min idle.
+    // Budget = cold-start (50s) + Zhipu response time. Be generous.
     switch (taskType) {
-      // Light tasks must beat Vercel Hobby's ~25 s edge wall time.
-      // 28 s gives a 3 s grace window before the client aborts cleanly.
       case 'enhance':
       case 'glossary':
-        return 28_000;
+        return 90_000;   // 90s — covers 50s cold-start + ~30s Zhipu
       case 'roadmap':
-        return 90_000;
+        return 120_000;  // 2 min
       case 'assemble':
-        return 180_000;
+        return 240_000;  // 4 min
       case 'module':
       default:
-        return 300_000;
+        return 300_000;  // 5 min
     }
   }
 
