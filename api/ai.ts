@@ -1,4 +1,4 @@
-export const config = { runtime: 'edge' };
+export const runtime = 'edge';
 
 type TaskType = 'roadmap' | 'module' | 'enhance' | 'assemble' | 'glossary';
 
