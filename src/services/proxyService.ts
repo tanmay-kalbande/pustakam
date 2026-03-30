@@ -28,15 +28,31 @@ export async function generateViaProxy(
     throw new Error('Supabase is not configured. Proxy auth cannot start.');
   }
 
+  const requestStartedAt = Date.now();
+  console.log('[ProxyService] starting request', {
+    taskType,
+    provider,
+    hasProxyUrl: Boolean(import.meta.env.VITE_PROXY_URL?.trim()),
+  });
+  console.log('[ProxyService] waiting for Supabase session');
   const { data: { session } } = await supabase.auth.getSession();
+  console.log('[ProxyService] session lookup completed in', Date.now() - requestStartedAt, 'ms', {
+    hasSession: Boolean(session),
+  });
 
   if (!session) {
     throw new Error('User is not authenticated. Please sign in.');
   }
 
+  const proxyUrl = getProxyUrl();
+  console.log('[ProxyService] sending request to proxy', {
+    proxyUrl,
+    elapsedMs: Date.now() - requestStartedAt,
+  });
+
   let response: Response;
   try {
-    response = await fetch(getProxyUrl(), {
+    response = await fetch(proxyUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,6 +67,10 @@ export async function generateViaProxy(
         provider,
         stream: true,
       }),
+    });
+    console.log('[ProxyService] proxy responded in', Date.now() - requestStartedAt, 'ms', {
+      status: response.status,
+      ok: response.ok,
     });
   } catch (fetchErr) {
     const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
