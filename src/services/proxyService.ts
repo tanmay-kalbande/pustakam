@@ -2,7 +2,10 @@
 import { supabase } from '../lib/supabaseClient';
 import { ModelID, ModelProvider } from '../types';
 
-const PROXY_URL = '/api/ai';
+// ── Points to Render proxy instead of Vercel Edge Function ────────────────────
+// In development:  set VITE_PROXY_URL=http://localhost:3001 in .env
+// In production:   set VITE_PROXY_URL=https://your-proxy.onrender.com in Vercel env vars
+const PROXY_URL = (import.meta.env.VITE_PROXY_URL || '') + '/api/ai';
 
 export type TaskType = 'roadmap' | 'module' | 'enhance' | 'assemble' | 'glossary';
 
@@ -49,44 +52,27 @@ export async function generateViaProxy(
     throw new Error(`Network error calling proxy: ${msg}`);
   }
 
-  // ── Parse error responses — try JSON first, fall back to text ────────────
   if (!response.ok) {
-    // Try to read the body as text so we always get SOMETHING useful
     let rawBody = '';
-    try {
-      rawBody = await response.text();
-    } catch {
-      rawBody = '(could not read response body)';
-    }
+    try { rawBody = await response.text(); } catch { rawBody = '(could not read response body)'; }
 
-    // Log the full body so it shows in DevTools console
-    console.error(
-      `[ProxyService] ${response.status} response from /api/ai:\n`,
-      rawBody.slice(0, 2000) // cap at 2k chars
-    );
+    console.error(`[ProxyService] ${response.status} response from proxy:\n`, rawBody.slice(0, 2000));
 
-    // Try to extract a structured error message
     let errorMsg = rawBody;
     try {
       const parsed = JSON.parse(rawBody);
       errorMsg = parsed?.error || parsed?.message || rawBody;
     } catch {
-      // rawBody is HTML or plain text — use as-is (trimmed)
       errorMsg = rawBody.slice(0, 300);
     }
 
-    if (response.status === 429) {
-      throw new Error(`RATE_LIMIT: ${errorMsg}`);
-    }
-
+    if (response.status === 429) throw new Error(`RATE_LIMIT: ${errorMsg}`);
     throw new Error(`Proxy ${response.status}: ${errorMsg}`);
   }
 
-  if (!response.body) {
-    throw new Error('Empty response stream from proxy');
-  }
+  if (!response.body) throw new Error('Empty response stream from proxy');
 
-  // ── Stream SSE ────────────────────────────────────────────────────────────
+  // ── Stream SSE ──────────────────────────────────────────────────────────────
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let fullContent = '';
@@ -117,16 +103,10 @@ export async function generateViaProxy(
     if (payload === '[DONE]') return;
 
     let parsed: Record<string, unknown> | null = null;
-    try {
-      parsed = JSON.parse(payload);
-    } catch {
-      return;
-    }
+    try { parsed = JSON.parse(payload); } catch { return; }
 
     const streamError = typeof parsed?.error === 'string' ? parsed.error : null;
-    if (eventType === 'error' || streamError) {
-      throw new Error(streamError || 'Proxy stream failed');
-    }
+    if (eventType === 'error' || streamError) throw new Error(streamError || 'Proxy stream failed');
 
     const content = (parsed?.choices as Array<{ delta?: { content?: string } }> | undefined)?.[0]?.delta?.content || '';
     if (content) {
@@ -143,22 +123,14 @@ export async function generateViaProxy(
     const frames = buffer.split('\n\n');
     buffer = frames.pop() || '';
 
-    for (const frame of frames) {
-      processFrame(frame);
-    }
+    for (const frame of frames) processFrame(frame);
   }
 
   buffer += decoder.decode();
   if (buffer.trim()) {
-    const frames = buffer.split('\n\n');
-    for (const frame of frames) {
-      processFrame(frame);
-    }
+    for (const frame of buffer.split('\n\n')) processFrame(frame);
   }
 
-  if (!fullContent) {
-    throw new Error('Proxy returned empty content');
-  }
-
+  if (!fullContent) throw new Error('Proxy returned empty content');
   return fullContent;
 }
