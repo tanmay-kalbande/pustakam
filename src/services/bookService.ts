@@ -423,16 +423,18 @@ User Input: "${userInput}"`;
 
   private getProxyTimeoutMs(taskType?: string): number {
     switch (taskType) {
+      // Light tasks must beat Vercel Hobby's ~25 s edge wall time.
+      // 28 s gives a 3 s grace window before the client aborts cleanly.
       case 'enhance':
-        return 180_000;
-      case 'roadmap':
       case 'glossary':
-        return 300_000;
+        return 28_000;
+      case 'roadmap':
+        return 90_000;
       case 'assemble':
-        return 420_000;
+        return 180_000;
       case 'module':
       default:
-        return 600_000;
+        return 300_000;
     }
   }
 

@@ -202,7 +202,7 @@ function App() {
     if (!isLoading) setIsAuthTransitioning(false);
   }, [isAuthenticated, isLoading]);
 
-  // Hard safety: never let the loading screen stay more than 6 seconds
+  // Hard safety: never let the loading screen stay more than 15 seconds
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       if (isLoadingScreenVisible) {
@@ -214,7 +214,7 @@ function App() {
           setIsAuthTransitioning(false);
         }, 400);
       }
-    }, 6000);
+    }, 15000);   // ← was 6000
     return () => clearTimeout(safetyTimer);
   }, []); // run once on mount
 

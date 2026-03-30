@@ -85,6 +85,10 @@ function resolveModel(taskType: TaskType, provider: ModelProvider): AllowedModel
 
 function maxTokensForTask(taskType: TaskType, requestedMaxTokens?: number): number {
   if (requestedMaxTokens) return requestedMaxTokens;
+  // enhance + glossary are small JSON responses (~200-400 tokens).
+  // Keeping max_tokens low means Zhipu/Mistral respond in 3-8 s
+  // instead of potentially streaming 8192 tokens over 25+ s.
+  if (taskType === 'enhance' || taskType === 'glossary') return 1024;
   return 8192;
 }
 
