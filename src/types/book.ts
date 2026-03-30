@@ -62,6 +62,7 @@ export interface BookGenerationProgress {
 }
 
 export interface BookSession {
+  title?: string;
   goal: string;
   language: 'en' | 'hi' | 'mr'; // Added Hindi and Marathi support
   targetAudience?: string;

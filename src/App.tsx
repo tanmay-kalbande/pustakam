@@ -36,6 +36,18 @@ import { APP_AI_BRANDLINE, PROVIDERS } from './constants/ai';
 
 type AppView = 'list' | 'create' | 'detail';
 type Theme = 'light' | 'dark';
+const MAX_BOOK_TITLE_LENGTH = 72;
+
+function formatBookTitle(session: Pick<BookSession, 'title' | 'goal'>): string {
+  const rawTitle = (session.title || session.goal || 'Untitled Book').replace(/\s+/g, ' ').trim();
+  if (rawTitle.length <= MAX_BOOK_TITLE_LENGTH) return rawTitle;
+
+  const slice = rawTitle.slice(0, MAX_BOOK_TITLE_LENGTH);
+  const lastSpace = slice.lastIndexOf(' ');
+  const safeSlice = lastSpace >= 40 ? slice.slice(0, lastSpace) : slice;
+
+  return `${safeSlice.trim().replace(/[.,:;!?-]+$/, '')}...`;
+}
 
 interface GenerationStatus {
   currentModule?: { id: string; title: string; attempt: number; progress: number; generatedText?: string; };
@@ -345,7 +357,7 @@ function App() {
 
     const newBook: BookProject = {
       id: bookId,
-      title: session.goal.length > 100 ? session.goal.substring(0, 100) + '...' : session.goal,
+      title: formatBookTitle(session),
       goal: session.goal,
       language: 'en',
       status: 'planning',
@@ -366,7 +378,7 @@ function App() {
       const roadmap = await bookService.generateRoadmap(session, bookId);
       setBooks(prev => prev.map(book =>
         book.id === bookId
-          ? { ...book, roadmap, status: 'roadmap_completed', progress: 10, title: session.goal }
+          ? { ...book, roadmap, status: 'roadmap_completed', progress: 10, title: formatBookTitle(session) }
           : book
       ));
       showToast('Roadmap created! Ready to generate chapters.', 'success');

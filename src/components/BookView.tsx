@@ -721,10 +721,11 @@ const HomeView = ({
                 try {
                   const enhanced = await bookService.enhanceBookInput(formData.goal, formData.generationMode);
                   const updatedData = {
-                    ...formData,
-                    goal: enhanced.goal,
-                    targetAudience: enhanced.targetAudience,
-                    complexityLevel: enhanced.complexityLevel,
+                     ...formData,
+                     title: enhanced.title,
+                     goal: enhanced.goal,
+                     targetAudience: enhanced.targetAudience,
+                     complexityLevel: enhanced.complexityLevel,
                     reasoning: enhanced.reasoning || '',
                     preferences: enhanced.preferences,
                   };
@@ -1014,6 +1015,7 @@ export function BookView({
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhanceError, setEnhanceError] = useState<string | null>(null);
   const [formData, setFormData] = useState<BookSession>({
+    title: '',
     goal: '',
     language: settings?.defaultLanguage || 'en',
     targetAudience: '',
@@ -1067,6 +1069,7 @@ export function BookView({
     try {
       const enhanced = await bookService.enhanceBookInput(formData.goal, formData.generationMode);
       setFormData({
+        title: enhanced.title,
         goal: enhanced.goal,
         language: 'en',
         targetAudience: enhanced.targetAudience,
@@ -1095,7 +1098,7 @@ export function BookView({
     if (!session.goal.trim()) { showToast('Please enter a learning goal.', 'warning'); return; }
 
     await onCreateBookRoadmap(session);
-    setFormData({ goal: '', language: 'en', targetAudience: '', complexityLevel: 'intermediate', reasoning: '', generationMode: 'stellar', preferences: { includeExamples: true, includePracticalExercises: false, includeQuizzes: false } });
+    setFormData({ title: '', goal: '', language: 'en', targetAudience: '', complexityLevel: 'intermediate', reasoning: '', generationMode: 'stellar', preferences: { includeExamples: true, includePracticalExercises: false, includeQuizzes: false } });
     setShowAdvanced(false);
   };
 
