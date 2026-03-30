@@ -213,6 +213,25 @@ const RetryDecisionPanel = ({
   return (
     <div className="bg-red-500/5 backdrop-blur-xl border border-red-500/20 rounded-lg overflow-hidden animate-fade-in-up">
       <div className="p-6">
+        
+        {/* Capacity Notice Card */}
+        <div className="mb-6 relative overflow-hidden rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
+          <div className="absolute -right-6 -top-6 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="flex items-start gap-4 relative z-10">
+            <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-amber-500/20 rounded-full border border-amber-500/30 shadow-inner">
+              <Zap className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <h4 className="text-[15px] font-bold text-amber-500 mb-1.5 leading-tight tracking-tight">Experiencing High Demand</h4>
+              <p className="text-[13px] text-amber-500/80 leading-relaxed font-medium">
+                Our AI servers are currently processing a massive number of requests. We are actively working on scaling our capacity and improving the infrastructure to provide a seamless experience. Apologies for the delay—feel free to retry!
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 flex items-center justify-center bg-red-500/20 rounded-lg border border-red-500/30">
             <AlertCircle className="w-6 h-6 text-red-400 animate-pulse" />

@@ -86,6 +86,7 @@ class BookGenerationService {
   private onGenerationStatusUpdate?: (bookId: string, status: Partial<GenerationStatus>) => void;
   private requestTimeout = 360000;
   private activeRequests = new Map<string, AbortController>();
+  private activeGenerations = new Set<string>();
   private checkpoints = new Map<string, GenerationCheckpoint>();
   private currentGeneratedTexts = new Map<string, string>();
   private userRetryDecisions = new Map<string, 'retry' | 'switch' | 'skip'>();
@@ -299,6 +300,7 @@ User Input: "${userInput}"`;
 
   pauseGeneration(bookId: string) {
     try { localStorage.setItem(`pause_flag_${bookId}`, 'true'); } catch {}
+    this.activeRequests.get(bookId)?.abort('USER_PAUSE');
     this.updateGenerationStatus(bookId, { status: 'paused', totalProgress: 0, logMessage: 'Generation paused by user' });
   }
 
@@ -548,7 +550,9 @@ User Input: "${userInput}"`;
         throw new Error(`Proxy error: ${msg}`);
       } finally {
         if (proxyTimeoutId !== null) clearTimeout(proxyTimeoutId);
-        this.activeRequests.delete(requestId);
+        if (this.activeRequests.get(requestId) === abortController) {
+          this.activeRequests.delete(requestId);
+        }
       }
     }
 
@@ -831,7 +835,7 @@ Start your response with { and end with }.
 
       const moduleContent = await this.generateWithAI(prompt, book.id, (chunk) => {
         if (this.isPaused(book.id)) {
-          this.activeRequests.get(book.id)?.abort();
+          this.activeRequests.get(book.id)?.abort('USER_PAUSE');
           return;
         }
         const currentText = (this.currentGeneratedTexts.get(book.id) || '') + chunk;
@@ -871,12 +875,22 @@ Start your response with { and end with }.
       if (error instanceof Error && error.message === 'GENERATION_PAUSED') throw error;
 
       // Treat AbortError (cancel/pause) as a pause — not a failure
+      const isAbortError = error instanceof DOMException && error.name === 'AbortError';
+      const isUserPause = (error instanceof Error && error.message === 'USER_PAUSE') || 
+                          (error instanceof Error && error.message.includes('USER_PAUSE'));
+      
       if (
-        (error instanceof DOMException && error.name === 'AbortError') ||
-        (error instanceof Error && error.message.toLowerCase().includes('aborted')) ||
+        isUserPause ||
+        (isAbortError && this.isPaused(book.id)) ||
         this.isPaused(book.id)
       ) {
         throw new Error('GENERATION_PAUSED');
+      }
+
+      // If it was just a regular network abort (e.g. NS_BINDING_ABORTED from browser), 
+      // treat it as a network error to auto-retry
+      if (isAbortError || (error instanceof Error && error.message.toLowerCase().includes('aborted'))) {
+        err('Network abort detected. This will be auto-retried.');
       }
 
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -966,7 +980,12 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
 
   async generateAllModulesWithRecovery(book: BookProject, session: BookSession): Promise<void> {
     if (!book.roadmap) throw new Error('No roadmap available');
+    if (this.activeGenerations.has(book.id)) {
+      console.warn('[BookService] generateAllModulesWithRecovery called while already running for this book. Ignoring double-click.');
+      return;
+    }
 
+    this.activeGenerations.add(book.id);
     this.resumeGeneration(book.id);
 
     const checkpoint = this.loadCheckpoint(book.id);
@@ -1081,6 +1100,7 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
 
     const totalWords = completedModules.reduce((s, m) => s + m.wordCount, 0);
     planService.recordBookCompleted(book.id, book.title || session.goal.slice(0, 50), session.goal, session.generationMode || 'stellar', book.roadmap?.totalModules || completedModules.length, totalWords).catch(() => {});
+    this.activeGenerations.delete(book.id);
   }
 
   async retryFailedModules(book: BookProject, session: BookSession): Promise<void> {
@@ -1239,12 +1259,14 @@ Format:
 
   cancelActiveRequests(bookId?: string): void {
     if (bookId) {
-      this.activeRequests.get(bookId)?.abort();
+      this.activeRequests.get(bookId)?.abort('USER_PAUSE');
       this.activeRequests.delete(bookId);
       this.pauseGeneration(bookId);
+      this.activeGenerations.delete(bookId);
     } else {
-      this.activeRequests.forEach(c => c.abort());
+      this.activeRequests.forEach(c => c.abort('USER_PAUSE'));
       this.activeRequests.clear();
+      this.activeGenerations.clear();
     }
   }
 

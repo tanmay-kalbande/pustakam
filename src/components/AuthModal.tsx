@@ -212,8 +212,15 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signin' }
                                             required
                                             className="w-full pl-10 pr-3 py-2.5 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-md text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--brand)]/50 transition-colors appearance-none cursor-pointer"
                                         >
-                                            <option value="business" className="bg-[var(--bg-elevated)]">Business</option>
-                                            <option value="educator" className="bg-[var(--bg-elevated)]">Educator</option>
+                                            <option value="" disabled className="bg-[var(--bg-elevated)]">Select Role</option>
+                                            <option value="student" className="bg-[var(--bg-elevated)]">Student</option>
+                                            <option value="developer" className="bg-[var(--bg-elevated)]">Developer / Engineer</option>
+                                            <option value="educator" className="bg-[var(--bg-elevated)]">Educator / Teacher</option>
+                                            <option value="designer" className="bg-[var(--bg-elevated)]">Designer</option>
+                                            <option value="pm" className="bg-[var(--bg-elevated)]">Product Manager</option>
+                                            <option value="creator" className="bg-[var(--bg-elevated)]">Content Creator / Writer</option>
+                                            <option value="researcher" className="bg-[var(--bg-elevated)]">Researcher / Scientist</option>
+                                            <option value="business" className="bg-[var(--bg-elevated)]">Business / Founder</option>
                                             <option value="other" className="bg-[var(--bg-elevated)]">Other</option>
                                         </select>
                                     </div>
