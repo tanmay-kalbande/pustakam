@@ -38,11 +38,11 @@
   /* PROFESSIONAL DARK THEME - Clean, confident developer tool surfaces */
   :root {
     --bg-base:     rgba(5, 5, 5, 0); /* transparent so nebula shows through on landing */
-    --bg-surface:  rgba(13, 13, 13, 0.45);   /* semi-transparent for glass effect */
-    --bg-elevated: rgba(20, 20, 20, 0.65);   /* semi-transparent for glass effect */
+    --bg-surface:  rgba(13, 13, 13, 0.72);   /* stronger glass so content stays readable */
+    --bg-elevated: rgba(20, 20, 20, 0.84);   /* more solid elevated surface for modals/cards */
 
-    --border-subtle:  rgba(255,255,255,0.07);
-    --border-default: rgba(255,255,255,0.11);
+    --border-subtle:  rgba(255,255,255,0.09);
+    --border-default: rgba(255,255,255,0.14);
 
     --text-primary:   #f5f5f5;
     --text-secondary: #a1a1aa;
@@ -220,33 +220,48 @@
 
   /* --- Reusable Card Patterns --- */
   .settings-panel {
-    background-color: var(--bg-surface);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+      var(--bg-surface);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     border: 1px solid var(--border-subtle);
     padding: 24px;
     border-radius: var(--radius-lg);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.3);
   }
 
   .card {
-    background: var(--bg-surface);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+      var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
   }
 
   .book-card {
-    background-color: rgba(13, 13, 13, 0.45);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+      var(--bg-surface);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.24);
   }
 
   .card-elevated {
-    background: var(--bg-elevated);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)),
+      var(--bg-elevated);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 56px rgba(0, 0, 0, 0.34);
   }
 
   /* --- Scrollbar --- */
@@ -1112,7 +1127,10 @@
 
   /* --- Cards --- */
   .content-card {
-    @apply bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl shadow-lg;
+    @apply border border-[var(--color-border)] rounded-xl shadow-lg backdrop-blur-md;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+      var(--color-card);
   }
 
   .light .content-card {
@@ -1120,7 +1138,10 @@
   }
 
   .stats-card {
-    @apply bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-5 shadow-lg backdrop-blur-sm transition-all hover:border-white/20 hover:-translate-y-1;
+    @apply border border-[var(--color-border)] rounded-xl p-5 shadow-lg backdrop-blur-md transition-all hover:border-white/20 hover:-translate-y-1;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012)),
+      var(--color-card);
   }
 
   /* --- Modal --- */

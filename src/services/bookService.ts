@@ -1225,18 +1225,30 @@ Write 600-900 words covering: key learning outcomes, important concepts recap, n
   }
 
   private async generateGlossary(modules: BookModule[]): Promise<string> {
-    // Extract headings and bold terms instead of raw content to avoid truncation
-    const content = modules.map(m => {
-      const lines = m.content.split('\n');
-      return lines
-        .filter(l => l.startsWith('#') || l.startsWith('**') || l.startsWith('- **'))
-        .join('\n');
-    }).join('\n\n');
+    // Build a glossary from the strongest signals first so the final pass stays fast.
+    const uniqueSignals = Array.from(new Set(
+      modules.flatMap(module =>
+        module.content
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line =>
+            line.length > 0 &&
+            line.length <= 160 &&
+            (line.startsWith('#') || line.startsWith('**') || line.startsWith('- **'))
+          )
+      )
+    ));
 
-    const prompt  = `Extract key terms from this content and create a glossary:
-${content.substring(0, 20000)}
+    const content = uniqueSignals.slice(0, 220).join('\n');
 
-Create 20-30 terms with clear 1-2 sentence definitions, alphabetical order.
+    const prompt  = `Create a concise glossary from these extracted headings and highlighted terms:
+${content.substring(0, 12000)}
+
+Rules:
+- Include 12-18 important terms only
+- Skip duplicates and generic filler terms
+- Keep definitions to one crisp sentence
+- Sort alphabetically
 
 Format:
 **Term**: Definition.`;
