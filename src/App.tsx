@@ -202,6 +202,22 @@ function App() {
     if (!isLoading) setIsAuthTransitioning(false);
   }, [isAuthenticated, isLoading]);
 
+  // Hard safety: never let the loading screen stay more than 6 seconds
+  useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      if (isLoadingScreenVisible) {
+        console.warn('[App] Loading screen safety timeout — forcing dismiss');
+        setIsLoadingScreenExiting(true);
+        setTimeout(() => {
+          setIsLoadingScreenVisible(false);
+          setIsLoadingScreenExiting(false);
+          setIsAuthTransitioning(false);
+        }, 400);
+      }
+    }, 6000);
+    return () => clearTimeout(safetyTimer);
+  }, []); // run once on mount
+
   // Load user books when auth resolves
   useEffect(() => {
     if (isLoading) return;

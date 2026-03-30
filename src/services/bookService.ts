@@ -120,41 +120,24 @@ class BookGenerationService {
 
     const isDoge = generationMode === 'blackhole';
 
-    const standardPrompt = `You are an intelligent assistant designed to help users create well-structured learning books.
+    const standardPrompt = `You are an intelligent assistant. Analyze the user's topic and return a JSON object for book creation.
 
-When a user provides ANY input, analyze it and return a structured JSON response with optimized fields for book creation.
+IMPORTANT RULES:
+- Respond with ONLY the JSON object below — no explanation, no markdown, no code fences.
+- Do NOT wrap in \`\`\`json or \`\`\`.
+- Start your response with { and end with }.
 
-Return ONLY this JSON (no extra text):
-{
-  "goal": "A clear, specific learning goal (50-150 characters)",
-  "title": "An engaging book title",
-  "targetAudience": "Specific target audience description",
-  "complexityLevel": "beginner | intermediate | advanced",
-  "preferences": {
-    "includeExamples": true,
-    "includePracticalExercises": true,
-    "includeQuizzes": false
-  },
-  "reasoning": "Brief explanation of your choices (optional)"
-}
+{"goal": "A clear, specific learning goal (50-150 characters)", "title": "An engaging book title", "targetAudience": "Specific target audience description", "complexityLevel": "beginner | intermediate | advanced", "preferences": {"includeExamples": true, "includePracticalExercises": true, "includeQuizzes": false}, "reasoning": "Brief explanation of your choices"}
 
 User Input: "${userInput}"`;
 
     const dogePrompt = `You are a savage, street-smart AI assistant for Blackhole Mode. Take the user's idea and return a high-octane JSON response.
 
-Return ONLY this JSON (no extra text):
-{
-  "goal": "An aggressive, action-oriented learning goal",
-  "title": "A savage, clickbaity book title",
-  "targetAudience": "Roast the target audience",
-  "complexityLevel": "beginner | intermediate | advanced",
-  "preferences": {
-    "includeExamples": true,
-    "includePracticalExercises": true,
-    "includeQuizzes": false
-  },
-  "reasoning": "A rough, street-smart reason why they need this"
-}
+IMPORTANT RULES:
+- Respond with ONLY the JSON object below — no explanation, no markdown, no code fences.
+- Start your response with { and end with }.
+
+{"goal": "An aggressive, action-oriented learning goal", "title": "A savage, clickbaity book title", "targetAudience": "Roast the target audience", "complexityLevel": "beginner | intermediate | advanced", "preferences": {"includeExamples": true, "includePracticalExercises": true, "includeQuizzes": false}, "reasoning": "A rough, street-smart reason why they need this"}
 
 User Input: "${userInput}"`;
 
@@ -163,17 +146,9 @@ User Input: "${userInput}"`;
     try {
       const response = await this.generateWithAI(finalPrompt, undefined, undefined, undefined, 'enhance');
       dbg('enhanceBookInput raw response length:', response.length);
+      dbg('enhanceBookInput raw response:', response.slice(0, 500));
 
-      let cleaned = response.trim()
-        .replace(/```json\s*/gi, '')
-        .replace(/```\s*/g, '');
-
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('AI response was not in a valid JSON format.');
-      }
-
-      const parsed = JSON.parse(jsonMatch[0]);
+      const parsed = this.parseAIJsonResponse(response);
       if (!parsed.goal || !parsed.title) throw new Error('AI response is missing required fields.');
       dbg('enhanceBookInput succeeded:', parsed.title);
       return {
@@ -186,8 +161,74 @@ User Input: "${userInput}"`;
       };
     } catch (e) {
       err('enhanceBookInput FAILED:', e);
-      throw e; // re-throw so caller can reset isEnhancing
+      throw e;
     }
+  }
+
+  /**
+   * Robustly parse a JSON response from any AI model.
+   * Handles: markdown fences, trailing commas, smart quotes,
+   * unescaped newlines, and partial wrapping text.
+   */
+  private parseAIJsonResponse(raw: string): Record<string, any> {
+    let cleaned = raw.trim();
+
+    // Strip markdown code fences (```json ... ``` or ``` ... ```)
+    cleaned = cleaned.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '');
+
+    // Replace smart quotes with regular quotes
+    cleaned = cleaned.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+
+    // Try to extract the JSON object
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      throw new Error('AI response does not contain a JSON object.');
+    }
+
+    let jsonStr = jsonMatch[0];
+
+    // Remove trailing commas before } or ]
+    jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+
+    // Remove single-line comments (// ...)
+    jsonStr = jsonStr.replace(/\/\/[^\n]*/g, '');
+
+    // Attempt standard parse first
+    try {
+      return JSON.parse(jsonStr);
+    } catch {
+      dbg('parseAIJsonResponse: standard parse failed, trying cleanup');
+    }
+
+    // Escape unescaped newlines inside string values
+    jsonStr = jsonStr.replace(/(["'])([^"']*?)\n([^"']*?)\1/g, (_, q, a, b) => `${q}${a}\\n${b}${q}`);
+
+    try {
+      return JSON.parse(jsonStr);
+    } catch {
+      dbg('parseAIJsonResponse: newline-escaped parse also failed, trying field extraction');
+    }
+
+    // Last resort: extract fields manually with regex
+    const extract = (field: string): string => {
+      const m = raw.match(new RegExp(`"${field}"\\s*:\\s*"([^"]*)"`));
+      return m?.[1] || '';
+    };
+
+    const goal = extract('goal');
+    const title = extract('title');
+    if (!goal && !title) {
+      throw new Error('Could not parse AI JSON response after multiple attempts.');
+    }
+
+    return {
+      goal,
+      title,
+      targetAudience: extract('targetAudience'),
+      complexityLevel: extract('complexityLevel') || 'intermediate',
+      preferences: { includeExamples: true, includePracticalExercises: true, includeQuizzes: false },
+      reasoning: extract('reasoning'),
+    };
   }
 
   // ============================================================================
@@ -708,18 +749,10 @@ Requirements:
 - Target audience: ${session.targetAudience || 'general learners'}
 - Complexity: ${session.complexityLevel || 'intermediate'}${reasoningPrompt}
 
-Return ONLY valid JSON:
-{
-  "modules": [
-    {
-      "title": "Module Title",
-      "objectives": ["Objective 1", "Objective 2"],
-      "estimatedTime": "2-3 hours"
-    }
-  ],
-  "estimatedReadingTime": "20-25 hours",
-  "difficultyLevel": "intermediate"
-}`;
+IMPORTANT: Respond with ONLY valid JSON. No markdown, no code fences, no explanation.
+Start your response with { and end with }.
+
+{"modules": [{"title": "Module Title", "objectives": ["Objective 1", "Objective 2"], "estimatedTime": "2-3 hours"}], "estimatedReadingTime": "20-25 hours", "difficultyLevel": "intermediate"}`;
   }
 
   private async parseRoadmapResponse(response: string, session: BookSession): Promise<BookRoadmap> {
@@ -727,6 +760,8 @@ Return ONLY valid JSON:
       let cleaned = response.trim()
         .replace(/```json\s*/ig, '')
         .replace(/```\s*/g, '')
+        .replace(/[\u201C\u201D]/g, '"')    // smart double quotes
+        .replace(/[\u2018\u2019]/g, "'")    // smart single quotes
         .replace(/^[^{]*/, '')
         .replace(/[^}]*$/, '');
 
@@ -737,7 +772,8 @@ Return ONLY valid JSON:
 
       // Sanitize common LLM JSON errors
       jsonString = jsonString
-        .replace(/,\s*([}\]])/g, '$1') // remove trailing commas
+        .replace(/,\s*([}\]])/g, '$1')        // remove trailing commas
+        .replace(/\/\/[^\n]*/g, '')            // remove single-line comments
         .replace(/[\u0000-\u0009\u000B\u000C\u000E-\u001F]+/g, ''); // remove invalid control chars
 
       const roadmap = JSON.parse(jsonString);
