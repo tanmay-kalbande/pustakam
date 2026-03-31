@@ -39,7 +39,7 @@ export function CustomSelect({ options, value, onChange, placeholder = "Select..
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="glass-input flex items-center justify-between w-full px-4 py-2 text-left"
+        className="glass-input flex items-center justify-between w-full min-h-12 rounded-2xl px-4 py-3 text-left"
       >
         <span className={selectedOption ? 'text-white' : 'text-gray-400'}>
           {selectedOption?.label || placeholder}
@@ -51,13 +51,13 @@ export function CustomSelect({ options, value, onChange, placeholder = "Select..
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 w-full mt-2 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl animate-fade-in max-h-60 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-2 rounded-2xl glass-input shadow-2xl animate-fade-in max-h-60 overflow-y-auto">
           <ul className="p-1">
             {options.map(option => (
               <li
                 key={option.value}
                 onClick={() => handleSelect(option.value)}
-                className={`flex items-center justify-between p-2.5 text-sm rounded-lg cursor-pointer transition-all ${
+                className={`flex items-center justify-between p-3 text-sm rounded-xl cursor-pointer transition-all ${
                   value === option.value
                     ? 'bg-amber-500/20 text-amber-400'
                     : 'text-gray-300 hover:bg-white/5'

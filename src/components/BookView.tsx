@@ -627,7 +627,7 @@ const ReadingMode: React.FC<ReadingModeProps> = ({
 const DetailTabButton = ({ label, Icon, isActive, onClick }: { label: ReactNode; Icon: React.ElementType; isActive: boolean; onClick: () => void; }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${isActive
+    className={`flex items-center gap-2 rounded-2xl border px-4 py-2 text-xs font-semibold transition-all duration-200 ${isActive
       ? 'border-[var(--brand)]/20 bg-[var(--brand)]/10 text-[var(--text-primary)]'
       : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]'}`}
   >
@@ -680,7 +680,7 @@ const HomeView = ({
 
   return (
     <div
-      className="relative flex-1 flex flex-col items-center px-6 w-full min-h-[90vh] overflow-y-auto"
+      className="relative flex-1 flex flex-col items-center px-6 w-full min-h-screen overflow-y-auto"
       style={{ background: 'var(--bg-base)' }}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,rgba(255,255,255,0.02),transparent_70%)] -z-10" />
@@ -688,16 +688,16 @@ const HomeView = ({
       {/* Spacer for smooth vertical centering transition */}
       <div 
         className="w-full transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]" 
-        style={{ height: showAdvanced ? '8rem' : '22vh' }}
+        style={{ height: showAdvanced ? '7rem' : '16vh' }}
       />
 
-      <div className="w-full max-w-2xl mx-auto animate-subtle-fade relative z-10 shrink-0 pb-32">
+      <div className="w-full max-w-[64rem] mx-auto animate-subtle-fade relative z-10 shrink-0 pb-32">
         {/* Badge + logo + headline */}
-        <div className="mb-10 text-center flex flex-col items-center">
-          <div className="w-11 h-11 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center shadow-lg mb-6">
+        <div className="mb-8 text-center flex flex-col items-center">
+          <div className="w-11 h-11 rounded-2xl glass-input flex items-center justify-center shadow-lg mb-5">
             <Sparkles size={20} className="text-[var(--brand)] opacity-80" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-[1.1]">
+          <h1 className="text-4xl md:text-6xl font-bold text-[var(--text-primary)] tracking-tight leading-[1.04]">
             Build Better<br />
             <span className="text-[var(--text-secondary)]">Learning Books</span>
           </h1>
@@ -706,7 +706,7 @@ const HomeView = ({
 
 
         {/* Input bar */}
-        <div className="relative flex items-center w-full glass-input shadow-2xl rounded-full p-1.5 pl-6 transition-all duration-300">
+        <div className="relative flex items-center w-full glass-input shadow-2xl rounded-[2rem] p-1.5 pl-6 transition-all duration-300">
           <textarea
             value={formData.goal}
             onChange={e => {
@@ -732,10 +732,10 @@ const HomeView = ({
                   setFormData(updatedData);
                   // Wait a tiny bit for state to propagate
                   setTimeout(() => {
-                    handleCreateRoadmap(updatedData);
+                    void handleCreateRoadmap(updatedData);
                   }, 100);
                 } catch (err) {
-                  handleCreateRoadmap(formData);
+                  void handleCreateRoadmap(formData);
                 } finally {
                   setIsEnhancing(false);
                 }
@@ -764,13 +764,13 @@ const HomeView = ({
         )}
 
         {/* Action chips */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mt-6 max-w-[620px] mx-auto">
-          <button onClick={() => setShowAdvanced(!showAdvanced)} className="btn btn-secondary px-4 py-1.5 rounded-full text-xs">
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-7 max-w-[620px] mx-auto">
+          <button onClick={() => setShowAdvanced(!showAdvanced)} className="btn btn-secondary glass-input px-4 py-2 rounded-2xl text-xs">
             <List size={14} /> Options
             <ChevronDown size={12} className={`transition-transform opacity-50 ${showAdvanced ? 'rotate-180' : ''}`} />
           </button>
           {bookCount > 0 && (
-            <button onClick={onShowList} className="btn btn-secondary px-4 py-1.5 rounded-full text-xs">
+            <button onClick={onShowList} className="btn btn-secondary glass-input px-4 py-2 rounded-2xl text-xs">
               <BookOpen size={14} /> My Library <span className="opacity-40">({bookCount})</span>
             </button>
           )}
@@ -779,10 +779,10 @@ const HomeView = ({
         {/* Advanced options */}
         {showAdvanced && (
           <div
-            className="mt-6 p-6 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-xl"
+            className="mt-7 p-7 card-elevated rounded-[1.75rem] shadow-xl"
             style={{ animation: 'dropdownSlideIn 0.2s cubic-bezier(0.16,1,0.3,1)', transformOrigin: 'top center' }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
               <div>
                 <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Target Audience</label>
                 <input
@@ -790,7 +790,7 @@ const HomeView = ({
                   value={formData.targetAudience}
                   onChange={e => setFormData(p => ({ ...p, targetAudience: e.target.value }))}
                   placeholder="Beginners, Professionals..."
-                  className="w-full h-10 glass-input rounded-md px-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-all shadow-sm"
+                  className="w-full h-12 glass-input rounded-2xl px-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-all shadow-sm"
                 />
               </div>
               <div>
@@ -807,21 +807,21 @@ const HomeView = ({
               </div>
             </div>
 
-            <div className="mb-4">
+            <div className="mb-5">
               <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Context & Goals (Optional)</label>
               <textarea
                 value={formData.reasoning}
                 onChange={e => setFormData(p => ({ ...p, reasoning: e.target.value }))}
                 placeholder="What should the reader achieve?"
-                className="w-full glass-input rounded-md p-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none resize-none transition-all"
-                rows={3}
+                className="w-full glass-input rounded-2xl p-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none resize-none transition-all"
+                rows={4}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pt-4 border-t border-[var(--border-subtle)]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 pt-5 border-t border-[var(--border-subtle)]">
               <div>
                 <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Generation Mode</label>
-                <div className="relative flex p-1 bg-white/5 border border-white/10 rounded-full h-10 overflow-hidden">
+                <div className="relative flex p-1 glass-input rounded-2xl h-12 overflow-hidden">
                   {[
                     { value: 'stellar',   label: 'Stellar', icon: Sparkles },
                     { value: 'blackhole', label: 'Street',  icon: Crown },
@@ -834,7 +834,7 @@ const HomeView = ({
                         generationMode: value as any,
                         language: value === 'stellar' ? 'en' : p.language,
                       }))}
-                      className={`relative z-10 flex-1 flex items-center justify-center gap-2 rounded-full text-[10px] font-bold transition-colors duration-200 ${
+                      className={`relative z-10 flex-1 flex items-center justify-center gap-2 rounded-[1rem] px-3 text-[10px] font-bold transition-colors duration-200 ${
                         formData.generationMode === value
                           ? 'text-white'
                           : 'text-white/50 hover:text-white/80'
@@ -843,7 +843,7 @@ const HomeView = ({
                       {formData.generationMode === value && (
                         <motion.div
                           layoutId="activeMode"
-                          className="absolute inset-0 rounded-full border border-white/5 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                          className="absolute inset-0 rounded-[1rem] border border-white/10 bg-white/12 shadow-[0_10px_30px_rgba(255,255,255,0.08)]"
                           transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                         />
                       )}
@@ -869,7 +869,7 @@ const HomeView = ({
               </div>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-[var(--border-subtle)]">
+            <div className="mt-9 pt-5 border-t border-[var(--border-subtle)]">
               <button
                 onClick={() => canGenerate ? handleCreateRoadmap(formData) : onOpenSettings()}
                 disabled={!formData.goal.trim() || localIsGenerating}
@@ -1179,7 +1179,7 @@ export function BookView({
       );
     }
     return (
-      <HomeView
+        <HomeView
         onNewBook={() => { setView('create'); }}
         onShowList={() => { setShowListInMain(true); setView('list'); }}
         hasApiKey={hasApiKey}
@@ -1189,7 +1189,7 @@ export function BookView({
         setFormData={setFormData}
         showAdvanced={showAdvanced}
         setShowAdvanced={setShowAdvanced}
-        handleCreateRoadmap={onCreateBookRoadmap}
+        handleCreateRoadmap={handleCreateRoadmap}
         handleEnhanceWithAI={handleEnhanceWithAI}
         isEnhancing={isEnhancing}
         enhanceError={enhanceError}
