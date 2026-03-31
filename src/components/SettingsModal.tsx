@@ -449,7 +449,7 @@ export function SettingsModal({
                       <h3 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">{APP_AI_BRANDLINE.toUpperCase()}</h3>
                       <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--brand)] opacity-60 px-2 py-0.5 bg-[var(--brand)]/10 rounded-md inline-block">{AI_SUITE_NAME} Edition</p>
                       <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
-                        A focused GLM-only knowledge forge for modular book generation, streaming chapters, and structured learning assets.
+                        A focused AI book forge for modular generation, long-form chapters, and structured learning assets.
                       </p>
                     </div>
                   </div>
@@ -458,7 +458,7 @@ export function SettingsModal({
                   <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                     {[
                       { label: 'AI Framework', val: 'Smart Orchestration' },
-                      { label: 'Providers',    val: `${PROVIDERS.length} (Z AI, Mistral)` },
+                      { label: 'Providers',    val: `${PROVIDERS.length} (Z AI, Fast Mistral)` },
                       { label: 'Architecture', val: 'Hybrid PWA' },
                       { label: 'Security',    val: 'Client-side Encryption' },
                     ].map(({ label, val }) => (

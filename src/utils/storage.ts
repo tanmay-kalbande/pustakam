@@ -1,6 +1,6 @@
 // src/utils/storage.ts
 import { APISettings, BookProject, ModelID, ModelProvider } from '../types';
-import { DEFAULT_ZHIPU_MODEL, ZHIPU_PROVIDER } from '../constants/ai';
+import { DEFAULT_MISTRAL_MODEL, MISTRAL_PROVIDER } from '../constants/ai';
 
 const SETTINGS_KEY = 'pustakam-settings';
 const BOOKS_KEY = 'pustakam-books';
@@ -20,8 +20,8 @@ const defaultSettings: APISettings = {
   xaiApiKey: '',
   openRouterApiKey: '',
   cohereApiKey: '',
-  selectedProvider: ZHIPU_PROVIDER,
-  selectedModel: DEFAULT_ZHIPU_MODEL,
+  selectedProvider: MISTRAL_PROVIDER,
+  selectedModel: DEFAULT_MISTRAL_MODEL,
   defaultGenerationMode: 'stellar',
   defaultLanguage: 'en',
 };
@@ -57,7 +57,7 @@ export const storageUtils = {
       }
 
       if (useProxy && !settings.selectedProvider) {
-        settings.selectedProvider = ZHIPU_PROVIDER;
+        settings.selectedProvider = MISTRAL_PROVIDER;
       }
 
       // Validate models
@@ -84,7 +84,7 @@ export const storageUtils = {
       }
 
       if (useProxy && !settings.selectedProvider) {
-        settings.selectedProvider = ZHIPU_PROVIDER;
+        settings.selectedProvider = MISTRAL_PROVIDER;
       }
 
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));

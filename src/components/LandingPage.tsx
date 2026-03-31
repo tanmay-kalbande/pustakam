@@ -24,7 +24,7 @@ const DEMO_BOOKS = [
     mode: 'Street Mode',
     input: 'Stop overthinking and take action',
     title: "Burn the Boat: No More 'Someday' Shit",
-    desc: 'Written in raw Street Mode. No hand-holding, no fluff. Aggressive, direct content that forces you to execute.',
+    desc: 'Direct, high-energy writing built to push action fast.',
     words: '19,914',
     chapters: '10',
     accent: 'from-amber-400/60 via-orange-300/40 to-white/10',
@@ -36,7 +36,7 @@ const DEMO_BOOKS = [
     mode: 'Stellar Mode',
     input: 'Personal finance for young adults',
     title: 'Foundations of Personal Finance',
-    desc: 'Written in structured Stellar Mode. Professional, framework-driven, and built for serious, deep learning.',
+    desc: 'Structured, professional writing built for calm deep learning.',
     words: '24,152',
     chapters: '12',
     accent: 'from-amber-500/50 via-yellow-400/30 to-emerald-200/10',
@@ -241,11 +241,12 @@ const renderDemo = (
   const activeBook = DEMO_BOOKS[activeDemoIdx];
   return (
     <div className="flex min-h-full w-full max-w-[860px] flex-col items-center justify-center px-4 py-4 md:min-h-0">
-      <div className="mb-3 text-center">
+      <div className="mb-4 text-center">
         <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.4em] text-amber-400/65">Sample Output</span>
         <h2 className="text-3xl font-bold tracking-tight text-white md:text-[42px]" style={{ fontFamily: "'Inter', sans-serif" }}>
           Review A Real Book
         </h2>
+        <p className="mt-2 text-sm text-white/55">See the tone, cover, and final export without the extra clutter.</p>
       </div>
 
       {/* Mode selector */}
@@ -263,25 +264,25 @@ const renderDemo = (
         ))}
       </div>
 
-      <div className="grid w-full max-w-[860px] grid-cols-1 gap-3 md:grid-cols-[1.08fr_0.92fr]">
-        {/* Info panel */}
+      <div className="grid w-full max-w-[860px] grid-cols-1 gap-3 md:grid-cols-[0.86fr_1.14fr]">
         <div className="rounded-[14px] border border-amber-500/20 bg-black/50 p-5 backdrop-blur-md">
-          <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.22em] text-white/30">Input Prompt</p>
-          <p className="mb-3 border-l-2 border-white/10 pl-4 text-sm italic leading-relaxed text-white/65">
-            "{activeBook.input}"
-          </p>
-          <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.22em] text-white/30">Generated Title</p>
-          <h3 className="mb-2 text-[24px] font-black leading-tight text-white" style={{ fontFamily: "'Rubik', sans-serif" }}>
+          <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.22em] text-white/30">{activeBook.mode}</p>
+          <h3 className="mb-3 text-[24px] font-black leading-tight text-white" style={{ fontFamily: "'Rubik', sans-serif" }}>
             {activeBook.title}
           </h3>
-          <p className="mb-3 text-sm leading-5 text-white/65">{activeBook.desc}</p>
-          <div className="flex items-center gap-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45">
-            <span>{activeBook.words} words</span>
-            <span>{activeBook.chapters} chapters</span>
+          <p className="mb-4 text-sm leading-6 text-white/62">{activeBook.desc}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/35">Length</p>
+              <p className="mt-1 text-sm font-semibold text-white/80">{activeBook.words} words</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/35">Chapters</p>
+              <p className="mt-1 text-sm font-semibold text-white/80">{activeBook.chapters}</p>
+            </div>
           </div>
         </div>
 
-        {/* Preview + download */}
         <div className="rounded-[14px] border border-amber-500/20 bg-black/50 p-4 backdrop-blur-md">
           <div className="mb-3 rounded-[22px] border border-white/10 bg-[#0a0a0a] p-3">
             <div className={`relative flex h-36 overflow-hidden rounded-[18px] border border-white/10 bg-gradient-to-br ${activeBook.accent}`}>
