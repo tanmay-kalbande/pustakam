@@ -1195,7 +1195,14 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
     try {
       const introduction = await this.generateBookIntroduction(session, book.roadmap!);
       const summary = await this.generateBookSummary(session, book.modules);
-      const glossary = await this.generateGlossary(book.modules);
+      let glossary = '';
+
+      try {
+        glossary = await this.generateGlossary(book.modules);
+      } catch (glossaryError) {
+        err('generateGlossary failed, using local fallback glossary:', glossaryError);
+        glossary = this.buildFallbackGlossary(book.modules);
+      }
 
       const totalWords   = book.modules.reduce((s, m) => s + m.wordCount, 0);
       const providerName = this.getProviderDisplayName();
@@ -1260,7 +1267,7 @@ Write 600-900 words covering: key learning outcomes, important concepts recap, n
   }
 
   private async generateGlossary(modules: BookModule[]): Promise<string> {
-    // Build a glossary from the strongest signals first so the final pass stays fast.
+    // Keep the glossary prompt small and high-signal so the final pass stays reliable.
     const uniqueSignals = Array.from(new Set(
       modules.flatMap(module =>
         module.content
@@ -1268,26 +1275,104 @@ Write 600-900 words covering: key learning outcomes, important concepts recap, n
           .map(line => line.trim())
           .filter(line =>
             line.length > 0 &&
-            line.length <= 160 &&
+            line.length <= 120 &&
             (line.startsWith('#') || line.startsWith('**') || line.startsWith('- **'))
           )
       )
     ));
 
-    const content = uniqueSignals.slice(0, 220).join('\n');
+    const glossaryTerms = this.extractGlossaryTerms(modules, uniqueSignals);
+    const compactSignals = uniqueSignals.slice(0, 90).join('\n').substring(0, 6000);
 
-    const prompt  = `Create a concise glossary from these extracted headings and highlighted terms:
-${content.substring(0, 12000)}
+    const primaryPrompt  = `Create a concise glossary from these extracted headings and highlighted terms:
+${compactSignals}
 
 Rules:
-- Include 12-18 important terms only
+- Include 10-14 important terms only
 - Skip duplicates and generic filler terms
 - Keep definitions to one crisp sentence
 - Sort alphabetically
 
 Format:
 **Term**: Definition.`;
-    return await this.generateWithAI(prompt, undefined, undefined, undefined, 'glossary');
+
+    try {
+      return await this.generateWithAI(primaryPrompt, undefined, undefined, undefined, 'glossary');
+    } catch (primaryError) {
+      err('Primary glossary prompt failed, retrying with a smaller seed set:', primaryError);
+    }
+
+    const fallbackPrompt = `Create a concise glossary for this book using only the strongest topic signals.
+
+MODULE TITLES:
+${modules.map(module => `- ${module.title}`).join('\n')}
+
+KEY TERMS:
+${glossaryTerms.slice(0, 30).map(term => `- ${term}`).join('\n')}
+
+Rules:
+- Include 8-12 important terms only
+- Skip duplicates and generic filler terms
+- Keep each definition to one crisp sentence
+- Sort alphabetically
+
+Format:
+**Term**: Definition.`;
+
+    try {
+      return await this.generateWithAI(fallbackPrompt, undefined, undefined, undefined, 'glossary');
+    } catch (fallbackError) {
+      err('Fallback glossary prompt failed, returning local glossary:', fallbackError);
+      return this.buildFallbackGlossary(modules, glossaryTerms);
+    }
+  }
+
+  private extractGlossaryTerms(modules: BookModule[], signalLines: string[] = []): string[] {
+    const stopTerms = new Set([
+      'introduction', 'summary', 'conclusion', 'key takeaways', 'next steps',
+      'overview', 'example', 'examples', 'exercise', 'exercises', 'quiz',
+      'table of contents', 'chapter summary', 'final thoughts',
+    ]);
+
+    const candidates = [
+      ...modules.map(module => module.title),
+      ...signalLines,
+      ...modules.flatMap(module =>
+        Array.from(module.content.matchAll(/\*\*([^*\n]{2,80})\*\*/g)).map(match => match[1])
+      ),
+    ];
+
+    return Array.from(new Set(
+      candidates
+        .map(candidate => candidate
+          .replace(/^[-#*\s:]+/, '')
+          .replace(/\*\*/g, '')
+          .replace(/`/g, '')
+          .replace(/\s+/g, ' ')
+          .trim()
+        )
+        .filter(candidate =>
+          candidate.length >= 3 &&
+          candidate.length <= 60 &&
+          candidate.split(' ').length <= 6 &&
+          !/^\d+$/.test(candidate) &&
+          !stopTerms.has(candidate.toLowerCase())
+        )
+    ));
+  }
+
+  private buildFallbackGlossary(modules: BookModule[], preferredTerms: string[] = []): string {
+    const terms = (preferredTerms.length > 0 ? preferredTerms : this.extractGlossaryTerms(modules))
+      .slice(0, 12)
+      .sort((a, b) => a.localeCompare(b));
+
+    if (terms.length === 0) {
+      return '**Core Concepts**: Review the chapter headings and highlighted callouts above for the main vocabulary introduced in this book.';
+    }
+
+    return terms
+      .map(term => `**${term}**: A key concept introduced in this book; refer to the related chapter for the full explanation and examples.`)
+      .join('\n\n');
   }
 
   // ============================================================================
