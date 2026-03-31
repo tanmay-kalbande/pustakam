@@ -694,7 +694,12 @@ const HomeView = ({
       <div className="w-full max-w-2xl mx-auto animate-subtle-fade relative z-10 shrink-0 pb-32">
         {/* Badge + logo + headline */}
         <div className="mb-10 text-center flex flex-col items-center">
-          <div className="w-11 h-11 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center shadow-lg mb-6">
+          <div
+            className={`w-11 h-11 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center shadow-lg mb-6 transition-all duration-200 ${
+              showAdvanced ? 'opacity-0 scale-95 pointer-events-none -mb-1' : 'opacity-100 scale-100'
+            }`}
+            aria-hidden={showAdvanced}
+          >
             <Sparkles size={20} className="text-[var(--brand)] opacity-80" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-[1.1]">
@@ -779,7 +784,7 @@ const HomeView = ({
         {/* Advanced options */}
         {showAdvanced && (
           <div
-            className="mt-6 p-6 card-elevated rounded-xl shadow-xl"
+            className="mt-6 p-6 glass-input home-options-panel rounded-[24px] shadow-xl"
             style={{ animation: 'dropdownSlideIn 0.2s cubic-bezier(0.16,1,0.3,1)', transformOrigin: 'top center' }}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

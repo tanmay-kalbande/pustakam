@@ -67,7 +67,7 @@ export async function generateViaProxy(
   signal?: AbortSignal,
   onChunk?: (chunk: string) => void,
   bookId?: string,
-  provider: ModelProvider = 'mistral'
+  provider: ModelProvider = 'zhipu'
 ): Promise<string> {
   if (!supabase) {
     throw new Error('Supabase is not configured. Proxy auth cannot start.');

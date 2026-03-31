@@ -36,7 +36,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                         Welcome, {firstName}.
                     </h1>
                     <p className="text-[var(--text-secondary)] text-sm mb-10 leading-relaxed">
-                        Ready to generate your first book with the fast default setup?
+                        Ready to generate your first book? Z AI is the default, and Fast Mistral is there when you want quicker runs.
                     </p>
 
                     <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg p-5 mb-8 text-left relative overflow-hidden">
@@ -47,16 +47,16 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                                 <span className="text-[var(--brand)] font-bold uppercase tracking-[0.2em] text-[10px]">Free Access</span>
                             </div>
                             <p className="text-[var(--text-primary)] text-lg font-bold mb-1 tracking-tight">
-                                Fast Mistral Active
+                                Z AI Default
                             </p>
-                            <p className="text-[var(--text-muted)] text-xs">Default provider • Fast mode for new users</p>
+                            <p className="text-[var(--text-muted)] text-xs">Fast Mistral is available in the provider switcher</p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-3 mb-8">
                         {[
                             { icon: BookOpen, label: 'Full Books' },
-                            { icon: Zap, label: 'Fast Start' },
+                            { icon: Zap, label: 'Fast Mistral' },
                             { icon: Download, label: 'PDF Export' },
                         ].map(({ icon: Icon, label }) => (
                             <div key={label} className="p-4 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-lg transition-colors hover:bg-[var(--bg-surface)]">

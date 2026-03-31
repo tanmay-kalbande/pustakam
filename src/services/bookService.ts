@@ -14,7 +14,7 @@ import { generateId } from '../utils/helpers';
 import { planService } from './planService';
 import { streetPromptService } from './streetPromptService';
 import { desiPromptService } from './desiPromptService';
-import { AI_SUITE_NAME, DEFAULT_MISTRAL_MODEL, MISTRAL_PROVIDER, ZHIPU_PROVIDER } from '../constants/ai';
+import { AI_SUITE_NAME, DEFAULT_ZHIPU_MODEL, ZHIPU_PROVIDER } from '../constants/ai';
 import { generateViaProxy, TaskType as ProxyTaskType } from './proxyService';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -76,8 +76,8 @@ class BookGenerationService {
     xaiApiKey: '',
     openRouterApiKey: '',
     cohereApiKey: '',
-    selectedProvider: MISTRAL_PROVIDER,
-    selectedModel: DEFAULT_MISTRAL_MODEL,
+    selectedProvider: ZHIPU_PROVIDER,
+    selectedModel: DEFAULT_ZHIPU_MODEL,
     defaultGenerationMode: 'stellar',
     defaultLanguage: 'en',
   };
@@ -364,12 +364,12 @@ User Input: "${userInput}"`;
     if (!this.settings.selectedModel) errors.push('No model selected');
 
     if (useProxy) {
-      // Proxy mode: zhipu and mistral are supported; others auto-correct to the fast default
+      // Proxy mode: zhipu and mistral are supported; others auto-correct to the default proxy provider
       const proxyProviders: ModelProvider[] = ['zhipu', 'mistral'];
       if (!proxyProviders.includes(this.settings.selectedProvider)) {
-        dbg('Auto-correcting provider to mistral for proxy mode');
-        this.settings.selectedProvider = MISTRAL_PROVIDER;
-        this.settings.selectedModel = DEFAULT_MISTRAL_MODEL;
+        dbg('Auto-correcting provider to zhipu for proxy mode');
+        this.settings.selectedProvider = ZHIPU_PROVIDER;
+        this.settings.selectedModel = DEFAULT_ZHIPU_MODEL;
       }
       // No API key validation needed in proxy mode
     } else {
