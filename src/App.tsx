@@ -214,6 +214,20 @@ function App() {
     if (!isLoading) setIsAuthTransitioning(false);
   }, [isAuthenticated, isLoading]);
 
+  // Extra safety: never let auth-transition mode blank the whole app for too long.
+  useEffect(() => {
+    if (!isAuthTransitioning) return;
+
+    const transitionSafetyTimer = setTimeout(() => {
+      console.warn('[App] Auth transition safety timeout - forcing content render');
+      setIsAuthTransitioning(false);
+      setIsLoadingScreenVisible(false);
+      setIsLoadingScreenExiting(false);
+    }, 8000);
+
+    return () => clearTimeout(transitionSafetyTimer);
+  }, [isAuthTransitioning]);
+
   // Hard safety: never let the loading screen stay more than 15 seconds
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
@@ -624,6 +638,7 @@ function App() {
                     setTimeout(() => {
                       setIsLoadingScreenVisible(false);
                       setIsLoadingScreenExiting(false);
+                      setIsAuthTransitioning(false);
                       setShowWelcomeModal(true);
                     }, 700);
                   }, 2500);
@@ -756,14 +771,18 @@ function App() {
               <AuthModal
                 isOpen={showAuthModal}
                 onClose={() => setShowAuthModal(false)}
-                onSuccess={() => { setIsAuthTransitioning(true); setShowAuthModal(false); setShowWelcomeModal(true); }}
+                onSuccess={() => {
+                  setShowAuthModal(false);
+                  setIsAuthTransitioning(false);
+                  setShowWelcomeModal(true);
+                }}
               />
-
-              <WelcomeModal isOpen={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} />
             </>
           )}
         </>
       )}
+
+      <WelcomeModal isOpen={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} />
 
       {/* 4. Support Modals (Legal Pages) - Rendered over everything else */}
       {showAboutPage && <AboutPage onClose={() => setShowAboutPage(false)} />}

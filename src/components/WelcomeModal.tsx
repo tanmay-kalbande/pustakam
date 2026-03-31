@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, BookOpen, Zap, Download, Check, Crown } from 'lucide-react';
+import { X, BookOpen, Zap, Download, Check } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface WelcomeModalProps {
@@ -43,13 +43,18 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--brand)]/5 blur-3xl -mr-16 -mt-16" />
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-3">
-                                <Crown size={14} className="text-[var(--brand)]" />
-                                <span className="text-[var(--brand)] font-bold uppercase tracking-[0.2em] text-[10px]">Free Access</span>
+                                <span className="text-[var(--brand)] font-bold uppercase tracking-[0.2em] text-[10px]">Models Available</span>
                             </div>
-                            <p className="text-[var(--text-primary)] text-lg font-bold mb-1 tracking-tight">
-                                Z AI Default
-                            </p>
-                            <p className="text-[var(--text-muted)] text-xs">Fast Mistral is available in the provider switcher</p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)]/70 px-3 py-3">
+                                    <p className="text-[var(--text-primary)] text-sm font-bold tracking-tight">Z AI</p>
+                                    <p className="text-[var(--text-muted)] text-[11px] mt-1">Long-form generation</p>
+                                </div>
+                                <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)]/70 px-3 py-3">
+                                    <p className="text-[var(--text-primary)] text-sm font-bold tracking-tight">Fast Mistral</p>
+                                    <p className="text-[var(--text-muted)] text-[11px] mt-1">Faster responses when needed</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
