@@ -454,6 +454,9 @@ User Input: "${userInput}"`;
   }
 
   private getProxyTimeoutMs(taskType?: string): number {
+    if (taskType === 'enhance' || taskType === 'glossary') {
+      return 135_000;
+    }
     // Render free tier can cold-start in up to ~50s after 15 min idle.
     // Budget = cold-start (50s) + Zhipu response time. Be generous.
     switch (taskType) {
