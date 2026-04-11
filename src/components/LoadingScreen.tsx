@@ -30,7 +30,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                         <span className="font-sans font-bold tracking-[0.02em] text-[var(--color-text-primary)]">Pustakam</span><span className="font-sans font-bold tracking-[0.02em] text-[var(--color-accent-primary)]">.ai</span>
                     </h1>
                     <p className="text-xs md:text-sm font-medium tracking-[0.3em] text-[var(--color-text-tertiary)] uppercase opacity-60">
-                        by Injin Stack
+                        by Tanmay Kalbande
                     </p>
                 </div>
 

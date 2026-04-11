@@ -10,7 +10,7 @@ CREATE TABLE public.profiles (
   full_name TEXT,
   credits INTEGER DEFAULT 3, -- Free tier: 3 credits for new users
   is_admin BOOLEAN DEFAULT FALSE,
-  -- Subscription plan fields
+  -- Access configuration fields
   plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'monthly', 'yearly')),
   plan_expires_at TIMESTAMPTZ DEFAULT NULL, -- NULL for free tier, expiry date for paid plans
   books_created INTEGER DEFAULT 0, -- Total books created by user
@@ -46,7 +46,7 @@ CREATE TABLE public.book_generations (
 );
 
 -- ============================================================================
--- Auto-create profile on user signup with 1-year PRO subscription
+-- Auto-create profile on user signup
 -- ============================================================================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$

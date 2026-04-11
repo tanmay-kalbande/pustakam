@@ -10,10 +10,10 @@ interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void;
-    initialMode?: 'signin' | 'signup' | 'subscribe';
+    initialMode?: 'signin' | 'signup';
 }
 
-type AuthMode = 'signin' | 'signup' | 'subscribe';
+type AuthMode = 'signin' | 'signup';
 
 export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signin' }: AuthModalProps) {
     const { signIn, signUp, isSupabaseEnabled, user } = useAuth();
@@ -33,12 +33,6 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signin' }
         if (isOpen) {
             setMode(initialMode);
             setError(null);
-            // If user is logged in and mode is subscribe, show contact options directly
-            if (user && initialMode === 'subscribe') {
-                setShowContactOptions(true);
-            } else {
-                setShowContactOptions(false);
-            }
         }
     }, [isOpen, initialMode, user]);
 
@@ -50,18 +44,13 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signin' }
         setIsLoading(true);
 
         try {
-            if (mode === 'signin' || mode === 'subscribe') {
+            if (mode === 'signin') {
                 const { error } = await signIn(email, password);
                 if (error) {
                     setError(error.message);
                 } else {
-                    if (mode === 'subscribe') {
-                        // Show contact options after successful login for subscription
-                        setShowContactOptions(true);
-                    } else {
-                        onSuccess?.();
-                        onClose();
-                    }
+                    onSuccess?.();
+                    onClose();
                 }
             } else {
                 const { error } = await signUp(email, password, fullName, profession, learningInterest);
@@ -84,60 +73,6 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signin' }
         setError(null);
     };
 
-    const handleWhatsApp = () => {
-        const message = encodeURIComponent('Hi! I want to subscribe to Pustakam premium plan.');
-        window.open(`https://wa.me/${config.contact.whatsappNumber}?text=${message}`, '_blank');
-        onClose();
-    };
-
-    const handleEmail = () => {
-        const subject = encodeURIComponent('Pustakam Premium Subscription');
-        const body = encodeURIComponent('Hi,\n\nI want to subscribe to Pustakam premium plan.\n\nThanks!');
-        window.open(`mailto:${config.contact.supportEmail}?subject=${subject}&body=${body}`, '_blank');
-        onClose();
-    };
-
-    // Show contact options after login for subscription
-    if (showContactOptions) {
-        return (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-                <div className="relative w-full max-w-sm bg-[var(--bg-elevated)] backdrop-blur-2xl border border-[var(--border-default)] rounded-lg shadow-2xl overflow-hidden">
-                    <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors z-10">
-                        <X size={18} />
-                    </button>
-
-                    <div className="relative p-8 text-center">
-                        <div className="w-16 h-16 mx-auto mb-5 bg-[var(--brand)]/10 rounded-xl flex items-center justify-center border border-[var(--brand)]/20">
-                            <img src="/white-logo.png" alt="Pustakam" className="w-10 h-10" />
-                        </div>
-                        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">Subscribe to Premium</h2>
-                        <p className="text-sm text-[var(--text-secondary)] mb-8">Choose how you'd like to contact us</p>
-
-                        <div className="space-y-3">
-                            <button
-                                onClick={handleWhatsApp}
-                                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-md flex items-center justify-center gap-3 transition-colors shadow-lg shadow-emerald-900/20"
-                            >
-                                <MessageCircle size={20} />
-                                <span>WhatsApp</span>
-                            </button>
-                            <button
-                                onClick={handleEmail}
-                                className="btn btn-secondary w-full py-3.5 flex items-center justify-center gap-3"
-                            >
-                                <Send size={20} />
-                                <span>Email Us</span>
-                            </button>
-                        </div>
-
-                        <p className="text-xs text-[var(--text-muted)] mt-6">We'll respond within 24 hours</p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
             {/* Backdrop */}
@@ -158,14 +93,12 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signin' }
                         <img src="/white-logo.png" alt="Pustakam" className="w-7 h-7" />
                     </div>
                     <h2 className="text-lg font-bold text-[var(--text-primary)]">
-                        {mode === 'subscribe' ? 'Sign In to Subscribe' : mode === 'signin' ? 'Welcome Back' : 'Create Account'}
+                        {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
                     </h2>
                     <p className="text-xs text-[var(--text-secondary)] mt-1">
-                        {mode === 'subscribe'
-                            ? 'Sign in to continue with subscription'
-                            : mode === 'signin'
-                                ? 'Sign in to continue to Pustakam'
-                                : 'Join Pustakam and start learning'
+                        {mode === 'signin'
+                            ? 'Sign in to continue to Pustakam'
+                            : 'Join Pustakam and start learning'
                         }
                     </p>
                 </div>
@@ -220,7 +153,6 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signin' }
                                             <option value="pm" className="bg-[var(--bg-elevated)]">Product Manager</option>
                                             <option value="creator" className="bg-[var(--bg-elevated)]">Content Creator / Writer</option>
                                             <option value="researcher" className="bg-[var(--bg-elevated)]">Researcher / Scientist</option>
-                                            <option value="business" className="bg-[var(--bg-elevated)]">Business / Founder</option>
                                             <option value="other" className="bg-[var(--bg-elevated)]">Other</option>
                                         </select>
                                     </div>
@@ -292,13 +224,11 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signin' }
                         )}
                     </button>
  
-                    {mode !== 'subscribe' && (
-                        <div className="text-center pt-2">
-                            <button type="button" onClick={toggleMode} className="text-sm text-[var(--text-muted)] hover:text-[var(--brand)] transition-colors">
-                                {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-                            </button>
-                        </div>
-                    )}
+                    <div className="text-center pt-2">
+                        <button type="button" onClick={toggleMode} className="text-sm text-[var(--text-muted)] hover:text-[var(--brand)] transition-colors">
+                            {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

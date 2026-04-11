@@ -1012,7 +1012,7 @@ class ProfessionalPdfGenerator {
         margin: [0, 0, 0, 15]
       },
       {
-        text: 'Injin Stack Team',
+        text: 'Tanmay Kalbande',
         fontSize: 14,
         bold: true,
         color: darkText,
@@ -1036,7 +1036,7 @@ class ProfessionalPdfGenerator {
         text: 'www.linkedin.com/in/tanmay-kalbande/',
         fontSize: 9,
         color: subtleText,
-        link: 'https://injinstack.dev'
+        link: 'https://www.linkedin.com/in/tanmay-kalbande/'
       },
       { text: '', pageBreak: 'after' }
     ];
@@ -1139,7 +1139,7 @@ class ProfessionalPdfGenerator {
               width: '*'
             },
             {
-              text: 'https://injinstack.dev',
+              text: 'https://www.linkedin.com/in/tanmay-kalbande/',
               fontSize: 7,
               color: '#999999',
               alignment: 'right',
@@ -1152,7 +1152,7 @@ class ProfessionalPdfGenerator {
       },
       info: {
         title: this.normalizeDashes(project.title),
-        author: 'Pustakam Injin - Injin Stack Team',
+        author: 'Pustakam Injin - Tanmay Kalbande',
         creator: 'Pustakam Injin',
         subject: project.goal,
         keywords: 'AI, Knowledge, Education, Pustakam'

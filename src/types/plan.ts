@@ -28,10 +28,10 @@ export const PLAN_DURATION_DAYS: Record<PlanType, number> = {
     yearly: 365,
 };
 
-// Pricing in INR (for display only)
+// Legacy configuration
 export const PLAN_PRICING: Record<PlanType, number> = {
-    monthly: 149,
-    yearly: 1299,
+    monthly: 0,
+    yearly: 0,
 };
 
 export interface UserPlan {

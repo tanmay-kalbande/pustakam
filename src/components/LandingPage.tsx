@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BookOpen, Compass, HardDriveDownload, Home, Menu, MoveRight, Shield, X } from 'lucide-react';
+import { BookOpen, Compass, HardDriveDownload, Home, Menu, MoveRight, Shield, X, Github } from 'lucide-react';
 import NebulaBackground from './NebulaBackground';
 
 interface LandingPageProps {
   onLogin: () => void;
   onGetStarted: () => void;
-  onSubscribe?: () => void;
   onShowAbout?: () => void;
   onShowTerms?: () => void;
   onShowPrivacy?: () => void;
@@ -520,6 +519,14 @@ const LandingPage = ({
 
         {/* Desktop right */}
         <div className="pointer-events-auto hidden items-center gap-4 md:flex">
+          <button 
+            onClick={() => alert("The GitHub repository link will be available here shortly!")} 
+            className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide opacity-60 transition-opacity hover:opacity-100"
+            title="View Source on GitHub"
+          >
+            <Github className="h-4 w-4" />
+            <span>GitHub</span>
+          </button>
           <button onClick={onLogin} className="text-[11px] font-medium uppercase tracking-wide opacity-50 transition-opacity hover:opacity-100">
             Login
           </button>
@@ -671,12 +678,19 @@ const LandingPage = ({
               <div className="flex items-center gap-4 text-[9px] font-medium uppercase tracking-wider text-white/30 md:text-[10px]">
                 <span>&copy; {new Date().getFullYear()} Pustakam Injin</span>
                 <span className="hidden md:inline">&bull;</span>
-                <span>Injin Stack Team</span>
+                <span>Tanmay Kalbande</span>
               </div>
               <div className="flex items-center gap-4 md:gap-5">
                 <button onClick={onShowAbout}   className="text-[9px] font-medium uppercase tracking-wider text-white/30 transition-colors hover:text-white md:text-[10px]">About</button>
                 <button onClick={onShowPrivacy} className="text-[9px] font-medium uppercase tracking-wider text-white/30 transition-colors hover:text-white md:text-[10px]">Privacy</button>
                 <button onClick={onShowTerms}   className="text-[9px] font-medium uppercase tracking-wider text-white/30 transition-colors hover:text-white md:text-[10px]">Terms</button>
+                <button 
+                  onClick={() => alert("The GitHub repository link will be available here shortly!")} 
+                  className="flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-wider text-white/30 transition-colors hover:text-white md:text-[10px]"
+                >
+                  <Github className="h-3 w-3" />
+                  Source
+                </button>
                 <span className="hidden items-center gap-1 text-[9px] font-medium uppercase tracking-wider text-white/25 md:inline-flex md:text-[10px]">
                   <Shield className="h-3 w-3" />
                   Secure Proxy

@@ -14,7 +14,7 @@ export const config = {
     // Contact
     contact: {
         whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || '919876543210',
-        supportEmail: import.meta.env.VITE_SUPPORT_EMAIL || 'hello@injinstack.dev',
+        supportEmail: import.meta.env.VITE_SUPPORT_EMAIL || 'hello@tanmaysk.in',
     },
 
     // AI Providers

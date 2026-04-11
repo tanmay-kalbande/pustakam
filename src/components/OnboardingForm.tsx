@@ -214,9 +214,9 @@ export default function OnboardingForm() {
 
           {/* Cover */}
           <div className="pk-cover">
-            <div className="pk-cover-brand">Pustakam AI ● INJIN STACK</div>
-            <h1>Welcome to the Forge 🔥</h1>
-            <p>Fill in your details so we can get you fully set up. Takes about 3&nbsp;minutes — all fields marked&nbsp;* are required.</p>
+            <div className="pk-cover-brand">Pustakam AI ● OPEN RESEARCH</div>
+            <h1>Join the Research Project 🔬</h1>
+            <p>Fill in your details to contribute to our open-source research initiative. Takes about 3&nbsp;minutes — all fields marked&nbsp;* are required.</p>
           </div>
 
           {/* ── Form ── */}
@@ -359,30 +359,28 @@ export default function OnboardingForm() {
               <div className="pk-card">
                 <div className="pk-section-header">Availability</div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">Start Date *</label><input type="date" name="start_date" required /></div>
+                  <div className="pk-field"><label className="pk-label">When can you start contributing? *</label><input type="date" name="start_date" required /></div>
                   <div className="pk-field">
-                    <label className="pk-label">Preferred Duration *</label>
+                    <label className="pk-label">Commitment Level *</label>
                     <div className="pk-radio-group">
-                      {['1 Month', '2 Months', '3 Months'].map(d => (
+                      {['Casual Contributor', 'Core Contributor', 'Just exploring'].map(d => (
                         <RadioPill key={d} label={d} value={d} group="duration" selected={selectedDuration} onSelect={setSelectedDuration} />
                       ))}
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Acknowledgement */}
+              <div className="pk-card" style={{ background: 'rgba(239, 68, 68, 0.05)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+                <div className="pk-section-header" style={{ color: '#ef4444' }}>Project Acknowledgement</div>
                 <div className="pk-row">
-                  <div className="pk-field">
-                    <label className="pk-label">Preferred Working Hours</label>
-                    <div className="pk-radio-group">
-                      {[
-                        { label: 'Morning',   value: 'Morning (6am–12pm)' },
-                        { label: 'Afternoon', value: 'Afternoon (12pm–6pm)' },
-                        { label: 'Evening',   value: 'Evening (6pm–12am)' },
-                        { label: 'Flexible',  value: 'Flexible' },
-                      ].map(h => (
-                        <RadioPill key={h.value} label={h.label} value={h.value} group="hours" selected={selectedHours} onSelect={setSelectedHours} />
-                      ))}
-                    </div>
-                  </div>
+                  <label style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', cursor: 'pointer' }}>
+                    <input type="checkbox" name="acknowledgement_unpaid_opensource" required style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#ef4444' }} />
+                    <span style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      I understand and agree that Pustakam AI is an <strong>unpaid, open-source research initiative</strong>. I acknowledge that submitting this form and contributing to the project does not constitute formal corporate employment or a commercial business contract. *
+                    </span>
+                  </label>
                 </div>
               </div>
 
@@ -405,13 +403,13 @@ export default function OnboardingForm() {
                   <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
                 </div>
               </div>
-              <div className="pk-success-title">You're in the Forge!</div>
+              <div className="pk-success-title">Welcome to the Project!</div>
               <div className="pk-success-sub">
-                Thanks for filling this in.<br />
-                We will be in touch with your next steps shortly.<br />
+                Thanks for your interest.<br />
+                We'll be in touch with how you can start contributing.<br />
                 Let's build something great. 🚀
               </div>
-              <div className="pk-success-badge">Pustakam AI — Volunteer Onboarding</div>
+              <div className="pk-success-badge">Pustakam AI — Open Source Contributor</div>
             </div>
           )}
 

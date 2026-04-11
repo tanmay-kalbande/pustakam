@@ -167,7 +167,7 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <h3>Building in Public</h3>
 
-                <p>Pustakam is an open research project built by the Injin Stack group. Every line of code, every prompt, every design decision — it all comes from a desire to learn better and experiment with multi-model pedagogy.</p>
+                <p>Pustakam is an open research project built by the Tanmay Kalbande group. Every line of code, every prompt, every design decision — it all comes from a desire to learn better and experiment with multi-model pedagogy.</p>
 
                 <QuoteBlock text="The best tools are built out of genuine frustration, not market research." author="Me, at 3am debugging API calls" />
 
@@ -468,7 +468,7 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <p>Pustakam isn't trying to replace teachers or courses. It's trying to fill the gaps that traditional education can't reach. The student who needs a custom guide for a niche topic at 2am. The professional who wants a quick deep-dive into a new framework before a Monday meeting. The curious mind who just wants to understand something complex — explained their way.</p>
 
-                <QuoteBlock text="The goal isn't to automate education. It's to personalize it at a scale that was previously impossible." author="Injin Stack" />
+                <QuoteBlock text="The goal isn't to automate education. It's to personalize it at a scale that was previously impossible." author="Tanmay Kalbande" />
 
                 <p>I genuinely believe we're at an inflection point. The tools are here. The models are getting better every month. The only question is: who's going to build learning experiences that actually respect the learner's time and intelligence?</p>
 
@@ -539,7 +539,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ onClose }) => {
                         </h1>
                         <p className="text-base md:text-lg text-white/40 mb-6 font-light">{selectedPost.subtitle}</p>
                         <div className="flex flex-wrap items-center gap-4 text-xs text-white/30">
-                            <span className="flex items-center gap-1.5"><User size={12} />Injin Stack Team</span>
+                            <span className="flex items-center gap-1.5"><User size={12} />Tanmay Kalbande</span>
                             <span className="flex items-center gap-1.5"><Calendar size={12} />{selectedPost.date}</span>
                             <span className="flex items-center gap-1.5"><Clock size={12} />{selectedPost.readTime}</span>
                         </div>
@@ -568,8 +568,8 @@ const BlogPage: React.FC<BlogPageProps> = ({ onClose }) => {
                                 <User size={20} className="text-white/70" />
                             </div>
                             <div>
-                                <h4 className="text-sm font-bold text-white mb-1">Injin Stack Team</h4>
-                                <p className="text-xs text-white/40 leading-relaxed">Architects of Pustakam AI. Building open experiments to make learning personal, instant, and genuinely useful. Reach out at hello@injinstack.dev</p>
+                                <h4 className="text-sm font-bold text-white mb-1">Tanmay Kalbande</h4>
+                                <p className="text-xs text-white/40 leading-relaxed">Architects of Pustakam AI. Building open experiments to make learning personal, instant, and genuinely useful. Reach out at hello@tanmaysk.in</p>
                             </div>
                         </div>
                     </div>
@@ -704,7 +704,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ onClose }) => {
                 <div className="mt-16 text-center">
                     <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-10" />
                     <p className="text-xs text-white/25 mb-2">More posts coming soon.</p>
-                    <p className="text-xs text-white/15">Have a topic you'd like covered? Email <a href="mailto:hello@injinstack.dev" className="text-cyan-500/50 hover:text-cyan-400 transition-colors">hello@injinstack.dev</a></p>
+                    <p className="text-xs text-white/15">Have a topic you'd like covered? Email <a href="mailto:hello@tanmaysk.in" className="text-cyan-500/50 hover:text-cyan-400 transition-colors">hello@tanmaysk.in</a></p>
                 </div>
             </main>
         </div>
