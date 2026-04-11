@@ -155,10 +155,10 @@ export default function OnboardingForm() {
 
         .pk-submit-card { background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border-subtle); backdrop-filter: blur(16px); padding: 24px 32px;
           display: flex; align-items: center; gap: 24px; }
-        .pk-btn { font-family: inherit; font-size: 14px; font-weight: 600; padding: 14px 36px;
+        .pk-btn { font-family: inherit; font-size: 13px; font-weight: 800; padding: 10px 28px;
           background: var(--brand); color: #111; border: none; border-radius: 8px; cursor: pointer;
-          letter-spacing: 0.02em; transition: all 0.2s ease; white-space: nowrap; box-shadow: 0 4px 14px rgba(254, 205, 140, 0.25); }
-        .pk-btn:hover { background: var(--brand-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(254, 205, 140, 0.3); }
+          letter-spacing: 0.02em; transition: all 0.2s ease; white-space: nowrap; }
+        .pk-btn:hover { background: var(--brand-hover); transform: translateY(-1px); }
         .pk-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
         .pk-note { font-size: 12px; color: var(--text-muted); }
         .pk-footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border-default);
@@ -372,8 +372,8 @@ export default function OnboardingForm() {
               </div>
 
               {/* Acknowledgement */}
-              <div className="pk-card" style={{ background: 'rgba(239, 68, 68, 0.05)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
-                <div className="pk-section-header" style={{ color: '#ef4444' }}>Project Acknowledgement</div>
+              <div className="pk-card">
+                <div className="pk-section-header">Project Acknowledgement</div>
                 <div className="pk-row">
                   <label style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', cursor: 'pointer' }}>
                     <input type="checkbox" name="acknowledgement_unpaid_opensource" required style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#ef4444' }} />
