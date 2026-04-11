@@ -30,7 +30,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onClose }) => {
             {/* Content */}
             <main className="max-w-4xl mx-auto px-6 py-12">
                 <div className="mb-12">
-                    <span className="text-[11px] font-mono tracking-[0.3em] uppercase text-[var(--brand)] mb-4 block">Company</span>
+                    <span className="text-[11px] font-mono tracking-[0.3em] uppercase text-[var(--brand)] mb-4 block">Project</span>
                     <h1 role="heading" aria-level={1} className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] mb-6">About Pustakam</h1>
                     <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
                         Built because the right tutorial never existed for what you needed right now.
@@ -93,7 +93,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onClose }) => {
                             Have questions, feedback, or just want to say hello? We'd love to hear from you.
                         </p>
                         <a
-                            href="mailto:hello@tanmaysk.in"
+                            href="mailto:hello@injinstack.dev"
                             className="btn btn-primary px-6 py-3"
                         >
                             Get in Touch

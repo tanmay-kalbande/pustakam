@@ -473,7 +473,7 @@ export function SettingsModal({
                     <div className="flex items-center justify-between">
                       <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Developer</p>
                       <a
-                        href="https://www.linkedin.com/in/tanmay-kalbande/"
+                        href="https://injinstack.dev"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--brand)] transition-colors"

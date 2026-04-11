@@ -55,7 +55,7 @@ const TESTIMONIALS = [
   { name: 'Sanya Verma',     role: 'Teacher',             quote: 'Made supplementary reading for my class in one afternoon. Students actually read it.' },
   { name: 'Aditya Rao',      role: 'Product Manager',     quote: 'No fluff, no filler. Just the content I needed, structured the way I\'d have done it myself.' },
   { name: 'Kavita Reddy',    role: 'Researcher',          quote: 'Finally something that organizes a topic the way my brain wants to learn it.' },
-  { name: 'Ishaan Malhotra', role: 'Startup Founder',     quote: 'Built our entire onboarding doc in 30 minutes. Would\'ve taken me a week alone.' },
+  { name: 'Ishaan Malhotra', role: 'Project Lead',     quote: 'Built our entire onboarding doc in 30 minutes. Would\'ve taken me a week alone.' },
   { name: 'Meera Deshmukh',  role: 'Writer',              quote: 'I use it for outlines and structure. It scaffolds, I add the voice.' },
 ];
 
@@ -671,7 +671,7 @@ const LandingPage = ({
               <div className="flex items-center gap-4 text-[9px] font-medium uppercase tracking-wider text-white/30 md:text-[10px]">
                 <span>&copy; {new Date().getFullYear()} Pustakam Injin</span>
                 <span className="hidden md:inline">&bull;</span>
-                <span>Tanmay Kalbande</span>
+                <span>Injin Stack Team</span>
               </div>
               <div className="flex items-center gap-4 md:gap-5">
                 <button onClick={onShowAbout}   className="text-[9px] font-medium uppercase tracking-wider text-white/30 transition-colors hover:text-white md:text-[10px]">About</button>

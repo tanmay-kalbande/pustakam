@@ -161,7 +161,7 @@ Pustakam is designed to work even if the backend is down, prioritizing user owne
 ## 🤝 User Engagement & Social Integration
 The platform is designed to build a community and trust around AI-driven learning.
 
-- **Direct Creator Access**: A "Message the Creator" feature integrated into the footer, allowing users to send feedback directly to the developer's inbox (`hello@tanmaysk.in`).
+- **Direct Creator Access**: A "Message the Creator" feature integrated into the footer, allowing users to send feedback directly to the developer's inbox (`hello@injinstack.dev`).
 - **Demo Library**: Pre-generated sample books (e.g., "Burn the Boat" in Street Mode) are available on the landing page to demonstrate the system's output quality before a user even signs up.
 - **Limited PRO Offer**: A dismissible promo system that offers a "1 Year Free Membership" to early adopters, incentivized via a pulse-animated notification.
 
@@ -202,7 +202,7 @@ The platform recommends specific "Neural Cores" for different knowledge types:
 
 ## 📩 Support & Contact
 The platform is maintained with a personal touch:
-- **Primary Support**: [hello@tanmaysk.in](mailto:hello@tanmaysk.in)
+- **Primary Support**: [hello@injinstack.dev](mailto:hello@injinstack.dev)
 - **Feedback**: Integrated WhatsApp flow for direct communication.
 - **Social Presence**: Linked directly to the creator's **X (Twitter)**, **GitHub**, and **LinkedIn** for real-time updates and professional networking.
 

@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: src/components/OnboardingForm.tsx
-// Pustakam AI — Intern Onboarding Form
+// Pustakam AI — Contributor Onboarding Form
 // Route: /join
 // ============================================================================
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -411,7 +411,7 @@ export default function OnboardingForm() {
                 We will be in touch with your next steps shortly.<br />
                 Let's build something great. 🚀
               </div>
-              <div className="pk-success-badge">Pustakam AI — Internship Onboarding</div>
+              <div className="pk-success-badge">Pustakam AI — Volunteer Onboarding</div>
             </div>
           )}
 

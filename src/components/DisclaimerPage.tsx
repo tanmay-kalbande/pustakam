@@ -280,9 +280,9 @@ export function DisclaimerPage({ isOpen, onClose }: DisclaimerPageProps) {
               </p>
               <p>
                 <span className="text-[var(--text-primary)] font-bold">Contact:</span> For questions about this
-                disclaimer, please contact the developer via <a href="mailto:hello@tanmaysk.in" className="text-amber-500 underline hover:text-amber-400">Email</a> or{' '}
+                disclaimer, please contact the developer via <a href="mailto:hello@injinstack.dev" className="text-amber-500 underline hover:text-amber-400">Email</a> or{' '}
                 <a
-                  href="https://www.linkedin.com/in/tanmay-kalbande/"
+                  href="https://injinstack.dev"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-amber-500 underline hover:text-amber-400"

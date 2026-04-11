@@ -126,8 +126,8 @@ const TermsPage: React.FC<TermsPageProps> = ({ onClose }) => {
                         <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-4">Contact</h2>
                         <p className="leading-relaxed">
                             For questions about these Terms, contact us at{' '}
-                            <a href="mailto:hello@tanmaysk.in" className="text-[var(--brand)] hover:text-[var(--brand)]/80 transition-colors">
-                                hello@tanmaysk.in
+                            <a href="mailto:hello@injinstack.dev" className="text-[var(--brand)] hover:text-[var(--brand)]/80 transition-colors">
+                                hello@injinstack.dev
                             </a>
                         </p>
                     </section>

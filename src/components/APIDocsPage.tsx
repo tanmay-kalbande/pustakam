@@ -176,7 +176,7 @@ const APIDocsPage: React.FC<APIDocsPageProps> = ({ onClose }) => {
 
                     <section className="pt-12 border-t border-[var(--border-subtle)] text-center">
                         <p className="text-[var(--text-muted)] text-xs font-mono tracking-widest uppercase">
-                            Built by Tanmay Kalbande · hello@tanmaysk.in
+                            Built by Injin Stack Team · hello@injinstack.dev
                         </p>
                     </section>
                 </div>
