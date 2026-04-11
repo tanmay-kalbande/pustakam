@@ -37,10 +37,17 @@ if ('serviceWorker' in navigator) {
 }
 
 import NotFoundPage from './components/NotFoundPage';
+import OnboardingForm from './components/OnboardingForm';
 
 const pathname = window.location.pathname;
 
-if (pathname !== '/' && pathname !== '/index.html') {
+if (pathname === '/join') {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <OnboardingForm />
+    </StrictMode>
+  );
+} else if (pathname !== '/' && pathname !== '/index.html') {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <NotFoundPage />
