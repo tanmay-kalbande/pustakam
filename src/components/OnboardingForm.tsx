@@ -104,103 +104,108 @@ export default function OnboardingForm() {
     <>
       <style>{`
         /* ─── Onboarding Form Scoped Styles ─── */
-        .pk-page { font-family: Arial, sans-serif; background: #F8F8F8; color: #1A1A1A; min-height: 100vh; padding: 40px 16px 60px; margin: 0; }
+        .pk-page { font-family: 'Inter', sans-serif; background: transparent; color: var(--text-primary); min-height: 100vh; padding: 40px 16px 60px; margin: 0; }
         .pk-page *, .pk-page *::before, .pk-page *::after { box-sizing: border-box; }
         .pk-wrap { max-width: 680px; margin: 0 auto; }
-        .pk-cover { background: #1A1A2E; border-radius: 10px; padding: 36px 40px; margin-bottom: 20px; }
-        .pk-cover-brand { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: #FECD8C; text-transform: uppercase; margin-bottom: 8px; }
-        .pk-cover h1 { font-size: 26px; font-weight: 700; color: #fff; margin: 10px 0 6px; }
-        .pk-cover p  { font-size: 13.5px; color: #AAAAAA; line-height: 1.6; }
-        .pk-card { background: #fff; border-radius: 10px; border: 1px solid #E0E0E0; padding: 28px 32px; margin-bottom: 16px; }
-        .pk-section-header { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1A1A2E; padding-bottom: 8px; border-bottom: 2.5px solid #FECD8C; margin-bottom: 18px; }
+        .pk-cover { background: var(--bg-elevated); border-radius: 12px; border: 1px solid var(--border-default); backdrop-filter: blur(16px); padding: 36px 40px; margin-bottom: 20px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2); }
+        .pk-cover-brand { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: var(--brand); text-transform: uppercase; margin-bottom: 8px; }
+        .pk-cover h1 { font-size: 26px; font-weight: 700; color: var(--text-primary); margin: 10px 0 6px; }
+        .pk-cover p  { font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; }
+        .pk-card { background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border-subtle); backdrop-filter: blur(16px); padding: 28px 32px; margin-bottom: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+        .pk-section-header { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brand); padding-bottom: 8px; border-bottom: 1px solid var(--border-default); margin-bottom: 18px; }
         .pk-row { display: grid; gap: 14px; margin-bottom: 14px; }
         .pk-row.two { grid-template-columns: 1fr 1fr; }
         .pk-row:last-child { margin-bottom: 0; }
-        .pk-field { display: flex; flex-direction: column; gap: 5px; }
-        .pk-field label.pk-label { font-size: 11px; font-weight: 700; color: #444444; text-transform: uppercase; letter-spacing: 0.04em; }
+        .pk-field { display: flex; flex-direction: column; gap: 6px; }
+        .pk-field label.pk-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
         .pk-field input, .pk-field select, .pk-field textarea {
-          font-family: Arial, sans-serif; font-size: 13.5px; padding: 10px 13px;
-          border: 1px solid #E0E0E0; border-radius: 6px; background: #F8F8F8;
-          color: #1A1A1A; width: 100%; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+          font-family: inherit; font-size: 14px; padding: 11px 14px;
+          border: 1px solid var(--border-default); border-radius: 8px; background: rgba(255,255,255,0.03);
+          color: var(--text-primary); width: 100%; transition: all 0.2s ease;
           -webkit-appearance: none; appearance: none;
         }
+        .pk-field input::placeholder, .pk-field textarea::placeholder { color: var(--text-muted); }
         .pk-field input:focus, .pk-field select:focus, .pk-field textarea:focus {
-          outline: none; border-color: #1A1A2E; background: #fff;
-          box-shadow: 0 0 0 3px rgba(26,26,46,0.08);
+          outline: none; border-color: var(--brand); background: rgba(255,255,255,0.06);
+          box-shadow: 0 0 0 3px rgba(254, 205, 140, 0.15);
         }
+        .pk-field select option { background: #111; color: var(--text-primary); }
         .pk-field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
-        .pk-field .hint { font-size: 11px; color: #888888; }
+        .pk-field .hint { font-size: 12px; color: var(--text-muted); }
 
-        .pk-radio-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
-        .pk-radio { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: #1A1A1A;
-          padding: 7px 15px; border: 1px solid #E0E0E0; border-radius: 20px; background: #F8F8F8;
-          transition: all 0.15s; user-select: none; }
+        .pk-radio-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+        .pk-radio { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; color: var(--text-secondary); font-weight: 500;
+          padding: 8px 16px; border: 1px solid var(--border-default); border-radius: 24px; background: rgba(255,255,255,0.03);
+          transition: all 0.2s ease; user-select: none; }
         .pk-radio input[type=radio] { display: none; }
-        .pk-radio.selected { border-color: #1A1A2E; background: #1A1A2E; color: #FECD8C; font-weight: 700; }
+        .pk-radio:hover { border-color: var(--border-subtle); background: rgba(255,255,255,0.06); color: var(--text-primary); }
+        .pk-radio.selected { border-color: var(--brand); background: rgba(254, 205, 140, 0.1); color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
 
-        .pk-check-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-        .pk-check { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 13px; color: #1A1A1A;
-          padding: 7px 15px; border: 1px solid #E0E0E0; border-radius: 20px; background: #F8F8F8;
-          transition: all 0.15s; user-select: none; }
+        .pk-check-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+        .pk-check { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; color: var(--text-secondary); font-weight: 500;
+          padding: 8px 16px; border: 1px solid var(--border-default); border-radius: 24px; background: rgba(255,255,255,0.03);
+          transition: all 0.2s ease; user-select: none; }
         .pk-check input[type=checkbox] { display: none; }
-        .pk-check.selected { border-color: #1A1A2E; background: #1A1A2E; color: #FECD8C; font-weight: 700; }
-        .pk-check-hint { font-size: 11px; color: #888; margin-top: 8px; }
+        .pk-check:hover { border-color: var(--border-subtle); background: rgba(255,255,255,0.06); color: var(--text-primary); }
+        .pk-check.selected { border-color: var(--brand); background: rgba(254, 205, 140, 0.1); color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+        .pk-check-hint { font-size: 12px; color: var(--text-muted); margin-top: 10px; display: block; }
 
-        .pk-custom-role-wrap { margin-top: 10px; display: none; }
+        .pk-custom-role-wrap { margin-top: 12px; display: none; }
         .pk-custom-role-wrap.visible { display: block; }
 
-        .pk-submit-card { background: #fff; border-radius: 10px; border: 1px solid #E0E0E0; padding: 24px 32px;
-          display: flex; align-items: center; gap: 20px; }
-        .pk-btn { font-family: Arial, sans-serif; font-size: 13.5px; font-weight: 700; padding: 12px 32px;
-          background: #1A1A2E; color: #FECD8C; border: none; border-radius: 6px; cursor: pointer;
-          letter-spacing: 0.03em; transition: opacity 0.15s; white-space: nowrap; }
-        .pk-btn:hover { opacity: 0.88; }
-        .pk-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .pk-note { font-size: 11.5px; color: #888888; }
-        .pk-footer { margin-top: 24px; padding-top: 14px; border-top: 2px solid #FECD8C;
-          font-size: 12px; font-weight: 700; color: #1A1A2E; text-align: center;
+        .pk-submit-card { background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border-subtle); backdrop-filter: blur(16px); padding: 24px 32px;
+          display: flex; align-items: center; gap: 24px; }
+        .pk-btn { font-family: inherit; font-size: 14px; font-weight: 600; padding: 14px 36px;
+          background: var(--brand); color: #111; border: none; border-radius: 8px; cursor: pointer;
+          letter-spacing: 0.02em; transition: all 0.2s ease; white-space: nowrap; box-shadow: 0 4px 14px rgba(254, 205, 140, 0.25); }
+        .pk-btn:hover { background: var(--brand-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(254, 205, 140, 0.3); }
+        .pk-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .pk-note { font-size: 12px; color: var(--text-muted); }
+        .pk-footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border-default);
+          font-size: 12px; font-weight: 600; color: var(--text-muted); text-align: center;
           letter-spacing: 0.08em; text-transform: uppercase; }
-        .pk-error { color: #D32F2F; font-size: 12px; margin-top: 6px; }
+        .pk-error { color: #ef4444; font-size: 13px; margin-top: 8px; font-weight: 500; }
 
         /* Success screen */
-        .pk-success { position: relative; overflow: hidden; text-align: center; padding: 70px 24px 60px;
-          background: #fff; border-radius: 10px; border: 1px solid #E0E0E0; }
-        .pk-success-ring { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #FECD8C;
-          display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
-          animation: pk-ringPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; transform: scale(0); }
-        .pk-success-inner { width: 62px; height: 62px; border-radius: 50%; background: #1A1A2E;
-          display: flex; align-items: center; justify-content: center; }
-        .pk-success-inner svg { width: 26px; height: 26px; stroke: #FECD8C; fill: none;
-          stroke-width: 2.5; stroke-dasharray: 40; stroke-dashoffset: 40;
-          animation: pk-drawCheck 0.4s 0.45s ease forwards; }
+        .pk-success { position: relative; overflow: hidden; text-align: center; padding: 80px 24px 70px;
+          background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border-subtle); backdrop-filter: blur(16px); box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
+        .pk-success-ring { width: 88px; height: 88px; border-radius: 50%; border: 3px solid rgba(254, 205, 140, 0.2);
+          display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;
+          animation: pk-ringPop 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards; transform: scale(0); }
+        .pk-success-inner { width: 68px; height: 68px; border-radius: 50%; background: rgba(254, 205, 140, 0.1);
+          display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(254, 205, 140, 0.15); }
+        .pk-success-inner svg { width: 30px; height: 30px; stroke: var(--brand); fill: none;
+          stroke-width: 2.5; stroke-dasharray: 40; stroke-dashoffset: 40; stroke-linecap: round; stroke-linejoin: round;
+          animation: pk-drawCheck 0.5s 0.4s ease forwards; }
         @keyframes pk-ringPop  { to { transform: scale(1); } }
         @keyframes pk-drawCheck { to { stroke-dashoffset: 0; } }
-        .pk-success-title { font-size: 24px; font-weight: 700; color: #1A1A2E; opacity: 0;
-          transform: translateY(12px); animation: pk-fadeUp 0.5s 0.7s ease forwards; margin-bottom: 10px; }
-        .pk-success-sub { font-size: 14px; color: #444444; line-height: 1.7; opacity: 0;
-          transform: translateY(10px); animation: pk-fadeUp 0.5s 0.9s ease forwards; }
-        .pk-success-badge { display: inline-block; margin-top: 22px; background: #1A1A2E; color: #FECD8C;
-          font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-          padding: 7px 20px; border-radius: 20px; opacity: 0; animation: pk-fadeUp 0.5s 1.1s ease forwards; }
+        .pk-success-title { font-size: 28px; font-weight: 700; color: var(--text-primary); opacity: 0;
+          transform: translateY(16px); animation: pk-fadeUp 0.6s 0.6s ease forwards; margin-bottom: 12px; letter-spacing: -0.01em; }
+        .pk-success-sub { font-size: 15px; color: var(--text-secondary); line-height: 1.6; opacity: 0;
+          transform: translateY(12px); animation: pk-fadeUp 0.6s 0.8s ease forwards; }
+        .pk-success-badge { display: inline-block; margin-top: 28px; background: rgba(254, 205, 140, 0.1); color: var(--brand); border: 1px solid rgba(254, 205, 140, 0.2);
+          font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+          padding: 8px 24px; border-radius: 24px; opacity: 0; animation: pk-fadeUp 0.6s 1s ease forwards; }
         @keyframes pk-fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-        .pk-confetti-piece { position: absolute; width: 8px; height: 8px; border-radius: 2px; opacity: 0;
-          animation: pk-confettiFall 1.2s ease forwards; }
+        .pk-confetti-piece { position: absolute; width: 8px; height: 8px; border-radius: 2px; opacity: 0; z-index: 10;
+          animation: pk-confettiFall 1.5s ease-out forwards; }
         @keyframes pk-confettiFall {
-          0%   { opacity: 1; transform: translateY(-10px) rotate(0deg); }
-          100% { opacity: 0; transform: translateY(200px) rotate(400deg); }
+          0%   { opacity: 1; transform: translateY(-20px) rotate(0deg) scale(1); }
+          100% { opacity: 0; transform: translateY(250px) rotate(400deg) scale(0.8); }
         }
 
         @media (max-width: 520px) {
-          .pk-page { padding: 20px 12px 40px; }
+          .pk-page { padding: 24px 16px 40px; }
           .pk-row.two { grid-template-columns: 1fr; }
           .pk-cover, .pk-card, .pk-submit-card { padding: 24px 20px; }
-          .pk-cover h1 { font-size: 22px; }
-          .pk-cover p { font-size: 13px; }
-          .pk-field label.pk-label { font-size: 10px; }
-          .pk-radio, .pk-check { font-size: 12px; padding: 6px 12px; }
+          .pk-cover h1 { font-size: 24px; }
+          .pk-cover p { font-size: 14px; }
+          .pk-field label.pk-label { font-size: 11px; }
+          .pk-radio, .pk-check { font-size: 13px; padding: 8px 14px; }
           .pk-submit-card { flex-direction: column; align-items: stretch; gap: 16px; text-align: center; }
-          .pk-btn { width: 100%; padding: 14px; }
+          .pk-btn { width: 100%; padding: 14px; font-size: 15px; }
+          .pk-success { padding: 60px 20px 50px; }
         }
       `}</style>
 
