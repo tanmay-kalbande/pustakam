@@ -1000,44 +1000,6 @@ class ProfessionalPdfGenerator {
         margin: [0, 0, 0, 40]
       },
 
-      // === SIGNATURE SECTION ===
-      {
-        canvas: [{
-          type: 'line',
-          x1: 0, y1: 0,
-          x2: 60, y2: 0,
-          lineWidth: 2,
-          lineColor: brandOrange
-        }],
-        margin: [0, 0, 0, 15]
-      },
-      {
-        text: 'Tanmay Kalbande',
-        fontSize: 14,
-        bold: true,
-        color: darkText,
-        margin: [0, 0, 0, 4]
-      },
-      {
-        text: 'Creator & Engineer',
-        fontSize: 10,
-        color: subtleText,
-        characterSpacing: 0.5,
-        margin: [0, 0, 0, 6]
-      },
-      {
-        text: 'pustakamai.tanmaysk.in',
-        fontSize: 9,
-        color: brandOrange,
-        link: 'https://pustakamai.tanmaysk.in',
-        margin: [0, 0, 0, 2]
-      },
-      {
-        text: 'www.linkedin.com/in/tanmay-kalbande/',
-        fontSize: 9,
-        color: subtleText,
-        link: 'https://www.linkedin.com/in/tanmay-kalbande/'
-      },
       { text: '', pageBreak: 'after' }
     ];
   }
@@ -1139,7 +1101,7 @@ class ProfessionalPdfGenerator {
               width: '*'
             },
             {
-              text: 'https://www.linkedin.com/in/tanmay-kalbande/',
+              text: 'https://pustakamai.tanmaysk.in/',
               fontSize: 7,
               color: '#999999',
               alignment: 'right',
@@ -1152,7 +1114,7 @@ class ProfessionalPdfGenerator {
       },
       info: {
         title: this.normalizeDashes(project.title),
-        author: 'Pustakam Injin - Tanmay Kalbande',
+        author: 'Pustakam Injin',
         creator: 'Pustakam Injin',
         subject: project.goal,
         keywords: 'AI, Knowledge, Education, Pustakam'
