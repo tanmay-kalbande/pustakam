@@ -678,7 +678,7 @@ const LandingPage = ({
               <div className="flex items-center gap-4 text-[9px] font-medium uppercase tracking-wider text-white/30 md:text-[10px]">
                 <span>&copy; {new Date().getFullYear()} Pustakam Injin</span>
                 <span className="hidden md:inline">&bull;</span>
-                <span>Tanmay Kalbande</span>
+                <span>Pustakam Project</span>
               </div>
               <div className="flex items-center gap-4 md:gap-5">
                 <button onClick={onShowAbout}   className="text-[9px] font-medium uppercase tracking-wider text-white/30 transition-colors hover:text-white md:text-[10px]">About</button>

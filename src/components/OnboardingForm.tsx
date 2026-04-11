@@ -53,10 +53,10 @@ export default function OnboardingForm() {
     const data = new FormData(form);
 
     // Append pill-selected values that aren't native inputs
-    if (selectedGender) data.set('gender', selectedGender);
-    if (selectedDuration) data.set('duration', selectedDuration);
-    if (selectedHours) data.set('hours', selectedHours);
-    data.set('interest', selectedInterests.join(', '));
+    if (selectedGender) data.set('04_gender', selectedGender);
+    if (selectedDuration) data.set('25_duration', selectedDuration);
+    if (selectedHours) data.set('26_hours', selectedHours);
+    data.set('15_interest', selectedInterests.join(', '));
 
     try {
       const res = await fetch('https://formspree.io/f/mykbrnoy', {
@@ -84,7 +84,7 @@ export default function OnboardingForm() {
       className={`pk-radio ${selected === value ? 'selected' : ''}`}
       onClick={() => onSelect(value)}
     >
-      <input type="radio" name={group} value={value} readOnly checked={selected === value} />
+      <input type="radio" name={group} value={value} readOnly checked={selected === value} style={{ display: 'none' }} />
       {label}
     </label>
   );
@@ -94,7 +94,7 @@ export default function OnboardingForm() {
       className={`pk-check ${selectedInterests.includes(value) ? 'selected' : ''}`}
       onClick={() => toggleInterest(value)}
     >
-      <input type="checkbox" name="interest" value={value} readOnly checked={selectedInterests.includes(value)} />
+      <input type="checkbox" name="15_interest" value={value} readOnly checked={selectedInterests.includes(value)} style={{ display: 'none' }} />
       {label}
     </label>
   );
@@ -227,23 +227,23 @@ export default function OnboardingForm() {
               <div className="pk-card">
                 <div className="pk-section-header">Personal Details</div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">First Name *</label><input type="text" name="first_name" placeholder="First name" required /></div>
-                  <div className="pk-field"><label className="pk-label">Last Name *</label><input type="text" name="last_name" placeholder="Last name" required /></div>
+                  <div className="pk-field"><label className="pk-label">First Name *</label><input type="text" name="01_first_name" placeholder="First name" required /></div>
+                  <div className="pk-field"><label className="pk-label">Last Name *</label><input type="text" name="02_last_name" placeholder="Last name" required /></div>
                 </div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">Date of Birth *</label><input type="date" name="dob" required /></div>
+                  <div className="pk-field"><label className="pk-label">Date of Birth *</label><input type="date" name="03_dob" required /></div>
                   <div className="pk-field">
                     <label className="pk-label">Gender</label>
                     <div className="pk-radio-group">
                       {['Male', 'Female', 'Other', 'Prefer not to say'].map(g => (
-                        <RadioPill key={g} label={g} value={g} group="gender" selected={selectedGender} onSelect={setSelectedGender} />
+                        <RadioPill key={g} label={g} value={g} group="04_gender" selected={selectedGender} onSelect={setSelectedGender} />
                       ))}
                     </div>
                   </div>
                 </div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">Nationality *</label><input type="text" name="nationality" placeholder="e.g. Indian" required /></div>
-                  <div className="pk-field"><label className="pk-label">Languages Spoken</label><input type="text" name="languages" placeholder="e.g. English, Hindi" /></div>
+                  <div className="pk-field"><label className="pk-label">Nationality *</label><input type="text" name="05_nationality" placeholder="e.g. Indian" required /></div>
+                  <div className="pk-field"><label className="pk-label">Languages Spoken</label><input type="text" name="06_languages" placeholder="e.g. English, Hindi" /></div>
                 </div>
               </div>
 
@@ -251,15 +251,15 @@ export default function OnboardingForm() {
               <div className="pk-card">
                 <div className="pk-section-header">Contact Information</div>
                 <div className="pk-row">
-                  <div className="pk-field"><label className="pk-label">Email Address *</label><input type="email" name="email" placeholder="your@email.com" required /></div>
+                  <div className="pk-field"><label className="pk-label">Email Address *</label><input type="email" name="07_email" placeholder="your@email.com" required /></div>
                 </div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">Phone Number *</label><input type="tel" name="phone" placeholder="+91 00000 00000" required /></div>
-                  <div className="pk-field"><label className="pk-label">WhatsApp Number</label><input type="tel" name="whatsapp" placeholder="If different from above" /></div>
+                  <div className="pk-field"><label className="pk-label">Phone Number *</label><input type="tel" name="08_phone" placeholder="+91 00000 00000" required /></div>
+                  <div className="pk-field"><label className="pk-label">WhatsApp Number</label><input type="tel" name="09_whatsapp" placeholder="If different from above" /></div>
                 </div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">City *</label><input type="text" name="city" placeholder="Your city" required /></div>
-                  <div className="pk-field"><label className="pk-label">State / Province</label><input type="text" name="state" placeholder="Your state" /></div>
+                  <div className="pk-field"><label className="pk-label">City *</label><input type="text" name="10_city" placeholder="Your city" required /></div>
+                  <div className="pk-field"><label className="pk-label">State / Province</label><input type="text" name="11_state" placeholder="Your state" /></div>
                 </div>
               </div>
 
@@ -267,12 +267,12 @@ export default function OnboardingForm() {
               <div className="pk-card">
                 <div className="pk-section-header">Online Presence</div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">LinkedIn</label><input type="url" name="linkedin" placeholder="https://linkedin.com/in/..." /></div>
-                  <div className="pk-field"><label className="pk-label">GitHub / Portfolio</label><input type="url" name="portfolio" placeholder="https://github.com/..." /></div>
+                  <div className="pk-field"><label className="pk-label">LinkedIn</label><input type="url" name="12_linkedin" placeholder="https://linkedin.com/in/..." /></div>
+                  <div className="pk-field"><label className="pk-label">GitHub / Portfolio</label><input type="url" name="13_portfolio" placeholder="https://github.com/..." /></div>
                 </div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">Instagram Handle</label><input type="text" name="instagram" placeholder="@yourhandle" /></div>
-                  <div className="pk-field"><label className="pk-label">Twitter / X Handle</label><input type="text" name="twitter" placeholder="@yourhandle" /></div>
+                  <div className="pk-field"><label className="pk-label">Instagram Handle</label><input type="text" name="14a_instagram" placeholder="@yourhandle" /></div>
+                  <div className="pk-field"><label className="pk-label">Twitter / X Handle</label><input type="text" name="14b_twitter" placeholder="@yourhandle" /></div>
                 </div>
               </div>
 
@@ -280,19 +280,19 @@ export default function OnboardingForm() {
               <div className="pk-card">
                 <div className="pk-section-header">Academic Background</div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">College / University *</label><input type="text" name="college" placeholder="Your university" required /></div>
-                  <div className="pk-field"><label className="pk-label">Degree &amp; Field *</label><input type="text" name="degree" placeholder="e.g. BA English, BSc Psychology" required /></div>
+                  <div className="pk-field"><label className="pk-label">College / University *</label><input type="text" name="16_college" placeholder="Your university" required /></div>
+                  <div className="pk-field"><label className="pk-label">Degree &amp; Field *</label><input type="text" name="17_degree" placeholder="e.g. BA English, BSc Psychology" required /></div>
                 </div>
                 <div className="pk-row two">
                   <div className="pk-field">
                     <label className="pk-label">Current Year of Study *</label>
-                    <select name="year" required defaultValue="">
+                    <select name="18_year" required defaultValue="">
                       <option value="" disabled>Select year</option>
                       <option>1st Year</option><option>2nd Year</option><option>3rd Year</option>
                       <option>4th Year</option><option>Postgraduate</option><option>Recent Graduate</option>
                     </select>
                   </div>
-                  <div className="pk-field"><label className="pk-label">Expected Graduation</label><input type="month" name="graduation" /></div>
+                  <div className="pk-field"><label className="pk-label">Expected Graduation</label><input type="month" name="19_graduation" /></div>
                 </div>
               </div>
 
@@ -311,12 +311,12 @@ export default function OnboardingForm() {
                         className={`pk-check ${selectedInterests.includes('Other') ? 'selected' : ''}`}
                         onClick={() => toggleInterest('Other')}
                       >
-                        <input type="checkbox" name="interest" value="Other" readOnly checked={selectedInterests.includes('Other')} />
+                        <input type="checkbox" name="15_interest" value="Other" readOnly checked={selectedInterests.includes('Other')} style={{ display: 'none' }} />
                         Something else
                       </label>
                     </div>
                     <div className={`pk-custom-role-wrap ${showCustomRole ? 'visible' : ''}`}>
-                      <input type="text" name="custom_interest" placeholder="Tell us what you'd like to work on..." />
+                      <input type="text" name="15b_custom_interest" placeholder="Tell us what you'd like to work on..." />
                     </div>
                     <span className="pk-check-hint">Select as many as you like  -  this helps us match you to the right work.</span>
                   </div>
@@ -327,30 +327,30 @@ export default function OnboardingForm() {
               <div className="pk-card">
                 <div className="pk-section-header">About You</div>
                 <div className="pk-row">
-                  <div className="pk-field"><label className="pk-label">Your Key Skills *</label><input type="text" name="skills" placeholder="e.g. Writing, Research, Canva, Python, Community building..." required /></div>
+                  <div className="pk-field"><label className="pk-label">Your Key Skills *</label><input type="text" name="20_skills" placeholder="e.g. Writing, Research, Canva, Python, Community building..." required /></div>
                 </div>
                 <div className="pk-row">
                   <div className="pk-field">
                     <label className="pk-label">What are you hoping to build or learn here? *</label>
-                    <textarea name="goals" placeholder="Share what excites you about Pustakam and what you want to get out of this..." required />
+                    <textarea name="21_goals" placeholder="Share what excites you about Pustakam and what you want to get out of this..." required />
                   </div>
                 </div>
                 <div className="pk-row">
                   <div className="pk-field">
                     <label className="pk-label">Relevant Projects or Experience</label>
-                    <textarea name="experience" placeholder="Any past work, clubs, projects, or things you've done that you're proud of..." />
+                    <textarea name="22_experience" placeholder="Any past work, clubs, projects, or things you've done that you're proud of..." />
                   </div>
                 </div>
                 <div className="pk-row">
                   <div className="pk-field">
                     <label className="pk-label">What is the first book you want to create on the platform? Describe it</label>
-                    <textarea name="first_book" placeholder="Tell us about the learning book you want to generate..." />
+                    <textarea name="23_first_book" placeholder="Tell us about the learning book you want to generate..." />
                   </div>
                 </div>
                 <div className="pk-row">
                   <div className="pk-field">
                     <label className="pk-label">A fun fact about you</label>
-                    <input type="text" name="fun_fact" placeholder="Something that surprises people..." />
+                    <input type="text" name="24_fun_fact" placeholder="Something that surprises people..." />
                   </div>
                 </div>
               </div>
@@ -359,12 +359,12 @@ export default function OnboardingForm() {
               <div className="pk-card">
                 <div className="pk-section-header">Availability</div>
                 <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">When can you start contributing? *</label><input type="date" name="start_date" required /></div>
+                  <div className="pk-field"><label className="pk-label">When can you start contributing? *</label><input type="date" name="25b_start_date" required /></div>
                   <div className="pk-field">
                     <label className="pk-label">Commitment Level *</label>
                     <div className="pk-radio-group">
                       {['Casual Contributor', 'Core Contributor', 'Just exploring'].map(d => (
-                        <RadioPill key={d} label={d} value={d} group="duration" selected={selectedDuration} onSelect={setSelectedDuration} />
+                        <RadioPill key={d} label={d} value={d} group="25_duration" selected={selectedDuration} onSelect={setSelectedDuration} />
                       ))}
                     </div>
                   </div>
@@ -376,7 +376,7 @@ export default function OnboardingForm() {
                 <div className="pk-section-header">Project Acknowledgement</div>
                 <div className="pk-row">
                   <label style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', cursor: 'pointer' }}>
-                    <input type="checkbox" name="acknowledgement_unpaid_opensource" required style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#ef4444' }} />
+                    <input type="checkbox" name="27_acknowledgement_unpaid_opensource" required style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#ef4444' }} />
                     <span style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                       I understand and agree that Pustakam AI is an <strong>unpaid, open-source research initiative</strong>. I acknowledge that submitting this form and contributing to the project does not constitute formal corporate employment or a commercial business contract. *
                     </span>
