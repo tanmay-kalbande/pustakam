@@ -53,7 +53,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onClose }) => {
                             Stop searching. Start building.
                         </p>
                         <p className="leading-relaxed text-[var(--text-secondary)]">
-                            Whether you're a student, a professional upskilling, or just curious — Pustakam turns 
+                            Whether you're a student, a professional upskilling, or just curious  -  Pustakam turns 
                             your learning goal into a complete, structured book in about 20 minutes.
                         </p>
                     </section>
@@ -63,7 +63,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onClose }) => {
                         <div className="space-y-4">
                             <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                                 <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">1. Describe Your Topic</h3>
-                                <p className="text-[var(--text-secondary)]">Simply tell us what you want to learn. From programming languages to philosophy, from cooking to quantum physics — any topic works.</p>
+                                <p className="text-[var(--text-secondary)]">Simply tell us what you want to learn. From programming languages to philosophy, from cooking to quantum physics  -  any topic works.</p>
                             </div>
                             <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                                 <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">2. GLM-5 Generates Content</h3>
@@ -71,7 +71,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onClose }) => {
                             </div>
                             <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                                 <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">3. Read or Download</h3>
-                                <p className="text-[var(--text-secondary)]">Read in the response view or grab the final book PDF. No generalized courses—just the specific documentation you requested.</p>
+                                <p className="text-[var(--text-secondary)]">Read in the response view or grab the final book PDF. No generalized courses - just the specific documentation you requested.</p>
                             </div>
                         </div>
                     </section>

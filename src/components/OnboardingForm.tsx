@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: src/components/OnboardingForm.tsx
-// Pustakam AI — Contributor Onboarding Form
+// Pustakam AI  -  Contributor Onboarding Form
 // Route: /join
 // ============================================================================
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -214,9 +214,9 @@ export default function OnboardingForm() {
 
           {/* Cover */}
           <div className="pk-cover">
-            <div className="pk-cover-brand">Pustakam AI ● OPEN RESEARCH</div>
+            <div className="pk-cover-brand">Pustakam AI � - � OPEN RESEARCH</div>
             <h1>Join the Research Project 🔬</h1>
-            <p>Fill in your details to contribute to our open-source research initiative. Takes about 3&nbsp;minutes — all fields marked&nbsp;* are required.</p>
+            <p>Fill in your details to contribute to our open-source research initiative. Takes about 3&nbsp;minutes  -  all fields marked&nbsp;* are required.</p>
           </div>
 
           {/* ── Form ── */}
@@ -318,7 +318,7 @@ export default function OnboardingForm() {
                     <div className={`pk-custom-role-wrap ${showCustomRole ? 'visible' : ''}`}>
                       <input type="text" name="custom_interest" placeholder="Tell us what you'd like to work on..." />
                     </div>
-                    <span className="pk-check-hint">Select as many as you like — this helps us match you to the right work.</span>
+                    <span className="pk-check-hint">Select as many as you like  -  this helps us match you to the right work.</span>
                   </div>
                 </div>
               </div>
@@ -409,7 +409,7 @@ export default function OnboardingForm() {
                 We'll be in touch with how you can start contributing.<br />
                 Let's build something great. 🚀
               </div>
-              <div className="pk-success-badge">Pustakam AI — Open Source Contributor</div>
+              <div className="pk-success-badge">Pustakam AI  -  Open Source Contributor</div>
             </div>
           )}
 

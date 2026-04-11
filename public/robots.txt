@@ -1,4 +1,4 @@
-# Pustakam AI — robots.txt
+# Pustakam AI  -  robots.txt
 # https://pustakamai.tanmaysk.in/
 
 # ── Allow all well-behaved crawlers ──────────────────────────
@@ -38,7 +38,7 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-# ── Crawl rate (optional — polite hint to crawlers) ──────────
+# ── Crawl rate (optional  -  polite hint to crawlers) ──────────
 # Crawl-delay: 2
 
 # ── Sitemap location ─────────────────────────────────────────

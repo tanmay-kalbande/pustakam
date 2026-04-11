@@ -111,7 +111,7 @@ Every book project tracks its own "life stats":
 
 ---
 
-## 🏗 PDF Engineering (High-Fidelity Export)
+## � -  PDF Engineering (High-Fidelity Export)
 Pustakam doesn't just "print" a web page; it uses a custom-built PDF generation engine based on `pdfmake` for professional-grade formatting.
 
 ### 1. Advanced Typography
@@ -122,7 +122,7 @@ Pustakam doesn't just "print" a web page; it uses a custom-built PDF generation 
 ### 2. Manual Layout Engine
 - **Markdown-to-PDF Parser**: A bespoke parser that translates Markdown syntax into `pdfmake` objects, handling nested lists, blockquotes with custom color bars, and multi-page code blocks.
 - **Intelligent Page Breaks**: Code blocks longer than 40 lines are automatically chunked and carried over to the next page with "(continued...)" markers.
-- **Disclaimer & Transparency**: Every PDF includes a generated disclaimer page clarifying that the content is AI-created and should be fact-checked—maintaining high ethical standards.
+- **Disclaimer & Transparency**: Every PDF includes a generated disclaimer page clarifying that the content is AI-created and should be fact-checked - maintaining high ethical standards.
 
 ---
 
@@ -132,7 +132,7 @@ The "soul" of the platform lives in its specialized prompt services, which are s
 ### 1. Blackhole Mode (Street Oracle)
 - **Vibe**: A battle-hardened hustler who treats learning like a war briefing.
 - **Dialect**: US Street/Hustle slang ("bro-love," "corners 'em," " mission specs," "vibes check").
-- **Constraint**: Mandates 2500–4500 words per chapter. No "warm-ups"—it starts chapters "straight to the throat."
+- **Constraint**: Mandates 2500–4500 words per chapter. No "warm-ups" - it starts chapters "straight to the throat."
 
 ### 2. Desi Mode (The Tapori Bhai)
 - **Vibe**: A Mumbai/Pune "Bhai" who uses humor and "roasting" to teach.

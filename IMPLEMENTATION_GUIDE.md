@@ -1,5 +1,5 @@
 # Week 1 Implementation Guide v2
-## Pustakam AI — Vercel Edge Proxy + Supabase Analytics + Rate Limiting
+## Pustakam AI  -  Vercel Edge Proxy + Supabase Analytics + Rate Limiting
 ## Agent-Ready Document
 
 ---
@@ -9,7 +9,7 @@
 ```
 Browser (React on Vercel)
     │
-    ├─► POST /api/ai  (Vercel Edge Function — no timeout, streaming)
+    ├─► POST /api/ai  (Vercel Edge Function  -  no timeout, streaming)
     │       - Reads ZHIPU_API_KEY from Vercel env (never exposed to browser)
     │       - Checks rate limit via Supabase
     │       - Logs usage to Supabase analytics table
@@ -24,7 +24,7 @@ Browser (React on Vercel)
 - `export const runtime = 'edge'` removes ALL timeout limits
 - Edge Runtime supports streaming natively
 - Zero Supabase Edge Functions needed
-- Zero new infrastructure — Vercel + Supabase you already have
+- Zero new infrastructure  -  Vercel + Supabase you already have
 
 ---
 
@@ -45,7 +45,7 @@ existing setup. You only need to ADD `ZHIPU_API_KEY` and
 
 ---
 
-## STEP 1 — DATABASE: Analytics + Rate Limits Tables
+## STEP 1  -  DATABASE: Analytics + Rate Limits Tables
 
 Run this entire block in **Supabase SQL Editor** as a single query.
 
@@ -100,7 +100,7 @@ CREATE INDEX IF NOT EXISTS idx_ai_usage_user_date
 
 -- ================================================================
 -- TABLE 2: rate_limits
--- Daily caps per user — reset every day at midnight UTC
+-- Daily caps per user  -  reset every day at midnight UTC
 -- ================================================================
 
 CREATE TABLE IF NOT EXISTS public.rate_limits (
@@ -202,12 +202,12 @@ AND table_name IN ('ai_usage', 'rate_limits')
 ORDER BY table_name;
 ```
 
-**Expected output:** Two rows — `ai_usage` and `rate_limits`.
+**Expected output:** Two rows  -  `ai_usage` and `rate_limits`.
 If either is missing, check for SQL errors and re-run.
 
 ---
 
-## STEP 2 — VERCEL ENV VARS
+## STEP 2  -  VERCEL ENV VARS
 
 Go to **Vercel Dashboard → Your Project → Settings → Environment Variables**.
 
@@ -218,7 +218,7 @@ Add these two new variables (Production + Preview + Development):
 | `ZHIPU_API_KEY` | your Zhipu API key |
 | `SUPABASE_SERVICE_ROLE_KEY` | your Supabase service role key |
 
-`SUPABASE_URL` and `SUPABASE_ANON_KEY` are already there — do not touch them.
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` are already there  -  do not touch them.
 
 **Important:** After adding, go to **Deployments → latest deployment → three
 dots → Redeploy**. Vercel does not pick up new env vars until redeployment.
@@ -232,14 +232,14 @@ VITE_USE_PROXY=true
 
 ---
 
-## STEP 3 — VERCEL EDGE FUNCTION: Create the Proxy
+## STEP 3  -  VERCEL EDGE FUNCTION: Create the Proxy
 
 Create this file at the project root. The path MUST be exactly `api/ai.ts`.
 If an `api/` folder does not exist, create it.
 
 ```typescript
 // api/ai.ts
-// Pustakam AI — Vercel Edge Function proxy for Zhipu
+// Pustakam AI  -  Vercel Edge Function proxy for Zhipu
 // runtime = 'edge' removes all timeout limits and enables streaming
 
 export const runtime = 'edge';
@@ -255,7 +255,7 @@ const MODEL_PRICING: Record<string, { input: number; output: number }> = {
   'glm-5':        { input: 0.1,    output: 0.32  }, // $1/$3.2 per 1M
 };
 
-// Model routing — maps client request to actual Zhipu model
+// Model routing  -  maps client request to actual Zhipu model
 const MODEL_ROUTING: Record<string, string> = {
   'roadmap':  'glm-4-flashx',  // Fast + cheap for structure tasks
   'enhance':  'glm-4-flashx',  // Fast + cheap for prompt improvement
@@ -469,7 +469,7 @@ export default async function handler(req: Request) {
     },
 
     async flush() {
-      // Stream is complete — now log everything to Supabase
+      // Stream is complete  -  now log everything to Supabase
       const totalTokens = promptTokens + outputTokens;
       const costCents   = (
         (promptTokens  / 1000) * pricing.input +
@@ -477,7 +477,7 @@ export default async function handler(req: Request) {
       );
       const durationMs  = Date.now() - startTime;
 
-      // Fire both writes concurrently — non-blocking from user perspective
+      // Fire both writes concurrently  -  non-blocking from user perspective
       await Promise.all([
         // Log to ai_usage analytics table
         logUsage({
@@ -549,7 +549,7 @@ async function updateRateLimit(
   tokens:   number,
   newBook:  boolean
 ) {
-  // Upsert — creates row if first request today, increments if exists
+  // Upsert  -  creates row if first request today, increments if exists
   await supabaseRequest(
     `${process.env.SUPABASE_URL}/rest/v1/rate_limits`,
     'POST',
@@ -561,7 +561,7 @@ async function updateRateLimit(
       books_started: newBook ? 1 : 0,
     },
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    // Supabase upsert header — increments existing values
+    // Supabase upsert header  -  increments existing values
     {
       'Prefer':        'resolution=merge-duplicates',
       'on-conflict':   'user_id,date',
@@ -601,7 +601,7 @@ function errorResponse(status: number, message: string): Response {
 
 ---
 
-## STEP 4 — FRONTEND: Add Proxy Service
+## STEP 4  -  FRONTEND: Add Proxy Service
 
 Create `src/services/proxyService.ts`. This is a thin client that calls
 your new Edge Function. It mirrors the same interface as the existing
@@ -657,7 +657,7 @@ export async function generateViaProxy(
 
   if (!response.body) throw new Error('Empty response stream');
 
-  // Read SSE stream — identical pattern to existing providers
+  // Read SSE stream  -  identical pattern to existing providers
   const reader  = response.body.getReader();
   const decoder = new TextDecoder();
   let fullContent = '';
@@ -726,7 +726,7 @@ export async function getMyUsageStats() {
 
 ---
 
-## STEP 5 — WIRE PROXY INTO bookService.ts
+## STEP 5  -  WIRE PROXY INTO bookService.ts
 
 Find `generateWithAI` in `src/services/bookService.ts`.
 
@@ -734,7 +734,7 @@ Add this block **right after the `navigator.onLine` check** and **before**
 the `const requestId = bookId || generateId()` line:
 
 ```typescript
-// ADD THIS BLOCK — proxy path for logged-in users
+// ADD THIS BLOCK  -  proxy path for logged-in users
 const useProxy = import.meta.env.VITE_USE_PROXY === 'true';
 if (useProxy) {
   try {
@@ -749,7 +749,7 @@ if (useProxy) {
     );
   } catch (proxyError) {
     const msg = proxyError instanceof Error ? proxyError.message : String(proxyError);
-    // Rate limit and auth errors must surface — do NOT fall through
+    // Rate limit and auth errors must surface  -  do NOT fall through
     if (msg.startsWith('RATE_LIMIT:') || msg.includes('not authenticated')) {
       throw proxyError;
     }
@@ -757,7 +757,7 @@ if (useProxy) {
     console.warn('[bookService] Proxy failed, using direct API:', msg);
   }
 }
-// END PROXY BLOCK — existing code continues unchanged below
+// END PROXY BLOCK  -  existing code continues unchanged below
 ```
 
 Then add `taskType` parameter to the `generateWithAI` signature:
@@ -796,7 +796,7 @@ return await this.generateWithAI(prompt, undefined, undefined, undefined, 'gloss
 
 ---
 
-## STEP 6 — LOCAL .env FILE
+## STEP 6  -  LOCAL .env FILE
 
 ```bash
 # Add to your existing .env file
@@ -809,10 +809,10 @@ Restart Vite dev server after adding: `ctrl+c` then `npm run dev`
 
 ---
 
-## STEP 7 — DEPLOY & VERIFY
+## STEP 7  -  DEPLOY & VERIFY
 
 ```bash
-# Commit and push — Vercel auto-deploys
+# Commit and push  -  Vercel auto-deploys
 git add api/ai.ts src/services/proxyService.ts src/services/bookService.ts
 git commit -m "feat: add Vercel Edge proxy for Zhipu with Supabase analytics"
 git push
@@ -821,7 +821,7 @@ git push
 **After deploy, verify it works:**
 
 ```bash
-# Should return 401 — confirms function is live
+# Should return 401  -  confirms function is live
 curl -X POST https://your-app.vercel.app/api/ai \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"test"}],"task_type":"roadmap"}'
@@ -833,15 +833,15 @@ curl -X POST https://your-app.vercel.app/api/ai \
 1. Sign in to Pustakam
 2. Open DevTools → Network tab
 3. Generate a book roadmap
-4. Confirm request goes to `your-app.vercel.app/api/ai` — NOT to `bigmodel.cn`
+4. Confirm request goes to `your-app.vercel.app/api/ai`  -  NOT to `bigmodel.cn`
 5. Open Supabase → Table Editor → `ai_usage`
-   — Should show a new row with your user_id, task_type='roadmap', tokens, cost
+    -  Should show a new row with your user_id, task_type='roadmap', tokens, cost
 6. Open `rate_limits` table
-   — Should show requests_made = 1, books_started = 1 for today
+    -  Should show requests_made = 1, books_started = 1 for today
 
 ---
 
-## STEP 8 — VERIFICATION CHECKLIST
+## STEP 8  -  VERIFICATION CHECKLIST
 
 ### Database
 - [ ] `ai_usage` table exists with all columns
@@ -917,21 +917,21 @@ WHERE success = TRUE;
 
 ```
 CREATED:
-  api/ai.ts                          — Vercel Edge Function (proxy + analytics)
-  src/services/proxyService.ts       — Frontend proxy client
+  api/ai.ts                           -  Vercel Edge Function (proxy + analytics)
+  src/services/proxyService.ts        -  Frontend proxy client
 
 MODIFIED:
-  src/services/bookService.ts        — Added proxy path + taskType param
-  .env                               — Added ZHIPU_API_KEY, SERVICE_ROLE_KEY, VITE_USE_PROXY
+  src/services/bookService.ts         -  Added proxy path + taskType param
+  .env                                -  Added ZHIPU_API_KEY, SERVICE_ROLE_KEY, VITE_USE_PROXY
 
 DATABASE (new tables via SQL Editor):
-  public.ai_usage                    — Per-request analytics + token tracking
-  public.rate_limits                 — Daily caps per user
+  public.ai_usage                     -  Per-request analytics + token tracking
+  public.rate_limits                  -  Daily caps per user
 
 DATABASE (new views via SQL Editor):
-  public.daily_ai_stats              — Daily platform summary
-  public.user_ai_stats               — Per-user totals
-  public.model_usage_stats           — Model usage breakdown
+  public.daily_ai_stats               -  Daily platform summary
+  public.user_ai_stats                -  Per-user totals
+  public.model_usage_stats            -  Model usage breakdown
 
 VERCEL ENV VARS ADDED:
   ZHIPU_API_KEY
@@ -948,4 +948,4 @@ UNCHANGED:
 
 ---
 
-*Pustakam AI — Week 1 Implementation Guide v2*
+*Pustakam AI  -  Week 1 Implementation Guide v2*

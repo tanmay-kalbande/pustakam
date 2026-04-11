@@ -42,7 +42,7 @@ In all static text blocks (About, Landing, Usage Guide):
 - Break up any 3+ consecutive sentences that start with "The" or "You"
 - Add at least one rhetorical question per section
 - Add one short punchy sentence (under 6 words) per paragraph
-- Vary paragraph length — not every paragraph should be 2-3 sentences
+- Vary paragraph length  -  not every paragraph should be 2-3 sentences
 
 ### 1.3 Generic Value Propositions
 AI always picks the same generic claims.
@@ -83,7 +83,7 @@ In LandingPage.tsx, the three feature cards section:
 - Or replace with a single paragraph of prose instead
 
 ### 2.2 Gradient Abuse
-AI sites use gradients on everything — hero sections, cards, buttons,
+AI sites use gradients on everything  -  hero sections, cards, buttons,
 backgrounds, text. It screams template.
 
 Audit all gradient usage across the codebase:
@@ -109,7 +109,7 @@ It feels like a template dashboard.
 Across all components, remove or reduce:
 - Any label that says "New", "Beta", "Pro", "Premium", "Featured"
   unless it serves a real functional purpose
-- The "Pustakam Injin" badge on the landing hero — one mention is enough
+- The "Pustakam Injin" badge on the landing hero  -  one mention is enough
 - Category tags on blog cards if there are fewer than 10 posts
 
 ### 2.5 Symmetry Everywhere
@@ -118,7 +118,7 @@ Real designers break the grid intentionally.
 
 In LandingPage.tsx hero section:
 - Left-align the headline and subtext on desktop instead of center
-  (this is already partially done — verify it's consistent)
+  (this is already partially done  -  verify it's consistent)
 - Make the CTA buttons left-aligned on desktop, not centered
 
 ### 2.6 The Glowing Dot Animation
@@ -204,7 +204,7 @@ In src/utils/errors.ts and any showToast calls:
 - "An unexpected error occurred. Please try again." →
   "Something broke on our end. Try again in a sec."
 - "Failed to generate roadmap" →
-  "Roadmap generation failed — hit retry or reload."
+  "Roadmap generation failed  -  hit retry or reload."
 - "Assembly failed" →
   "Couldn't assemble the final book. Your chapters are saved."
 
@@ -228,7 +228,7 @@ In LandingPage.tsx footer:
 - Remove at least one link that isn't essential at launch
 - The current footer has About, Privacy, Terms, Secure Proxy badge
 - Consider: does a new user need Compliance on day one?
-- Keep it: About, Privacy, Terms, Contact — that's it
+- Keep it: About, Privacy, Terms, Contact  -  that's it
 
 ---
 
@@ -261,12 +261,12 @@ In bookService.ts and any generation status messages:
 In index.html:
 Current: "Pustakam AI - Book Generation with AI | Infinite Knowledge Engine"
 This reads like AI-generated SEO copy.
-Replace with: "Pustakam — Build a 30,000-Word Book with AI"
+Replace with: "Pustakam  -  Build a 30,000-Word Book with AI"
 
 ### 6.2 Meta Description Keyword Stuffing
 In index.html meta description:
 Current mentions "pustkam ai, book generation with ai, ai book generator"
-multiple times with misspellings — classic AI SEO spam pattern.
+multiple times with misspellings  -  classic AI SEO spam pattern.
 Replace with one clean human sentence:
 "Pustakam turns any topic into a structured, chapter-by-chapter book
 using GLM-5. Sign up free. First book in 20 minutes."
@@ -277,22 +277,22 @@ using GLM-5. Sign up free. First book in 20 minutes."
 
 Fix in this order:
 
-1. COPY FIXES (Section 1) — highest impact, users notice immediately
-2. BUTTON LABELS (Section 4.1) — quick wins
-3. HERO SPECIFICITY (Section 3.2) — first thing visitors read
-4. GRADIENT REDUCTION (Section 2.2) — biggest visual tell
-5. BENTO GRID BREAK (Section 2.1) — structural tell
-6. ERROR MESSAGES (Section 4.2) — trust signal
-7. LOADING MESSAGES (Section 5.1 and 5.3) — polish
-8. META TAGS (Section 6) — SEO and first impression
+1. COPY FIXES (Section 1)  -  highest impact, users notice immediately
+2. BUTTON LABELS (Section 4.1)  -  quick wins
+3. HERO SPECIFICITY (Section 3.2)  -  first thing visitors read
+4. GRADIENT REDUCTION (Section 2.2)  -  biggest visual tell
+5. BENTO GRID BREAK (Section 2.1)  -  structural tell
+6. ERROR MESSAGES (Section 4.2)  -  trust signal
+7. LOADING MESSAGES (Section 5.1 and 5.3)  -  polish
+8. META TAGS (Section 6)  -  SEO and first impression
 9. EVERYTHING ELSE in order listed
 
 ---
 
 ## WHAT NOT TO CHANGE
 
-- The nebula background — it's distinctive and works
-- The orange accent color — consistent and memorable
-- The dark theme default — right choice for the audience
-- The JetBrains/mono font usage — gives it a technical edge
-- The overall layout structure — it's solid
+- The nebula background  -  it's distinctive and works
+- The orange accent color  -  consistent and memorable
+- The dark theme default  -  right choice for the audience
+- The JetBrains/mono font usage  -  gives it a technical edge
+- The overall layout structure  -  it's solid

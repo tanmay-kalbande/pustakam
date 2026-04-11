@@ -44,7 +44,7 @@ const DEMO_BOOKS = [
   },
 ] as const;
 
-// ── Testimonials — natural, real-sounding ─────────────────────
+// ── Testimonials  -  natural, real-sounding ─────────────────────
 const TESTIMONIALS = [
   { name: 'Arjun Mehta',     role: 'Software Engineer',   quote: 'Typed "learn Rust from scratch" and had a proper structured book 20 minutes later. Actually used it.' },
   { name: 'Priya Sharma',    role: 'Content Strategist',  quote: 'The structure it generates is honestly better than most paid courses I\'ve taken.' },
@@ -172,7 +172,7 @@ const renderHome = (
             "{TESTIMONIALS[currentTestimonialIdx].quote}"
           </p>
           <p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-white/30">
-            — {TESTIMONIALS[currentTestimonialIdx].name}, {TESTIMONIALS[currentTestimonialIdx].role}
+             -  {TESTIMONIALS[currentTestimonialIdx].name}, {TESTIMONIALS[currentTestimonialIdx].role}
           </p>
         </motion.div>
       </AnimatePresence>
@@ -655,7 +655,7 @@ const LandingPage = ({
             </div>
           </div>
 
-          {/* Desktop layout — no scroll, content fits viewport */}
+          {/* Desktop layout  -  no scroll, content fits viewport */}
           <div className="hidden h-full min-h-0 w-full flex-1 flex-col items-center justify-center md:flex">
             <AnimatePresence mode="wait" custom={getDirection()}>
               <motion.div
@@ -672,7 +672,7 @@ const LandingPage = ({
             </AnimatePresence>
           </div>
 
-          {/* Footer — hidden on Home tab */}
+          {/* Footer  -  hidden on Home tab */}
           <footer className={`z-50 w-full border-t border-white/5 bg-black px-6 py-4 md:absolute md:bottom-0 md:left-0 md:right-0 md:bg-black/80 md:py-5 md:backdrop-blur-xl ${activeTab === 'home' ? 'hidden' : ''}`}>
             <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row md:gap-3">
               <div className="flex items-center gap-4 text-[9px] font-medium uppercase tracking-wider text-white/30 md:text-[10px]">

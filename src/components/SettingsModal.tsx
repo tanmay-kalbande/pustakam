@@ -28,7 +28,7 @@ interface SettingsModalProps {
   }) => void;
 }
 
-// Only three real tabs — 'keys' was broken (immediately redirected away) so removed
+// Only three real tabs  -  'keys' was broken (immediately redirected away) so removed
 type ActiveTab = 'personality' | 'data' | 'about';
 
 interface ImportPreview {

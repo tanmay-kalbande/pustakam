@@ -4,7 +4,7 @@
 --
 -- ROOT CAUSE OF PREVIOUS ERROR:
 --   DROP TRIGGER IF EXISTS profiles_updated_at ON public.profiles
---   The IF EXISTS only protects against the trigger missing — NOT against
+--   The IF EXISTS only protects against the trigger missing  -  NOT against
 --   the table missing. On a fresh project, public.profiles does not exist
 --   yet, so this line throws "relation does not exist" and aborts the entire
 --   script before any CREATE TABLE runs.
@@ -19,7 +19,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- STEP 1: DROP EXISTING APP OBJECTS (all safe for fresh projects)
 -- ============================================================================
 
--- Views (safe — IF EXISTS handles missing views cleanly)
+-- Views (safe  -  IF EXISTS handles missing views cleanly)
 DROP VIEW IF EXISTS public.ai_model_usage_stats CASCADE;
 DROP VIEW IF EXISTS public.user_ai_stats CASCADE;
 DROP VIEW IF EXISTS public.daily_ai_stats CASCADE;
@@ -27,7 +27,7 @@ DROP VIEW IF EXISTS public.model_usage_stats CASCADE;
 DROP VIEW IF EXISTS public.daily_stats CASCADE;
 DROP VIEW IF EXISTS public.platform_stats CASCADE;
 
--- Functions (safe — IF EXISTS handles missing functions cleanly)
+-- Functions (safe  -  IF EXISTS handles missing functions cleanly)
 DROP FUNCTION IF EXISTS public.update_updated_at() CASCADE;
 DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
 DROP FUNCTION IF EXISTS public.increment_books_created(uuid) CASCADE;
@@ -296,13 +296,13 @@ $$;
 -- STEP 4: TRIGGERS
 -- ============================================================================
 
--- profiles trigger — we own this table, always safe
+-- profiles trigger  -  we own this table, always safe
 CREATE TRIGGER profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at();
 
--- auth.users trigger — wrapped because Supabase restricts auth.* DDL
+-- auth.users trigger  -  wrapped because Supabase restricts auth.* DDL
 DO $$
 BEGIN
   CREATE TRIGGER on_auth_user_created
@@ -463,7 +463,7 @@ GRANT SELECT ON public.ai_model_usage_stats TO authenticated;
 
 -- ============================================================================
 -- STEP 9: BACKFILL PROFILES FOR EXISTING AUTH USERS
--- Safe to run on a fresh project with no users — inserts nothing.
+-- Safe to run on a fresh project with no users  -  inserts nothing.
 -- ============================================================================
 
 INSERT INTO public.profiles (

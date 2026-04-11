@@ -4,7 +4,7 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Home / Landing Page — highest priority -->
+  <!-- Home / Landing Page  -  highest priority -->
   <url>
     <loc>https://pustakamai.tanmaysk.in/</loc>
     <lastmod>2026-01-25</lastmod>

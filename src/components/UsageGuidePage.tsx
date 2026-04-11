@@ -203,13 +203,13 @@ const UsageGuidePage: React.FC<UsageGuidePageProps> = ({ onClose }) => {
                                             <h4 className="text-sm font-bold uppercase tracking-wider text-red-400">What to Avoid</h4>
                                             <ul className="space-y-3 text-[13px] text-white/50">
                                                 <li className="flex gap-3">
-                                                    <span className="text-red-500 font-bold">×</span> Vague one-word topics
+                                                    <span className="text-red-500 font-bold">� - </span> Vague one-word topics
                                                 </li>
                                                 <li className="flex gap-3">
-                                                    <span className="text-red-500 font-bold">×</span> Ambiguous language settings
+                                                    <span className="text-red-500 font-bold">� - </span> Ambiguous language settings
                                                 </li>
                                                 <li className="flex gap-3">
-                                                    <span className="text-red-500 font-bold">×</span> Missing the "Persona" context
+                                                    <span className="text-red-500 font-bold">� - </span> Missing the "Persona" context
                                                 </li>
                                             </ul>
                                         </div>
@@ -244,7 +244,7 @@ const UsageGuidePage: React.FC<UsageGuidePageProps> = ({ onClose }) => {
                                 <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
                                     <Globe className="text-white/20 mb-4" size={20} />
                                     <h4 className="text-white font-semibold mb-2 text-sm">Offline Access</h4>
-                                    <p className="text-white/40 text-xs leading-relaxed">Once a book is generated, you can read it anywhere—even without an internet connection.</p>
+                                    <p className="text-white/40 text-xs leading-relaxed">Once a book is generated, you can read it anywhere - even without an internet connection.</p>
                                 </div>
                                 <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
                                     <Settings className="text-white/20 mb-4" size={20} />

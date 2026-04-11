@@ -95,7 +95,7 @@ const APIDocsPage: React.FC<APIDocsPageProps> = ({ onClose }) => {
                                 <div className="p-8 rounded-[2rem] bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)] hover:border-[var(--brand)]/20 transition-all duration-500 group">
                                     <h4 className="text-xs font-bold text-[var(--brand)] uppercase tracking-[0.2em] mb-4">Privacy Immutable</h4>
                                     <p className="text-[var(--text-muted)] text-sm leading-relaxed">
-                                        <strong>End-to-End Privacy:</strong> Your creative output remains 100% local. We use anonymized analytics for performance, and encrypted account records for profile persistence—never at the cost of your intellectual privacy.
+                                        <strong>End-to-End Privacy:</strong> Your creative output remains 100% local. We use anonymized analytics for performance, and encrypted account records for profile persistence - never at the cost of your intellectual privacy.
                                     </p>
                                 </div>
                                 <div className="mt-auto p-4 rounded-2xl bg-[var(--brand)]/5 border border-[var(--brand)]/10">
@@ -137,7 +137,7 @@ const APIDocsPage: React.FC<APIDocsPageProps> = ({ onClose }) => {
                     {/* Providers & Use Cases sections follow with same styling... */}
 
                     <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
-                        Pustakam runs on Zhipu GLM models via a secure server-side proxy. No API key setup is required — just sign in and start generating.
+                        Pustakam runs on Zhipu GLM models via a secure server-side proxy. No API key setup is required  -  just sign in and start generating.
                     </p>
 
                     {/* Section 4: Model Strategy */}

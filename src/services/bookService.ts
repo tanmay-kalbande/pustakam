@@ -1,11 +1,11 @@
 // ============================================================================
 // FILE: src/services/bookService.ts
 // NOTES:
-//   1. validateSettings() — auto-correct provider; never error-out in proxy mode
-//   2. generateWithAI() — routes through Render proxy (pustakam-proxy.onrender.com)
+//   1. validateSettings()  -  auto-correct provider; never error-out in proxy mode
+//   2. generateWithAI()  -  routes through Render proxy (pustakam-proxy.onrender.com)
 //      Timeouts are generous to survive Render free-tier cold starts (~50s wake)
-//   3. getApiKeyForProvider() — zhipu is proxy-only, never needs a local key
-//   4. enhanceBookInput() — wraps errors so isEnhancing always resets
+//   3. getApiKeyForProvider()  -  zhipu is proxy-only, never needs a local key
+//   4. enhanceBookInput()  -  wraps errors so isEnhancing always resets
 // ============================================================================
 
 import { BookProject, BookRoadmap, BookModule, RoadmapModule, BookSession } from '../types/book';
@@ -19,7 +19,7 @@ import { generateViaProxy, TaskType as ProxyTaskType } from './proxyService';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// ── Debug helper — always logs so DevTools console is never blank ────────────
+// ── Debug helper  -  always logs so DevTools console is never blank ────────────
 const dbg = (...args: unknown[]) => console.log('[BookService]', ...args);
 const err = (...args: unknown[]) => console.error('[BookService]', ...args);
 
@@ -124,7 +124,7 @@ class BookGenerationService {
     const standardPrompt = `You are an intelligent assistant. Analyze the user's topic and return a JSON object for book creation.
 
 IMPORTANT RULES:
-- Respond with ONLY the JSON object below — no explanation, no markdown, no code fences.
+- Respond with ONLY the JSON object below  -  no explanation, no markdown, no code fences.
 - Do NOT wrap in \`\`\`json or \`\`\`.
 - Start your response with { and end with }.
 
@@ -135,7 +135,7 @@ User Input: "${userInput}"`;
     const dogePrompt = `You are a savage, street-smart AI assistant for Blackhole Mode. Take the user's idea and return a high-octane JSON response.
 
 IMPORTANT RULES:
-- Respond with ONLY the JSON object below — no explanation, no markdown, no code fences.
+- Respond with ONLY the JSON object below  -  no explanation, no markdown, no code fences.
 - Start your response with { and end with }.
 
 {"goal": "An aggressive, action-oriented learning goal", "title": "A savage, clickbaity book title", "targetAudience": "Roast the target audience", "complexityLevel": "beginner | intermediate | advanced", "preferences": {"includeExamples": true, "includePracticalExercises": true, "includeQuizzes": false}, "reasoning": "A rough, street-smart reason why they need this"}
@@ -402,7 +402,7 @@ User Input: "${userInput}"`;
       case 'xai':         return this.settings.xaiApiKey || null;
       case 'openrouter':  return this.settings.openRouterApiKey || null;
       case 'cohere':      return this.settings.cohereApiKey || null;
-      // zhipu is proxy-only — no local key
+      // zhipu is proxy-only  -  no local key
       case 'zhipu':       return null;
       default:            return null;
     }
@@ -462,7 +462,7 @@ User Input: "${userInput}"`;
     switch (taskType) {
       case 'enhance':
       case 'glossary':
-        return 90_000;   // 90s — covers 50s cold-start + ~30s Zhipu
+        return 90_000;   // 90s  -  covers 50s cold-start + ~30s Zhipu
       case 'roadmap':
         return 120_000;  // 2 min
       case 'assemble':
@@ -510,7 +510,7 @@ User Input: "${userInput}"`;
   }
 
   // ============================================================================
-  // generateWithAI — proxy timeout + full console logging
+  // generateWithAI  -  proxy timeout + full console logging
   // ============================================================================
 
   private async generateWithAI(
@@ -911,7 +911,7 @@ Start your response with { and end with }.
     } catch (error) {
       if (error instanceof Error && error.message === 'GENERATION_PAUSED') throw error;
 
-      // Treat AbortError (cancel/pause) as a pause — not a failure
+      // Treat AbortError (cancel/pause) as a pause  -  not a failure
       const isAbortError = error instanceof DOMException && error.name === 'AbortError';
       const isUserPause = (error instanceof Error && error.message === 'USER_PAUSE') || 
                           (error instanceof Error && error.message.includes('USER_PAUSE'));
@@ -954,7 +954,7 @@ Start your response with { and end with }.
         }
       }
 
-      this.updateGenerationStatus(book.id, { status: 'error', logMessage: `✗ Failed: ${roadmapModule.title}` });
+      this.updateGenerationStatus(book.id, { status: 'error', logMessage: `� -  Failed: ${roadmapModule.title}` });
       return { id: generateId(), roadmapModuleId: roadmapModule.id, title: roadmapModule.title, content: '', wordCount: 0, status: 'error', error: errorMessage, generatedAt: new Date() };
     }
   }
@@ -988,15 +988,15 @@ CONTEXT:
 - Complexity: ${session.complexityLevel || 'intermediate'}${reasoningPrompt}${contextSummary}
 
 REQUIREMENTS:
-- Write EXACTLY 2500-4000 words (this is critical — under 2000 words is a failure)
-- ${isFirstModule ? 'Provide a strong introduction to the topic' : 'Build naturally upon previous chapters — do NOT repeat their introductions'}
+- Write EXACTLY 2500-4000 words (this is critical  -  under 2000 words is a failure)
+- ${isFirstModule ? 'Provide a strong introduction to the topic' : 'Build naturally upon previous chapters  -  do NOT repeat their introductions'}
 - Use ## and ### markdown headers to structure content
 - Include bullet points, numbered lists, and bold key terms
 ${session.preferences?.includeExamples ? '- Include 2-3 practical, real-world examples with code/scenarios' : ''}
 ${session.preferences?.includePracticalExercises ? '- Add 3-5 practice exercises at the end' : ''}
 
 DO NOT:
-- Start with "In this chapter" or "In this module" — dive straight into the content
+- Start with "In this chapter" or "In this module"  -  dive straight into the content
 - Use filler phrases like "In conclusion", "As we have seen", "It is worth noting"
 - Repeat information already covered in previous modules
 - Generate fewer than 2000 words
@@ -1052,7 +1052,7 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
         this.saveCheckpoint(book.id, Array.from(completedIds), Array.from(failedIds), i - 1, moduleRetryCount,
           completedModules.reduce((s, m) => s + (m.status === 'completed' ? m.wordCount : 0), 0));
         this.updateProgress(book.id, { status: 'generating_content', modules: [...completedModules], progress: 15 + (completedModules.length / book.roadmap.modules.length) * 70 });
-        this.updateGenerationStatus(book.id, { status: 'paused', totalProgress: 0, logMessage: 'Generation paused — progress saved' });
+        this.updateGenerationStatus(book.id, { status: 'paused', totalProgress: 0, logMessage: 'Generation paused  -  progress saved' });
         return;
       }
 
@@ -1069,7 +1069,7 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
           this.saveCheckpoint(book.id, Array.from(completedIds), Array.from(failedIds), i, moduleRetryCount,
             completedModules.reduce((s, m) => s + (m.status === 'completed' ? m.wordCount : 0), 0));
           this.updateProgress(book.id, { status: 'generating_content', modules: [...completedModules] });
-          this.updateGenerationStatus(book.id, { status: 'paused', totalProgress: 0, logMessage: 'Generation paused — progress saved' });
+          this.updateGenerationStatus(book.id, { status: 'paused', totalProgress: 0, logMessage: 'Generation paused  -  progress saved' });
           return;
         }
 
@@ -1088,11 +1088,11 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
           this.saveCheckpoint(book.id, Array.from(completedIds), Array.from(failedIds), i, moduleRetryCount,
             completedModules.reduce((s, m) => s + (m.status === 'completed' ? m.wordCount : 0), 0));
           this.updateProgress(book.id, { modules: [...completedModules], status: 'error', error: `Failed: ${roadmapModule.title}` });
-          this.updateGenerationStatus(book.id, { status: 'error', totalProgress: (completedIds.size / book.roadmap.modules.length) * 100, logMessage: `✗ Stopped: ${roadmapModule.title}` });
+          this.updateGenerationStatus(book.id, { status: 'error', totalProgress: (completedIds.size / book.roadmap.modules.length) * 100, logMessage: `� -  Stopped: ${roadmapModule.title}` });
           return;
         }
 
-        // Mistral has stricter rate limits — give it more breathing room
+        // Mistral has stricter rate limits  -  give it more breathing room
         const cooldown = this.settings.selectedProvider === 'mistral' ? 3000 : 1000;
         if (i < modulesToGenerate.length - 1) await sleep(cooldown);
 
@@ -1112,7 +1112,7 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
           this.saveCheckpoint(book.id, Array.from(completedIds), Array.from(failedIds), i, moduleRetryCount,
             completedModules.reduce((s, m) => s + (m.status === 'completed' ? m.wordCount : 0), 0));
           this.updateProgress(book.id, { status: 'generating_content', modules: [...completedModules] });
-          this.updateGenerationStatus(book.id, { status: 'paused', totalProgress: 0, logMessage: 'Generation paused — progress saved' });
+          this.updateGenerationStatus(book.id, { status: 'paused', totalProgress: 0, logMessage: 'Generation paused  -  progress saved' });
           return;
         }
 
@@ -1124,7 +1124,7 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
           completedModules.reduce((s, m) => s + (m.status === 'completed' ? m.wordCount : 0), 0));
         completedModules.push({ id: generateId(), roadmapModuleId: roadmapModule.id, title: roadmapModule.title, content: '', wordCount: 0, status: 'error', error: errorMessage, generatedAt: new Date() });
         this.updateProgress(book.id, { modules: [...completedModules], status: 'error', error: `Failed: ${roadmapModule.title}` });
-        this.updateGenerationStatus(book.id, { status: 'error', totalProgress: (completedIds.size / book.roadmap.modules.length) * 100, logMessage: `✗ Stopped: ${roadmapModule.title}` });
+        this.updateGenerationStatus(book.id, { status: 'error', totalProgress: (completedIds.size / book.roadmap.modules.length) * 100, logMessage: `� -  Stopped: ${roadmapModule.title}` });
         return;
       }
     }

@@ -101,7 +101,7 @@ const TimelineStep: React.FC<{ steps: { title: string; desc: string; icon: React
 const QuoteBlock: React.FC<{ text: string; author?: string }> = ({ text, author }) => (
     <div className="my-8 relative pl-5 border-l-2 border-cyan-500/40">
         <p className="text-lg md:text-xl text-white/80 italic font-light leading-relaxed">"{text}"</p>
-        {author && <p className="text-xs text-cyan-400/70 mt-2 font-medium">— {author}</p>}
+        {author && <p className="text-xs text-cyan-400/70 mt-2 font-medium"> -  {author}</p>}
     </div>
 );
 
@@ -122,7 +122,7 @@ const InfoCallout: React.FC<{ title: string; text: string; color?: string }> = (
 const BLOG_POSTS: BlogPost[] = [
     {
         id: 'why-i-built-pustakam',
-        title: 'Why I Built Pustakam AI — And What It Means for Self-Learners',
+        title: 'Why I Built Pustakam AI  -  And What It Means for Self-Learners',
         subtitle: 'The origin story behind the Infinite Knowledge Engine',
         date: 'February 1, 2026',
         readTime: '6 min read',
@@ -132,9 +132,9 @@ const BLOG_POSTS: BlogPost[] = [
         icon: Sparkles,
         content: (
             <>
-                <p>Every project starts with a frustration. Mine started when I was trying to learn something new — I don't even remember exactly what it was — and I couldn't find a single resource that explained things the way I wanted. YouTube videos were too slow. Blog posts were either too shallow or too advanced. Textbooks felt like they were written for someone else.</p>
+                <p>Every project starts with a frustration. Mine started when I was trying to learn something new  -  I don't even remember exactly what it was  -  and I couldn't find a single resource that explained things the way I wanted. YouTube videos were too slow. Blog posts were either too shallow or too advanced. Textbooks felt like they were written for someone else.</p>
 
-                <p>That's when the idea hit me. What if I could just tell an AI exactly what I want to learn, at exactly the depth I need, and get an entire structured book out of it? Not a chatbot conversation. Not a list of links. A real, structured book — chapters, modules, progressive learning — tailored just for me.</p>
+                <p>That's when the idea hit me. What if I could just tell an AI exactly what I want to learn, at exactly the depth I need, and get an entire structured book out of it? Not a chatbot conversation. Not a list of links. A real, structured book  -  chapters, modules, progressive learning  -  tailored just for me.</p>
 
                 <h3>The Problem with Learning Today</h3>
 
@@ -150,7 +150,7 @@ const BLOG_POSTS: BlogPost[] = [
                     ]}
                 />
 
-                <p>Pustakam was built to solve exactly this. You give it a topic — could be "Rust programming from scratch" or "explain behavioral economics to a college student" — and it builds a complete learning guide calibrated to your level.</p>
+                <p>Pustakam was built to solve exactly this. You give it a topic  -  could be "Rust programming from scratch" or "explain behavioral economics to a college student"  -  and it builds a complete learning guide calibrated to your level.</p>
 
                 <h3>What Makes It Different</h3>
 
@@ -163,17 +163,17 @@ const BLOG_POSTS: BlogPost[] = [
                     { label: 'Export Format', value: 'PDF', icon: Layers, color: 'text-emerald-400' },
                 ]} />
 
-                <p><strong>Street Mode</strong> speaks like your smartest friend who happens to know everything — direct, punchy, and full of energy. <strong>Stellar Mode</strong> is your patient professor who lays out frameworks, gives examples, and quizzes you along the way.</p>
+                <p><strong>Street Mode</strong> speaks like your smartest friend who happens to know everything  -  direct, punchy, and full of energy. <strong>Stellar Mode</strong> is your patient professor who lays out frameworks, gives examples, and quizzes you along the way.</p>
 
                 <h3>Building in Public</h3>
 
-                <p>Pustakam is an open research project built by the Tanmay Kalbande group. Every line of code, every prompt, every design decision — it all comes from a desire to learn better and experiment with multi-model pedagogy.</p>
+                <p>Pustakam is an open research project built by the Tanmay Kalbande group. Every line of code, every prompt, every design decision  -  it all comes from a desire to learn better and experiment with multi-model pedagogy.</p>
 
                 <QuoteBlock text="The best tools are built out of genuine frustration, not market research." author="Me, at 3am debugging API calls" />
 
                 <p>If you're someone who loves learning but hates how fragmented online education is, give Pustakam a try. It's free to start, local-first (your data stays on your device), and it works with multiple AI providers so you're never locked in.</p>
 
-                <p>This is just the beginning. I have so many ideas for where to take this — collaborative learning, multi-language support, community-generated templates. But every journey starts with the first step, and for Pustakam, that step was admitting that the way we learn online is broken.</p>
+                <p>This is just the beginning. I have so many ideas for where to take this  -  collaborative learning, multi-language support, community-generated templates. But every journey starts with the first step, and for Pustakam, that step was admitting that the way we learn online is broken.</p>
 
                 <p>Let's fix it together.</p>
             </>
@@ -194,11 +194,11 @@ const BLOG_POSTS: BlogPost[] = [
             <>
                 <p>When I was designing Pustakam's generation engine, I had this nagging thought: why does all educational content sound the same? That monotone, Wikipedia-ish style that puts you to sleep by paragraph three.</p>
 
-                <p>I was watching a lot of motivational content at the time — creators who mixed humor with knowledge, used street slang to explain complex ideas, and made you feel like you were getting roasted into learning. And I thought: what if a book could do that?</p>
+                <p>I was watching a lot of motivational content at the time  -  creators who mixed humor with knowledge, used street slang to explain complex ideas, and made you feel like you were getting roasted into learning. And I thought: what if a book could do that?</p>
 
                 <h3>Two Modes, Two Philosophies</h3>
 
-                <p>That's how Street Mode and Stellar Mode were born. They aren't just different tones — they represent fundamentally different learning philosophies.</p>
+                <p>That's how Street Mode and Stellar Mode were born. They aren't just different tones  -  they represent fundamentally different learning philosophies.</p>
 
                 <ComparisonTable
                     headers={['Feature', '🔥 Street Mode', '🌟 Stellar Mode']}
@@ -215,17 +215,17 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <h3>Why Street Mode Works</h3>
 
-                <p>There's actual psychology behind this. When content feels informal and high-energy, your brain processes it differently. It activates emotional pathways that formal writing doesn't touch. You <em>feel</em> the urgency. You don't just understand a concept — you want to act on it immediately.</p>
+                <p>There's actual psychology behind this. When content feels informal and high-energy, your brain processes it differently. It activates emotional pathways that formal writing doesn't touch. You <em>feel</em> the urgency. You don't just understand a concept  -  you want to act on it immediately.</p>
 
-                <p>Street Mode doesn't baby you. It says "here's the truth, here's what you need to do, now stop overthinking and execute." For topics like personal development, entrepreneurship, and fitness — it's an absolute game-changer.</p>
+                <p>Street Mode doesn't baby you. It says "here's the truth, here's what you need to do, now stop overthinking and execute." For topics like personal development, entrepreneurship, and fitness  -  it's an absolute game-changer.</p>
 
                 <QuoteBlock text="Street Mode doesn't teach you something. It dares you to not learn it." />
 
                 <h3>When Stellar Mode Shines</h3>
 
-                <p>But not every topic needs that energy. When you're learning data science, programming patterns, or academic subjects — you need structure. You need a clear framework that builds concept on concept. That's Stellar Mode's domain.</p>
+                <p>But not every topic needs that energy. When you're learning data science, programming patterns, or academic subjects  -  you need structure. You need a clear framework that builds concept on concept. That's Stellar Mode's domain.</p>
 
-                <p>Stellar Mode gives you the "why" behind everything. It doesn't just show you code — it explains the architectural decision. It doesn't just give you facts — it gives you mental models. If Street Mode is a sprint, Stellar Mode is a marathon with checkpoints.</p>
+                <p>Stellar Mode gives you the "why" behind everything. It doesn't just show you code  -  it explains the architectural decision. It doesn't just give you facts  -  it gives you mental models. If Street Mode is a sprint, Stellar Mode is a marathon with checkpoints.</p>
 
                 <BarChartVisual
                     title="User Preference by Topic Category"
@@ -254,25 +254,25 @@ const BLOG_POSTS: BlogPost[] = [
         subtitle: 'A deep dive into the generation pipeline, multi-model architecture, and resilience engineering',
         date: 'February 9, 2026',
         readTime: '8 min read',
-        excerpt: 'People ask me all the time: "How does Pustakam actually generate an entire book?" Here\'s the full technical breakdown — from prompt to PDF.',
+        excerpt: 'People ask me all the time: "How does Pustakam actually generate an entire book?" Here\'s the full technical breakdown  -  from prompt to PDF.',
         category: 'Technical',
         categoryColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
         icon: Cpu,
         content: (
             <>
-                <p>One of the most common questions I get is: "How does an entire book get generated by AI?" People imagine some single prompt that magically outputs 30,000 words. The reality is way more interesting — and way more engineered.</p>
+                <p>One of the most common questions I get is: "How does an entire book get generated by AI?" People imagine some single prompt that magically outputs 30,000 words. The reality is way more interesting  -  and way more engineered.</p>
 
                 <p>Let me walk you through exactly what happens when you hit "Generate" on Pustakam.</p>
 
                 <h3>Step 1: The Enhancer</h3>
 
-                <p>Most users don't write perfect prompts. Someone might type "I want to learn coding" — which is absurdly vague. The first thing Pustakam does is run your input through an <strong>AI Enhancer</strong>. This takes your rough idea and brainstorms a specific learning goal, book title, audience profile, and complexity level.</p>
+                <p>Most users don't write perfect prompts. Someone might type "I want to learn coding"  -  which is absurdly vague. The first thing Pustakam does is run your input through an <strong>AI Enhancer</strong>. This takes your rough idea and brainstorms a specific learning goal, book title, audience profile, and complexity level.</p>
 
-                <p>The Enhancer is basically a specialized AI call that's prompt-engineered to think like a curriculum designer. It doesn't just expand your query — it structures it for optimal book generation downstream.</p>
+                <p>The Enhancer is basically a specialized AI call that's prompt-engineered to think like a curriculum designer. It doesn't just expand your query  -  it structures it for optimal book generation downstream.</p>
 
                 <h3>Step 2: Roadmap Generation</h3>
 
-                <p>Once the enhanced prompt is ready, Pustakam generates a <strong>roadmap</strong> — think of it as the table of contents on steroids. Each module has a title, learning objectives, and estimated depth. This roadmap becomes the skeleton of your entire book.</p>
+                <p>Once the enhanced prompt is ready, Pustakam generates a <strong>roadmap</strong>  -  think of it as the table of contents on steroids. Each module has a title, learning objectives, and estimated depth. This roadmap becomes the skeleton of your entire book.</p>
 
                 <TimelineStep steps={[
                     { title: 'Input Enhancement', desc: 'Your raw idea gets refined into a structured goal, title, and audience profile.', icon: Zap, color: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' },
@@ -283,7 +283,7 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <h3>Step 3: Module-by-Module Generation</h3>
 
-                <p>Here's where it gets interesting. Pustakam doesn't generate the entire book in one call — that would be unreliable and hit token limits. Instead, it generates <strong>one module at a time</strong>, feeding the context of previous modules into each subsequent call.</p>
+                <p>Here's where it gets interesting. Pustakam doesn't generate the entire book in one call  -  that would be unreliable and hit token limits. Instead, it generates <strong>one module at a time</strong>, feeding the context of previous modules into each subsequent call.</p>
 
                 <p>This "progressive context stacking" approach has a huge advantage: if one module fails (API error, rate limit, network timeout), you don't lose the entire book. Only that one module needs to be regenerated.</p>
 
@@ -308,7 +308,7 @@ const BLOG_POSTS: BlogPost[] = [
                     <li><strong>Proxy Pipeline</strong> that enforces secure routing and prevents local browser hangs</li>
                     <li><strong>Jittered auto-retry</strong> on 429 and network errors with exponential backoff</li>
                     <li><strong>Checkpointing</strong> that saves every completed module to localStorage instantly</li>
-                    <li><strong>Local Consistency Mode</strong> — pausing generation saves identical state</li>
+                    <li><strong>Local Consistency Mode</strong>  -  pausing generation saves identical state</li>
                 </ul>
 
                 <p>You can literally close your browser mid-generation, come back a week later, and resume exactly where you left off. Every chapter, every paragraph, every checkpoint is preserved on your device.</p>
@@ -320,9 +320,9 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <h3>The PDF Engine</h3>
 
-                <p>We used pdfmake under the hood for export since the final output needs to be professional-grade. Custom font injection, Unicode normalization, intelligent page breaks for long code blocks, and even emoji support. Each PDF includes a cover page, structured layout, and a transparency disclaimer — because we believe in being upfront about AI-generated content.</p>
+                <p>We used pdfmake under the hood for export since the final output needs to be professional-grade. Custom font injection, Unicode normalization, intelligent page breaks for long code blocks, and even emoji support. Each PDF includes a cover page, structured layout, and a transparency disclaimer  -  because we believe in being upfront about AI-generated content.</p>
 
-                <p>Building all of this was genuinely one of the hardest engineering challenges I've taken on. But that's what makes it rewarding — knowing that every generation is battle-tested against real-world failure modes.</p>
+                <p>Building all of this was genuinely one of the hardest engineering challenges I've taken on. But that's what makes it rewarding  -  knowing that every generation is battle-tested against real-world failure modes.</p>
 
 
             </>
@@ -341,7 +341,7 @@ const BLOG_POSTS: BlogPost[] = [
         icon: Brain,
         content: (
             <>
-                <p>Building Pustakam AI has been a rollercoaster. Some days I feel like a genius. Most days I feel like I'm drowning in edge cases. But through all of it, there are five lessons that really stuck with me — and I think they apply to anyone building something ambitious.</p>
+                <p>Building Pustakam AI has been a rollercoaster. Some days I feel like a genius. Most days I feel like I'm drowning in edge cases. But through all of it, there are five lessons that really stuck with me  -  and I think they apply to anyone building something ambitious.</p>
 
                 <h3>Lesson 1: Users Don't Write Good Prompts (And That's Your Problem)</h3>
 
@@ -370,11 +370,11 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <p>Here's something nobody tells you about building AI products: the happy path is maybe 60% of the experience. The other 40% is rate limits, network timeouts, malformed responses, and context window overflows. If your error handling is bad, your product feels broken even when your core feature works perfectly.</p>
 
-                <p>I invested heavily in resilience — checkpointing, auto-retry, model switching, graceful degradation. It's not glamorous work, but it's the difference between a demo and a real product.</p>
+                <p>I invested heavily in resilience  -  checkpointing, auto-retry, model switching, graceful degradation. It's not glamorous work, but it's the difference between a demo and a real product.</p>
 
                 <h3>Lesson 4: Privacy Isn't a Feature, It's a Promise</h3>
 
-                <p>The zero-middleman architecture wasn't a business decision — it was a moral one. People share API keys, personal learning goals, and reading habits with Pustakam. I decided early on that none of that should ever touch my servers. Your keys go directly from your browser to the AI provider. Period.</p>
+                <p>The zero-middleman architecture wasn't a business decision  -  it was a moral one. People share API keys, personal learning goals, and reading habits with Pustakam. I decided early on that none of that should ever touch my servers. Your keys go directly from your browser to the AI provider. Period.</p>
 
                 <StatGrid stats={[
                     { label: 'Data on Server', value: '0', icon: Shield, color: 'text-emerald-400' },
@@ -400,7 +400,7 @@ const BLOG_POSTS: BlogPost[] = [
     },
     {
         id: 'future-of-learning',
-        title: 'The Future of Learning is Personal — Here\'s Why',
+        title: 'The Future of Learning is Personal  -  Here\'s Why',
         subtitle: 'Why mass-produced education is dying and what comes next',
         date: 'February 19, 2026',
         readTime: '7 min read',
@@ -436,7 +436,7 @@ const BLOG_POSTS: BlogPost[] = [
                     ]}
                 />
 
-                <p>That stat in the chart above is a rough estimate, but it's directionally true for most self-learners. Only about 20% of the time you spend "learning" is actually spent learning. The rest is overhead — searching, filtering, and skipping content that doesn't match your level.</p>
+                <p>That stat in the chart above is a rough estimate, but it's directionally true for most self-learners. Only about 20% of the time you spend "learning" is actually spent learning. The rest is overhead  -  searching, filtering, and skipping content that doesn't match your level.</p>
 
                 <h3>Enter Multi-Model Personalization</h3>
 
@@ -459,14 +459,14 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <TimelineStep steps={[
                     { title: 'AI-Generated Curricula', desc: 'Every learner gets a unique, optimized learning path generated in real-time based on their goals and existing knowledge.', icon: Target, color: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' },
-                    { title: 'Dynamic Difficulty', desc: 'Content adapts to your comprehension in real-time — like a game that adjusts difficulty as you play.', icon: TrendingUp, color: 'bg-purple-500/10 border-purple-500/20 text-purple-400' },
+                    { title: 'Dynamic Difficulty', desc: 'Content adapts to your comprehension in real-time  -  like a game that adjusts difficulty as you play.', icon: TrendingUp, color: 'bg-purple-500/10 border-purple-500/20 text-purple-400' },
                     { title: 'Community Knowledge', desc: 'Users share generated books and templates, creating a crowdsourced library of learning paths.', icon: BookOpen, color: 'bg-amber-500/10 border-amber-500/20 text-amber-400' },
                     { title: 'Cross-Language Mastery', desc: 'Learn any topic in any language with the same depth and quality, powered by specialized multilingual models.', icon: Sparkles, color: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' },
                 ]} />
 
                 <h3>Pustakam's Role</h3>
 
-                <p>Pustakam isn't trying to replace teachers or courses. It's trying to fill the gaps that traditional education can't reach. The student who needs a custom guide for a niche topic at 2am. The professional who wants a quick deep-dive into a new framework before a Monday meeting. The curious mind who just wants to understand something complex — explained their way.</p>
+                <p>Pustakam isn't trying to replace teachers or courses. It's trying to fill the gaps that traditional education can't reach. The student who needs a custom guide for a niche topic at 2am. The professional who wants a quick deep-dive into a new framework before a Monday meeting. The curious mind who just wants to understand something complex  -  explained their way.</p>
 
                 <QuoteBlock text="The goal isn't to automate education. It's to personalize it at a scale that was previously impossible." author="Tanmay Kalbande" />
 

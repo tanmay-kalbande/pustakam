@@ -232,7 +232,7 @@ function App() {
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       if (isLoadingScreenVisible) {
-        console.warn('[App] Loading screen safety timeout — forcing dismiss');
+        console.warn('[App] Loading screen safety timeout  -  forcing dismiss');
         setIsLoadingScreenExiting(true);
         setTimeout(() => {
           setIsLoadingScreenVisible(false);

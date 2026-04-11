@@ -26,7 +26,7 @@ const defaultSettings: APISettings = {
   defaultLanguage: 'en',
 };
 
-// Only two providers are supported — Z AI (Zhipu) and Mistral.
+// Only two providers are supported  -  Z AI (Zhipu) and Mistral.
 // Model selection is handled by server-side orchestration; these lists
 // are used only for storage validation (fallback defaults).
 const validProviders: ModelProvider[] = ['zhipu', 'mistral'];
