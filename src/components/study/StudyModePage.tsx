@@ -179,7 +179,7 @@ const SurfaceToggle = ({
   value: ReaderSurface;
   onChange: (next: ReaderSurface) => void;
 }) => (
-  <div className="inline-flex rounded-full border border-[var(--border-subtle)] bg-[var(--bg-base)] p-1">
+  <div className="inline-flex rounded-full border border-white/8 bg-white/[0.03] p-1">
     {[
       { value: 'module' as const, label: 'Chapter Mode', icon: BookOpen },
       { value: 'full_book' as const, label: 'Full Book', icon: BookText },
@@ -190,7 +190,7 @@ const SurfaceToggle = ({
         className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
           value === nextValue
             ? 'bg-[var(--brand)] text-black'
-            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            : 'text-[var(--text-secondary)] hover:bg-white/[0.04] hover:text-[var(--text-primary)]'
         }`}
       >
         <Icon className="h-3.5 w-3.5" />
@@ -216,7 +216,7 @@ const StudyTabButton = ({
     className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
       active
         ? 'border-[var(--brand)]/20 bg-[var(--brand)]/10 text-[var(--text-primary)]'
-        : 'border-[var(--border-subtle)] bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+        : 'border-white/8 bg-white/[0.03] text-[var(--text-secondary)] hover:bg-white/[0.05] hover:text-[var(--text-primary)]'
     }`}
   >
     <Icon className="h-3.5 w-3.5" />
@@ -443,7 +443,7 @@ export function StudyModePage({
     };
   });
 
-  const currentModule = orderedModules[selectedModuleIndex];
+  const currentModule = orderedModules[selectedModuleIndex] || orderedModules[0] || null;
   const roadmapModule = book.roadmap?.modules.find(item => item.id === currentModule?.roadmapModuleId) || null;
   const currentTheme = THEMES[settings.theme];
   const interactions = thread?.interactions || [];
@@ -616,6 +616,11 @@ export function StudyModePage({
   ];
   const selectedContextText = selectedText || moduleOverviewSnippet;
   const selectedTextPreview = selectedText ? `${selectedText.slice(0, 220)}${selectedText.length > 220 ? '...' : ''}` : '';
+  const completedModules = orderedModules.filter(module => module.status === 'completed').length;
+  const moduleProgress = readingProgressUtils.getModuleProgress(book.id, selectedModuleIndex)?.percentComplete || 0;
+  const fullBookProgress = readingProgressUtils.getFullBookProgress(book.id)?.percentComplete || 0;
+  const bookWordCount = (book.finalBook || orderedModules.map(module => module.content).join(' ')).split(/\s+/).filter(Boolean).length;
+  const estimatedReadMinutes = Math.max(6, Math.round(bookWordCount / 220));
 
   const handleAskDoubt = async (payload?: { question: string; selectedText?: string }) => {
     const effectiveQuestion = payload?.question || questionInput;
@@ -734,18 +739,18 @@ export function StudyModePage({
   };
 
   const renderStudyPanel = () => (
-    <div className="flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(12,16,15,0.96),rgba(8,10,10,0.98))] shadow-[0_24px_70px_rgba(0,0,0,0.28)]">
-      <div className="border-b border-[var(--border-subtle)] px-4 py-4">
+    <div className="flex h-full flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(16,18,19,0.98),rgba(9,11,12,0.98))] shadow-[0_30px_90px_rgba(0,0,0,0.38)]">
+      <div className="border-b border-white/8 px-5 py-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Companion</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Assistant</p>
             <h3 className="mt-1 text-base font-semibold text-[var(--text-primary)]">{currentModule.title}</h3>
             <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">
-              Ask, reframe, and drill this chapter without losing reading context.
+              Ask questions, reframe difficult sections, and build recall without leaving the chapter.
             </p>
           </div>
           {isMobile ? (
-            <button onClick={() => setStudyPanelOpen(false)} className="rounded-full border border-[var(--border-subtle)] p-2 text-[var(--text-secondary)]">
+            <button onClick={() => setStudyPanelOpen(false)} className="rounded-full border border-white/10 p-2 text-[var(--text-secondary)]">
               <X className="h-4 w-4" />
             </button>
           ) : null}
@@ -758,7 +763,7 @@ export function StudyModePage({
         </div>
 
         {selectedText ? (
-          <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/8 px-3 py-3">
+          <div className="mt-4 rounded-[22px] border border-emerald-500/20 bg-emerald-500/8 px-3 py-3">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300">Using selection</p>
@@ -772,7 +777,7 @@ export function StudyModePage({
         ) : null}
       </div>
 
-      <div className="custom-scrollbar flex-1 overflow-y-auto px-4 py-4">
+      <div className="custom-scrollbar flex-1 overflow-y-auto px-5 py-5">
         {activeTool === 'doubt' ? (
           <div className="space-y-4">
             <div className="rounded-[20px] border border-[var(--border-subtle)] bg-white/[0.02] p-4">
@@ -940,8 +945,8 @@ export function StudyModePage({
       </div>
 
       {activeTool === 'doubt' ? (
-        <div className="border-t border-[var(--border-subtle)] bg-[rgba(9,12,11,0.96)] px-4 py-4">
-          <div className="rounded-[22px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 p-3">
+        <div className="border-t border-white/8 bg-[rgba(10,12,13,0.98)] px-5 py-5">
+          <div className="rounded-[24px] border border-white/8 bg-black/20 p-3">
             <textarea
               value={questionInput}
               onChange={event => setQuestionInput(event.target.value)}
@@ -988,83 +993,113 @@ export function StudyModePage({
   );
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] flex flex-col">
-      <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] px-6 py-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="btn btn-secondary px-3 py-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Book
-          </button>
-          <div className="hidden md:block">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Study Mode</span>
-            <h1 className="text-sm font-semibold text-[var(--text-primary)] truncate max-w-sm">{book.title}</h1>
-          </div>
-        </div>
-      </header>
-      <div className="relative flex-1 p-4 md:p-6 space-y-5 w-full max-w-full overflow-x-hidden">
-      <div className={`grid gap-5 ${studyPanelOpen && !isMobile ? 'xl:grid-cols-[220px_minmax(0,1fr)_380px]' : 'xl:grid-cols-[220px_minmax(0,1fr)]'}`}>
-        <aside className="space-y-3 xl:sticky xl:top-24 xl:self-start">
-          <div className="rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] p-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Reader mode</p>
-            <div className="mt-3">
-              <SurfaceToggle value={readerSurface} onChange={setReaderSurface} />
+    <div className="min-h-screen bg-[#050505] text-[var(--text-primary)]">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1700px] flex-col px-3 pb-8 pt-3 md:px-5 md:pt-5">
+        <header className="sticky top-0 z-50 mb-5 overflow-hidden rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(12,14,15,0.92),rgba(9,11,12,0.9))] shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-2xl">
+          <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(254,205,140,0.5),transparent)]" />
+          <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 md:px-6">
+            <div className="flex min-w-0 items-center gap-3 md:gap-4">
+              <button onClick={onBack} className="btn btn-secondary px-3 py-2">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </button>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[var(--text-muted)]">Pustakam Study Workspace</p>
+                <h1 className="truncate text-sm font-semibold text-[var(--text-primary)] md:text-base">{book.title}</h1>
+              </div>
             </div>
-            <div className="mt-4 rounded-[18px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Now reading</p>
-              <h3 className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{currentModule.title}</h3>
-              <p className="mt-2 text-xs leading-6 text-[var(--text-secondary)]">
-                {roadmapModule?.description || 'Switch chapters to target doubts, explanations, and flashcards precisely.'}
-              </p>
-            </div>
-          </div>
 
-          <div className="rounded-[22px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3">
-            <div className="mb-3 flex items-center justify-between px-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Chapters</p>
-              <span className="rounded-full border border-[var(--border-subtle)] px-2 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
-                {selectedModuleIndex + 1}/{orderedModules.length}
-              </span>
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
+              {[
+                { label: 'Chapters', value: `${completedModules}/${orderedModules.length}` },
+                { label: 'Read', value: `${readerSurface === 'full_book' ? fullBookProgress : moduleProgress}%` },
+                { label: 'ETA', value: `${estimatedReadMinutes} min` },
+              ].map(item => (
+                <div key={item.label} className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">
+                  <span className="mr-2 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">{item.label}</span>
+                  <span className="text-xs font-semibold text-[var(--text-primary)]">{item.value}</span>
+                </div>
+              ))}
             </div>
-            <div className="custom-scrollbar space-y-1.5 xl:max-h-[70vh] xl:overflow-y-auto">
-              {orderedModules.map((module, index) => {
-                const progress = readingProgressUtils.getModuleProgress(book.id, index)?.percentComplete || 0;
-                const isActive = index === selectedModuleIndex && readerSurface === 'module';
-                return (
-                  <button
-                    key={module.id}
-                    onClick={() => {
-                      setSelectedModuleIndex(index);
-                      setReaderSurface('module');
-                      setSelectedText('');
-                    }}
-                    className={`group w-full rounded-[18px] border px-3 py-3 text-left transition ${
-                      isActive
-                        ? 'border-emerald-400/20 bg-emerald-400/8'
-                        : 'border-transparent bg-[var(--bg-base)] hover:border-[var(--border-default)]'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">
-                          Chapter {index + 1}
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">{module.title}</p>
-                        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
-                          <div className="h-full rounded-full bg-emerald-300/70 transition-all" style={{ width: `${progress}%` }} />
+          </div>
+        </header>
+
+        <div className={`grid gap-5 ${studyPanelOpen && !isMobile ? 'xl:grid-cols-[260px_minmax(0,1fr)_380px]' : 'xl:grid-cols-[260px_minmax(0,1fr)]'}`}>
+          <aside className="space-y-4 xl:sticky xl:top-[6.75rem] xl:self-start">
+            <div className="overflow-hidden rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(14,16,17,0.95),rgba(9,11,12,0.98))]">
+              <div className="border-b border-white/8 px-5 py-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Workspace</p>
+                <div className="mt-3">
+                  <SurfaceToggle value={readerSurface} onChange={setReaderSurface} />
+                </div>
+              </div>
+
+              <div className="space-y-4 px-5 py-5">
+                <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Now reading</p>
+                  <h2 className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{currentModule.title}</h2>
+                  <p className="mt-2 text-xs leading-6 text-[var(--text-secondary)]">
+                    {roadmapModule?.description || 'Switch chapters to keep questions, explanations, and flashcards tied to the right context.'}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-[20px] border border-white/8 bg-white/[0.02] p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Companion</p>
+                    <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{studyPanelOpen ? 'Open' : 'Closed'}</p>
+                  </div>
+                  <div className="rounded-[20px] border border-white/8 bg-white/[0.02] p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Progress</p>
+                    <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{readerSurface === 'full_book' ? fullBookProgress : moduleProgress}%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(14,16,17,0.95),rgba(9,11,12,0.98))]">
+              <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Chapter index</p>
+                <span className="rounded-full border border-white/8 px-2.5 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
+                  {selectedModuleIndex + 1}/{orderedModules.length}
+                </span>
+              </div>
+              <div className="custom-scrollbar space-y-1.5 px-3 py-3 xl:max-h-[calc(100vh-18rem)] xl:overflow-y-auto">
+                {orderedModules.map((module, index) => {
+                  const progress = readingProgressUtils.getModuleProgress(book.id, index)?.percentComplete || 0;
+                  const isActive = index === selectedModuleIndex && readerSurface === 'module';
+
+                  return (
+                    <button
+                      key={module.id}
+                      onClick={() => {
+                        setSelectedModuleIndex(index);
+                        setReaderSurface('module');
+                        setSelectedText('');
+                      }}
+                      className={`group w-full rounded-[22px] border px-4 py-3 text-left transition ${
+                        isActive
+                          ? 'border-[var(--brand)]/25 bg-[rgba(254,205,140,0.09)]'
+                          : 'border-transparent bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Chapter {index + 1}</p>
+                          <p className="mt-1 truncate text-sm font-semibold text-[var(--text-primary)]">{module.title}</p>
+                          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                            <div className="h-full rounded-full bg-[var(--brand)]/80 transition-all" style={{ width: `${progress}%` }} />
+                          </div>
                         </div>
-                      </div>
-                      {progress > 0 ? (
-                        <span className="rounded-full bg-white/5 px-2 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
+                        <span className="rounded-full border border-white/8 px-2 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
                           {progress}%
                         </span>
-                      ) : null}
-                    </div>
-                  </button>
-                );
-              })}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </aside>
+          </aside>
 
         <section className="space-y-4">
           {isMobile ? (
@@ -1080,7 +1115,7 @@ export function StudyModePage({
                     className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold ${
                       index === selectedModuleIndex
                         ? 'border-[var(--brand)]/30 bg-[var(--brand)]/10 text-[var(--text-primary)]'
-                        : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)]'
+                        : 'border-white/10 bg-white/[0.03] text-[var(--text-secondary)]'
                     }`}
                   >
                     {index + 1}. {module.title}
@@ -1090,13 +1125,75 @@ export function StudyModePage({
             </div>
           ) : null}
 
-          <div
-            className="reading-container overflow-hidden rounded-[26px] border border-[var(--border-subtle)] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
-            style={{ backgroundColor: currentTheme.bg, color: currentTheme.text, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-4 py-3" style={{ backgroundColor: currentTheme.bg }}>
+          <div className="overflow-hidden rounded-[32px] border border-white/8 bg-[linear-gradient(180deg,rgba(12,14,15,0.96),rgba(8,10,11,0.98))] shadow-[0_28px_100px_rgba(0,0,0,0.34)]">
+            <div className="border-b border-white/8 px-5 py-5 md:px-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="max-w-3xl">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-white/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">
+                      {readerSurface === 'full_book' ? 'Full book review' : `Chapter ${selectedModuleIndex + 1}`}
+                    </span>
+                    {roadmapModule?.estimatedTime ? (
+                      <span className="rounded-full border border-white/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">
+                        {roadmapModule.estimatedTime}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[var(--text-primary)] md:text-[2.5rem]">
+                    {readerSurface === 'full_book' ? book.title : currentModule.title}
+                  </h2>
+                  <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--text-secondary)] md:text-[15px]">
+                    {readerSurface === 'full_book'
+                      ? 'Use this surface for long-form revision and polish, while the assistant stays pinned to the currently selected chapter for precise help.'
+                      : roadmapModule?.description || 'This chapter is now your active study surface, so questions, re-explanations, and flashcards stay grounded in the right context.'}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => setStudyPanelOpen(true)} className="btn btn-secondary py-2">
+                    <Brain className="h-4 w-4" />
+                    Open companion
+                  </button>
+                  {readerSurface === 'full_book' ? (
+                    isEditing ? (
+                      <>
+                        <button onClick={onCancelEdit} className="btn btn-secondary py-2">
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </button>
+                        <button onClick={onSaveFullBook} className="btn btn-primary py-2">
+                          <Save className="h-4 w-4" />
+                          Save
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={onEditFullBook} className="btn btn-secondary py-2">
+                        <Edit className="h-4 w-4" />
+                        Edit full book
+                      </button>
+                    )
+                  ) : null}
+                </div>
+              </div>
+
+              {roadmapModule?.objectives?.length && readerSurface === 'module' ? (
+                <div className="mt-5 grid gap-3 md:grid-cols-2">
+                  {roadmapModule.objectives.slice(0, 4).map(objective => (
+                    <div key={objective} className="rounded-[22px] border border-white/8 bg-white/[0.03] px-4 py-3 text-sm leading-6 text-[var(--text-secondary)]">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--brand)]" />
+                        <span>{objective}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="border-b border-white/8 px-5 py-4 md:px-6">
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1 rounded-full p-1" style={{ backgroundColor: currentTheme.contentBg }}>
+                <div className="flex items-center gap-1 rounded-full border border-white/8 p-1" style={{ backgroundColor: currentTheme.contentBg }}>
                   {(['light', 'sepia', 'dark'] as const).map(mode => (
                     <button
                       key={mode}
@@ -1112,25 +1209,25 @@ export function StudyModePage({
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setSettings(previous => ({ ...previous, fontSize: Math.max(12, previous.fontSize - 1) }))} className="rounded-full p-2 hover:bg-black/5" style={{ color: currentTheme.secondary }}>
+                <div className="flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-2 py-1">
+                  <button onClick={() => setSettings(previous => ({ ...previous, fontSize: Math.max(12, previous.fontSize - 1) }))} className="rounded-full p-2 transition hover:bg-white/[0.05]" style={{ color: currentTheme.secondary }}>
                     <ZoomOut size={16} />
                   </button>
                   <span className="min-w-[2.5rem] text-center text-sm font-mono" style={{ color: currentTheme.secondary }}>
                     {settings.fontSize}px
                   </span>
-                  <button onClick={() => setSettings(previous => ({ ...previous, fontSize: Math.min(28, previous.fontSize + 1) }))} className="rounded-full p-2 hover:bg-black/5" style={{ color: currentTheme.secondary }}>
+                  <button onClick={() => setSettings(previous => ({ ...previous, fontSize: Math.min(28, previous.fontSize + 1) }))} className="rounded-full p-2 transition hover:bg-white/[0.05]" style={{ color: currentTheme.secondary }}>
                     <ZoomIn size={16} />
                   </button>
                 </div>
 
                 <div className="relative hidden items-center group md:flex">
-                  <button className="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium" style={{ backgroundColor: currentTheme.contentBg, color: currentTheme.text, borderColor: currentTheme.border }}>
+                  <button className="flex items-center gap-2 rounded-full border border-white/8 px-3 py-2 text-sm font-medium" style={{ backgroundColor: currentTheme.contentBg, color: currentTheme.text }}>
                     <span className="opacity-70">Font</span>
                     <span>{FONT_LABELS[settings.fontFamily]}</span>
                     <ChevronDown size={14} className="opacity-50" />
                   </button>
-                  <div className="absolute left-0 top-full z-30 mt-2 hidden w-44 overflow-hidden rounded-2xl border shadow-xl group-hover:block" style={{ backgroundColor: currentTheme.contentBg, borderColor: currentTheme.border }}>
+                  <div className="absolute left-0 top-full z-30 mt-2 hidden w-44 overflow-hidden rounded-2xl border border-white/10 shadow-xl group-hover:block" style={{ backgroundColor: currentTheme.contentBg }}>
                     {(['rubik', 'nunito', 'crimson', 'mono'] as const).map(font => (
                       <button
                         key={font}
@@ -1150,86 +1247,19 @@ export function StudyModePage({
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <SurfaceToggle value={readerSurface} onChange={setReaderSurface} />
-                {readerSurface === 'full_book' ? (
-                  isEditing ? (
-                    <>
-                      <button onClick={onCancelEdit} className="btn btn-secondary py-2">
-                        <X className="h-4 w-4" />
-                        Cancel
-                      </button>
-                      <button onClick={onSaveFullBook} className="btn btn-primary py-2">
-                        <Save className="h-4 w-4" />
-                        Save
-                      </button>
-                    </>
-                  ) : (
-                    <button onClick={onEditFullBook} className="btn btn-secondary py-2">
-                      <Edit className="h-4 w-4" />
-                      Edit full book
-                    </button>
-                  )
-                ) : null}
-              </div>
+              <SurfaceToggle value={readerSurface} onChange={setReaderSurface} />
             </div>
 
-            <div className="px-4 py-5 sm:px-7">
-              {readerSurface === 'module' ? (
-                <div className="mb-5 rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-[var(--border-subtle)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                          Chapter {selectedModuleIndex + 1}
-                        </span>
-                        {roadmapModule?.estimatedTime ? (
-                          <span className="rounded-full border border-[var(--border-subtle)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                            {roadmapModule.estimatedTime}
-                          </span>
-                        ) : null}
-                      </div>
-                      <h2 className="mt-3 text-[1.7rem] font-semibold leading-tight text-[var(--text-primary)]">{currentModule.title}</h2>
-                      <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--text-secondary)]">
-                        {roadmapModule?.description || 'This chapter is now the center of your study workflow, so doubts and flashcards stay context-aware.'}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <button onClick={() => setStudyPanelOpen(true)} className="btn btn-secondary py-2">
-                        <Brain className="h-4 w-4" />
-                        Open companion
-                      </button>
-                    </div>
-                  </div>
-
-                  {roadmapModule?.objectives?.length ? (
-                    <div className="mt-4 grid gap-2.5 md:grid-cols-2">
-                      {roadmapModule.objectives.slice(0, 4).map(objective => (
-                        <div key={objective} className="rounded-[18px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 px-3.5 py-3 text-sm leading-6 text-[var(--text-secondary)]">
-                          <div className="flex items-start gap-3">
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--brand)]" />
-                            <span>{objective}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ) : (
-                <div className="mb-5 rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-4 text-sm leading-7 text-[var(--text-secondary)]">
-                  The full-book surface stays available for long-form review and editing. Study tools still stay pinned to the currently selected chapter so answers remain precise.
-                </div>
-              )}
-
+            <div className="px-5 py-6 md:px-7">
               {readerSurface === 'full_book' && isEditing ? (
                 <textarea
-                  className="w-full rounded-[28px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 font-mono text-sm leading-relaxed text-[var(--text-primary)] outline-none"
+                  className="w-full rounded-[28px] border border-white/10 bg-black/20 p-5 font-mono text-sm leading-relaxed text-[var(--text-primary)] outline-none"
                   value={editedContent}
                   onChange={event => onContentChange(event.target.value)}
                   style={{ minHeight: '70vh', fontSize: `${settings.fontSize - 2}px` }}
                 />
               ) : (
-                <div ref={contentRef}>
+                <div ref={contentRef} className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-4 py-5 md:px-7 md:py-7">
                   <article
                     className={`prose prose-lg mx-auto max-w-none transition-all duration-300 ${settings.theme !== 'light' ? 'prose-invert' : ''}`}
                     style={{
@@ -1266,7 +1296,7 @@ export function StudyModePage({
           </div>
         </section>
 
-        {studyPanelOpen && !isMobile ? <section className="xl:sticky xl:top-24 xl:self-start xl:max-h-[calc(100vh-7rem)]">{renderStudyPanel()}</section> : null}
+        {studyPanelOpen && !isMobile ? <section className="xl:sticky xl:top-[6.75rem] xl:self-start xl:max-h-[calc(100vh-8rem)]">{renderStudyPanel()}</section> : null}
       </div>
 
       {!studyPanelOpen || isMobile ? (

@@ -41,6 +41,7 @@ import { getDefaultModel, getProviderConfig } from './services/providerRegistry'
 type AppView = 'list' | 'create' | 'detail';
 type Theme = 'light' | 'dark';
 const MAX_BOOK_TITLE_LENGTH = 72;
+const STUDY_MODE_PREFIX = '/study';
 const BookView = lazy(() => import('./components/BookView').then(module => ({ default: module.BookView })));
 const StudyModePage = lazy(() => import('./components/study/StudyModePage').then(module => ({ default: module.StudyModePage })));
 
@@ -65,6 +66,18 @@ function WorkspaceFallback() {
   );
 }
 
+function getStudyModeBookIdFromPath(pathname = window.location.pathname): string | null {
+  const normalizedPath = pathname.replace(/\/+$/, '') || '/';
+  if (!normalizedPath.startsWith(`${STUDY_MODE_PREFIX}/`)) return null;
+
+  const encodedBookId = normalizedPath.slice(STUDY_MODE_PREFIX.length + 1);
+  return encodedBookId ? decodeURIComponent(encodedBookId) : null;
+}
+
+function getStudyModePath(bookId: string): string {
+  return `${STUDY_MODE_PREFIX}/${encodeURIComponent(bookId)}`;
+}
+
 interface GenerationStatus {
   currentModule?: { id: string; title: string; attempt: number; progress: number; generatedText?: string; };
   totalProgress: number;
@@ -75,7 +88,7 @@ interface GenerationStatus {
 }
 
 function App() {
-  const [showLocalLanding, setShowLocalLanding] = useState(true);
+  const [showLocalLanding, setShowLocalLanding] = useState(() => !getStudyModeBookIdFromPath());
   const [books, setBooks] = useState<BookProject[]>([]);
   const [settings, setSettings] = useState<APISettings>(() => storageUtils.getSettings());
   const [currentBookId, setCurrentBookId] = useState<string | null>(null);
@@ -110,13 +123,33 @@ function App() {
   const [showCompliancePage, setShowCompliancePage] = useState(false);
   const [showDisclaimerPage, setShowDisclaimerPage] = useState(false);
   const [showBlogPage, setShowBlogPage] = useState(false);
-  const [studyModeBookId, setStudyModeBookId] = useState<string | null>(null);
+  const [studyModeBookId, setStudyModeBookId] = useState<string | null>(() => getStudyModeBookIdFromPath());
 
   // Quota / BYOK state
   const [quotaStatus, setQuotaStatus] = useState<QuotaStatus | null>(null);
 
   const showToast = useCallback((message: string, type: ToastType = 'info') => {
     setToast({ message, type });
+  }, []);
+
+  const handleOpenStudyMode = useCallback((bookId: string) => {
+    const nextPath = getStudyModePath(bookId);
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({ studyModeBookId: bookId }, '', nextPath);
+    }
+
+    setStudyModeBookId(bookId);
+    setCurrentBookId(bookId);
+    setView('detail');
+    setShowListInMain(false);
+  }, []);
+
+  const handleCloseStudyMode = useCallback(() => {
+    setStudyModeBookId(null);
+
+    if (window.location.pathname.startsWith(`${STUDY_MODE_PREFIX}/`)) {
+      window.history.replaceState({}, '', '/');
+    }
   }, []);
 
   const { isAuthenticated, isSupabaseEnabled, isLoading, user, profile, signOut, refreshProfile } = useAuth();
@@ -258,6 +291,12 @@ function App() {
   const hasLoadedUserBooksRef = React.useRef(false);
 
   useEffect(() => {
+    const syncStudyRoute = () => setStudyModeBookId(getStudyModeBookIdFromPath());
+    window.addEventListener('popstate', syncStudyRoute);
+    return () => window.removeEventListener('popstate', syncStudyRoute);
+  }, []);
+
+  useEffect(() => {
     if (!isLoading && hasLoadedUserBooksRef.current) {
       const timer = setTimeout(() => {
         void storageUtils.saveBooks(books, user?.id);
@@ -266,6 +305,28 @@ function App() {
       return () => clearTimeout(timer);
     }
   }, [books, user?.id, isLoading]);
+
+  useEffect(() => {
+    if (!studyModeBookId) return;
+
+    const studyBook = books.find(book => book.id === studyModeBookId);
+    if (studyBook?.status === 'completed') {
+      setCurrentBookId(prev => (prev === studyModeBookId ? prev : studyModeBookId));
+      setView('detail');
+      setShowListInMain(false);
+      return;
+    }
+
+    if (!isLoading && hasLoadedUserBooksRef.current) {
+      setStudyModeBookId(null);
+
+      if (window.location.pathname.startsWith(`${STUDY_MODE_PREFIX}/`)) {
+        window.history.replaceState({}, '', '/');
+      }
+
+      showToast('That study workspace is not available yet. Finish generating the book first.', 'warning');
+    }
+  }, [books, isLoading, showToast, studyModeBookId]);
 
   useEffect(() => { if (!currentBookId) setView('list'); }, [currentBookId]);
 
@@ -811,7 +872,7 @@ function App() {
                     settings={settings}
                     onModelChange={handleModelChange}
                     quotaStatus={quotaStatus}
-                    onOpenStudyMode={(bookId: string) => setStudyModeBookId(bookId)}
+                    onOpenStudyMode={handleOpenStudyMode}
                   />
                 </Suspense>
               </main>
@@ -894,29 +955,30 @@ function App() {
       {showDisclaimerPage && <DisclaimerPage isOpen={showDisclaimerPage} onClose={() => setShowDisclaimerPage(false)} />}
       {showBlogPage && <BlogPage onClose={() => setShowBlogPage(false)} />}
 
-      {/* Study Mode - Separate Full Page */}
       {studyModeBookId && (() => {
         const studyBook = books.find(b => b.id === studyModeBookId);
         if (!studyBook || studyBook.status !== 'completed') return null;
         return (
           <div className="fixed inset-0 z-[200]" style={{ background: '#050505' }}>
             <NebulaBackground theme={theme} />
-            <div className="relative z-10 h-full">
-              <Suspense fallback={<WorkspaceFallback />}>
-                <StudyModePage
-                  book={studyBook}
-                  theme={theme}
-                  isEditing={false}
-                  editedContent=""
-                  onEditFullBook={() => {}}
-                  onSaveFullBook={() => {}}
-                  onCancelEdit={() => {}}
-                  onContentChange={() => {}}
-                  showToast={showToast}
-                  isMobile={isMobile}
-                  onBack={() => setStudyModeBookId(null)}
-                />
-              </Suspense>
+            <div className="relative z-10 flex h-full flex-col">
+              <main id="main-scroll-area" className="main-content">
+                <Suspense fallback={<WorkspaceFallback />}>
+                  <StudyModePage
+                    book={studyBook}
+                    theme={theme}
+                    isEditing={false}
+                    editedContent=""
+                    onEditFullBook={() => {}}
+                    onSaveFullBook={() => {}}
+                    onCancelEdit={() => {}}
+                    onContentChange={() => {}}
+                    showToast={showToast}
+                    isMobile={isMobile}
+                    onBack={handleCloseStudyMode}
+                  />
+                </Suspense>
+              </main>
             </div>
           </div>
         );

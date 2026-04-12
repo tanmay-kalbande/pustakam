@@ -52,6 +52,7 @@ import NotFoundPage from './components/NotFoundPage';
 import OnboardingForm from './components/OnboardingForm';
 
 const pathname = window.location.pathname;
+const isStudyRoute = pathname === '/study' || pathname.startsWith('/study/');
 
 if (pathname === '/join') {
   createRoot(document.getElementById('root')!).render(
@@ -59,7 +60,7 @@ if (pathname === '/join') {
       <OnboardingForm />
     </StrictMode>
   );
-} else if (pathname !== '/' && pathname !== '/index.html') {
+} else if (pathname !== '/' && pathname !== '/index.html' && !isStudyRoute) {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <NotFoundPage />
