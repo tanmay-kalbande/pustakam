@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, BookOpen, Sparkles, Download, Check, Cpu } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, BookOpen, Sparkles, Download, Check, Cpu, MonitorSmartphone } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface WelcomeModalProps {
@@ -9,6 +9,15 @@ interface WelcomeModalProps {
 
 export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
     const { profile } = useAuth();
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile(); // Check on mount
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     if (!isOpen) return null;
 
     const firstName = profile?.full_name?.split(' ')[0] || 'Creator';
@@ -57,6 +66,19 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                             </div>
                         ))}
                     </div>
+
+                    {/* Mobile Desktop Recommendation */}
+                    {isMobile && (
+                        <div className="bg-[var(--brand)]/10 border border-[var(--brand)]/30 text-[var(--brand)] rounded-lg p-3.5 mb-6 text-left flex items-start gap-3">
+                            <MonitorSmartphone size={18} className="mt-0.5 flex-shrink-0" />
+                            <div className="space-y-1">
+                                <p className="text-[11px] font-bold uppercase tracking-wider">Optimal Experience</p>
+                                <p className="text-[10px] md:text-[11px] opacity-90 leading-relaxed">
+                                    Pustakam AI features an advanced split-pane workspace. For the best reading and building experience, we recommend using a desktop browser.
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* How it works - compact */}
                     <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg p-3.5 mb-6 text-left">

@@ -12,13 +12,27 @@ import { ProviderConfig, ProviderID } from '../types/providers';
 // ── Shared body builders ────────────────────────────────────────────────────
 
 /** Standard OpenAI-compatible request body (used by most providers) */
-const openAIBody = (model: string, prompt: string, maxTokens = 8192) => ({
-  model,
-  messages: [{ role: 'user', content: prompt }],
-  temperature: 0.7,
-  max_tokens: maxTokens,
-  stream: true,
-});
+const openAIBody = (model: string, prompt: string, maxTokens = 8192) => {
+  const isReasoningModel = model.includes('gemma-4') || model.includes('gemma-3') || model.includes('deepseek-reasoner');
+  const messages: any[] = [];
+  
+  if (isReasoningModel) {
+    messages.push({
+      role: 'system',
+      content: 'CRITICAL INSTRUCTION: You MUST NOT output any internal thinking, reasoning, chain of thought, or <think> tags. Provide the direct final answer only without any preceding thought process.'
+    });
+  }
+  
+  messages.push({ role: 'user', content: prompt });
+
+  return {
+    model,
+    messages,
+    temperature: 0.7,
+    max_tokens: maxTokens,
+    stream: true,
+  };
+};
 
 /** Anthropic uses a different body format */
 const anthropicBody = (model: string, prompt: string, maxTokens = 8192) => ({
@@ -29,13 +43,22 @@ const anthropicBody = (model: string, prompt: string, maxTokens = 8192) => ({
 });
 
 /** Google Gemini (AI Studio) body format */
-const googleBody = (model: string, prompt: string, maxTokens = 8192) => ({
-  contents: [{ parts: [{ text: prompt }] }],
-  generationConfig: {
-    maxOutputTokens: maxTokens,
-    temperature: 0.7,
-  },
-});
+const googleBody = (model: string, prompt: string, maxTokens = 8192) => {
+  const isReasoningModel = model.includes('gemma-4') || model.includes('gemma-3');
+  
+  return {
+    ...(isReasoningModel ? { 
+      systemInstruction: { 
+        parts: [{ text: "CRITICAL INSTRUCTION: You MUST NOT output any internal thinking, reasoning, chain of thought, or <think> tags. Provide the direct final answer only without any preceding thought process." }] 
+      } 
+    } : {}),
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      maxOutputTokens: maxTokens,
+      temperature: 0.7,
+    },
+  };
+};
 
 // ── Shared header builders ──────────────────────────────────────────────────
 

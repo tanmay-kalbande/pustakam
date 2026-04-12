@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Settings, User, LogOut, ChevronDown, ChevronUp, BookOpen, Shield, Zap } from 'lucide-react';
 import { APISettings, ModelProvider } from '../types';
 import { BookProject } from '../types/book';
@@ -6,6 +6,7 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 import { motion } from 'framer-motion';
 import { AI_SUITE_NAME, PROVIDERS } from '../constants/ai';
 import { getDefaultModel, getModelsForProvider } from '../services/providerRegistry';
+import { byokStorage } from '../utils/byokStorage';
 
 interface TopHeaderProps {
     settings: APISettings;
@@ -151,7 +152,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                                                     scrollbarColor: 'var(--brand) transparent'
                                                 }}
                                             >
-                                                {PROVIDERS.map((provider) => {
+                                                {PROVIDERS.filter(p => p.isProxy || byokStorage.hasKey(p.id)).map((provider) => {
                                                     const isActive = settings.selectedProvider === provider.id;
                                                     const needsWhiteFilter = ['anthropic', 'groq', 'openai', 'openrouter', 'xai'].includes(provider.id);
                                                     
