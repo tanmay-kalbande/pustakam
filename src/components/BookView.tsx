@@ -12,9 +12,10 @@ import {
   ZoomIn, ZoomOut, BookOpen, BookmarkCheck, Copy, AlertTriangle,
   CheckCircle2, Pause, Zap, Sun, Palette, Bookmark, ChevronDown,
   Search, Code, Music, Heart, Cpu, TrendingUp, Eye, Coins, Utensils,
-  MessageCircle, Users, GraduationCap, Atom, Target, Briefcase, Crown,
+  MessageCircle, Users, GraduationCap, Atom, Target, Briefcase, Crown, Key,
 } from 'lucide-react';
 import { APISettings, ModelProvider } from '../types';
+import type { QuotaStatus } from '../types/providers';
 import { BookProject, BookSession, ReadingBookmark } from '../types/book';
 import { bookService } from '../services/bookService';
 import { BookAnalytics } from './BookAnalytics';
@@ -87,6 +88,7 @@ interface BookViewProps {
   onReadingModeChange?: (isReading: boolean) => void;
   settings: APISettings;
   onModelChange: (model: string, provider: ModelProvider) => void;
+  quotaStatus?: QuotaStatus | null;
 }
 
 interface ReadingModeProps {
@@ -675,6 +677,7 @@ const HomeView = ({
   onOpenSettings: () => void;
   settings: APISettings;
   onModelChange: (model: string, provider: ModelProvider) => void;
+  quotaStatus?: QuotaStatus | null;
 }) => {
   const canGenerate = !!(formData.goal.trim() && !localIsGenerating);
 
@@ -780,6 +783,42 @@ const HomeView = ({
             </button>
           )}
         </div>
+
+        {/* Quota indicator */}
+        {quotaStatus && (
+          <div className="flex justify-center mt-4">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-medium transition-all ${
+              quotaStatus.remaining > 0
+                ? 'border-[var(--brand)]/20 bg-[var(--brand)]/5 text-[var(--brand)]'
+                : quotaStatus.hasBYOK
+                  ? 'border-green-500/20 bg-green-500/5 text-green-500'
+                  : 'border-amber-500/30 bg-amber-500/5 text-amber-500'
+            }`}>
+              {quotaStatus.remaining > 0 ? (
+                <>
+                  <Zap size={12} />
+                  <span>{quotaStatus.remaining} free {quotaStatus.remaining === 1 ? 'book' : 'books'} remaining</span>
+                </>
+              ) : quotaStatus.hasBYOK ? (
+                <>
+                  <Key size={12} />
+                  <span>Using your API key</span>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle size={12} />
+                  <span>Free quota used</span>
+                  <button
+                    onClick={onOpenSettings}
+                    className="underline hover:no-underline font-bold ml-1"
+                  >
+                    Add API key →
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Advanced options */}
         {showAdvanced && (
@@ -1012,7 +1051,7 @@ export function BookView({
   onUpdateBookContent, showListInMain, setShowListInMain, isMobile = false,
   generationStatus, generationStats, onPauseGeneration, onResumeGeneration,
   isGenerating, onRetryDecision, availableModels, theme, onOpenSettings,
-  showAlertDialog, showToast, onReadingModeChange, settings, onModelChange
+  showAlertDialog, showToast, onReadingModeChange, settings, onModelChange, quotaStatus
 }: BookViewProps) {
   const [detailTab, setDetailTab] = useState<'overview' | 'analytics' | 'read'>('overview');
   const [localIsGenerating, setLocalIsGenerating] = useState(false);
@@ -1203,6 +1242,7 @@ export function BookView({
         onOpenSettings={onOpenSettings}
         settings={settings}
         onModelChange={onModelChange}
+        quotaStatus={quotaStatus}
       />
     );
   }

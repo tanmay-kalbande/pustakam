@@ -1,29 +1,22 @@
 // src/types.ts
-export type ModelProvider = 'zhipu' | 'mistral';
+// Re-export the unified ProviderID from the providers module
+export type { ProviderID } from './types/providers';
+import type { ProviderID } from './types/providers';
 
-export type ModelID =
-  // Zhipu GLM  -  orchestrated by server
-  | 'glm-5'
-  | 'glm-5-turbo'
-  | 'glm-4.7-flashx'
-  // Mistral  -  orchestrated by server
-  | 'mistral-small-latest'
-  | 'mistral-medium-latest'
-  | 'mistral-large-latest'
-  | 'labs-mistral-small-creative';
+// ModelProvider is now an alias for ProviderID (backward compat)
+export type ModelProvider = ProviderID;
+
+// ModelID is now a plain string — models are defined in the provider registry
+export type ModelID = string;
 
 export interface APISettings {
-  googleApiKey: string;
-  mistralApiKey: string;
-  groqApiKey: string;
-  xaiApiKey: string;
-  openRouterApiKey: string;
-  cohereApiKey: string;
-  /** Which provider the user chose ('zhipu' or 'mistral'). Model is auto-selected by the server. */
+  /** Which provider the user selected */
   selectedProvider: ModelProvider;
-  /** Kept for type compatibility  -  server ignores this and picks via orchestration map. */
-  selectedModel: ModelID;
+  /** Which model the user selected (from the provider's model list) */
+  selectedModel: string;
+  /** Default generation mode */
   defaultGenerationMode: 'stellar' | 'blackhole';
+  /** Default language */
   defaultLanguage: 'en' | 'hi' | 'mr';
 }
 

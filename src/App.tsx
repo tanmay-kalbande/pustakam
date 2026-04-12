@@ -8,11 +8,13 @@ import { InstallPrompt } from './components/InstallPrompt';
 import { SettingsModal } from './components/SettingsModal';
 import { useGenerationStats } from './components/GenerationProgressPanel';
 import { APISettings, ModelProvider } from './types';
+import type { QuotaStatus } from './types/providers';
 import { usePWA } from './hooks/usePWA';
 import { WifiOff } from 'lucide-react';
 import { storageUtils } from './utils/storage';
 import { bookService } from './services/bookService';
 import { planService } from './services/planService';
+import { quotaService } from './services/quotaService';
 import { BookView } from './components/BookView';
 import { BookProject, BookSession } from './types/book';
 import { generateId } from './utils/helpers';
@@ -33,6 +35,7 @@ import { DisclaimerPage } from './components/DisclaimerPage';
 import BlogPage from './components/BlogPage';
 import { Toast, ToastType } from './components/Toast';
 import { APP_AI_BRANDLINE, PROVIDERS } from './constants/ai';
+import { getDefaultModel, getProviderConfig } from './services/providerRegistry';
 
 type AppView = 'list' | 'create' | 'detail';
 type Theme = 'light' | 'dark';
@@ -97,6 +100,9 @@ function App() {
   const [showDisclaimerPage, setShowDisclaimerPage] = useState(false);
   const [showBlogPage, setShowBlogPage] = useState(false);
 
+  // Quota / BYOK state
+  const [quotaStatus, setQuotaStatus] = useState<QuotaStatus | null>(null);
+
   const showToast = useCallback((message: string, type: ToastType = 'info') => {
     setToast({ message, type });
   }, []);
@@ -154,7 +160,7 @@ function App() {
       .filter(p => p.id !== settings.selectedProvider)
       .map(p => ({
         provider: p.id,
-        model: p.id === 'zhipu' ? 'glm-5' : 'mistral-medium-latest',
+        model: getDefaultModel(p.id),
         name: p.name,
       })),
     [settings.selectedProvider]
@@ -199,6 +205,23 @@ function App() {
       }));
     });
   }, [settings]);
+
+  // Fetch quota status when auth resolves or settings change
+  const refreshQuota = useCallback(async () => {
+    try {
+      const status = await quotaService.getQuotaStatus(user?.id);
+      setQuotaStatus(status);
+      bookService.setQuotaMode(status.mode);
+    } catch (err) {
+      console.warn('[App] Failed to fetch quota:', err);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      refreshQuota();
+    }
+  }, [isLoading, user?.id, refreshQuota]);
 
   const hasLoadedUserBooksRef = React.useRef(false);
 
@@ -320,7 +343,7 @@ function App() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
-  const hasApiKey = import.meta.env.VITE_USE_PROXY === 'true';
+  const hasApiKey = import.meta.env.VITE_USE_PROXY === 'true' || (quotaStatus?.hasBYOK ?? false);
 
   const shouldShowLanding =
     !isLoading &&
@@ -411,6 +434,19 @@ function App() {
     }
     if (!session?.goal?.trim()) {
       showAlertDialog({ type: 'error', title: 'Invalid Session', message: 'Book session data is incomplete. Try creating a new book.', confirmText: 'Dismiss' });
+      return;
+    }
+
+    // Check quota before generation
+    if (quotaStatus && !quotaStatus.canGenerate) {
+      showAlertDialog({
+        type: 'warning',
+        title: 'Generation Limit Reached',
+        message: 'Your free book quota is exhausted. Add your own API key in Settings to continue generating books.',
+        confirmText: 'Open Settings',
+        cancelText: 'Cancel',
+        onConfirm: () => setSettingsOpen(true),
+      });
       return;
     }
 
@@ -531,13 +567,15 @@ function App() {
     storageUtils.saveSettings(newSettings);
     setSettingsOpen(false);
     showToast('Settings saved.', 'success');
+    // Refresh quota since BYOK keys may have changed
+    refreshQuota();
   };
 
   const handleModelChange = (model: string, provider: ModelProvider) => {
     const newSettings = { ...settings, selectedModel: model, selectedProvider: provider };
     setSettings(newSettings);
     storageUtils.saveSettings(newSettings);
-    const providerName = provider === 'zhipu' ? 'Z.ai' : (provider || 'MODEL').toUpperCase();
+    const providerName = getProviderConfig(provider).name;
     showToast(`Switched to ${providerName}`, 'info');
   };
 
@@ -577,7 +615,7 @@ function App() {
     setSettings(newSettings);
     storageUtils.saveSettings(newSettings);
     setShowModelSwitch(false);
-    const providerName = provider === 'zhipu' ? 'Z.ai' : (provider || 'MODEL').toUpperCase();
+    const providerName = getProviderConfig(provider).name;
     showToast(`Switched to ${providerName}. Click Resume to continue.`, 'success');
     if (currentBook) {
       setGenerationStatus(prev => ({ ...prev, status: 'paused', logMessage: '⚙️ Model switched' }));
@@ -714,6 +752,7 @@ function App() {
                   onReadingModeChange={setIsReadingMode}
                   settings={settings}
                   onModelChange={handleModelChange}
+                  quotaStatus={quotaStatus}
                 />
               </main>
 
@@ -727,6 +766,7 @@ function App() {
                 onOpenAPIDocs={() => setShowAPIDocsPage(true)}
                 onOpenUsageGuide={() => setShowUsageGuidePage(true)}
                 onOpenCompliance={() => setShowCompliancePage(true)}
+                quotaStatus={quotaStatus}
                 showAlertDialog={showAlertDialog}
               />
 

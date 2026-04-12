@@ -2,20 +2,26 @@
 // FILE: src/services/bookService.ts
 // NOTES:
 //   1. validateSettings()  -  auto-correct provider; never error-out in proxy mode
-//   2. generateWithAI()  -  routes through Render proxy (pustakam-proxy.onrender.com)
-//      Timeouts are generous to survive Render free-tier cold starts (~50s wake)
-//   3. getApiKeyForProvider()  -  zhipu is proxy-only, never needs a local key
+//   2. generateWithAI()  -  routes through THREE paths:
+//      a) PROXY mode (free tier) → Render proxy with platform API keys
+//      b) BYOK mode → direct API call with user's own key via providerService
+//      c) BLOCKED → user has no quota and no BYOK key
+//   3. getApiKeyForProvider()  -  reads from byokStorage for BYOK mode
 //   4. enhanceBookInput()  -  wraps errors so isEnhancing always resets
 // ============================================================================
 
 import { BookProject, BookRoadmap, BookModule, RoadmapModule, BookSession } from '../types/book';
 import { APISettings, ModelProvider } from '../types';
+import type { ProviderID, QuotaStatus } from '../types/providers';
 import { generateId } from '../utils/helpers';
 import { planService } from './planService';
 import { streetPromptService } from './streetPromptService';
 import { desiPromptService } from './desiPromptService';
 import { AI_SUITE_NAME, DEFAULT_ZHIPU_MODEL, ZHIPU_PROVIDER } from '../constants/ai';
 import { generateViaProxy, TaskType as ProxyTaskType } from './proxyService';
+import { generateText } from './providerService';
+import { byokStorage } from '../utils/byokStorage';
+import { getProviderConfig } from './providerRegistry';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -70,17 +76,14 @@ export interface EnhancedBookData {
 
 class BookGenerationService {
   private settings: APISettings = {
-    googleApiKey: '',
-    mistralApiKey: '',
-    groqApiKey: '',
-    xaiApiKey: '',
-    openRouterApiKey: '',
-    cohereApiKey: '',
     selectedProvider: ZHIPU_PROVIDER,
     selectedModel: DEFAULT_ZHIPU_MODEL,
     defaultGenerationMode: 'stellar',
     defaultLanguage: 'en',
   };
+
+  // Quota-driven routing mode: 'proxy' (free tier), 'byok' (user key), 'blocked'
+  private quotaMode: QuotaStatus['mode'] = 'proxy';
 
   private onProgressUpdate?: (bookId: string, updates: Partial<BookProject>) => void;
   private onGenerationStatusUpdate?: (bookId: string, status: Partial<GenerationStatus>) => void;
@@ -102,6 +105,16 @@ class BookGenerationService {
 
   updateSettings(settings: APISettings) {
     this.settings = settings;
+  }
+
+  /** Set the quota-driven routing mode. Called by App.tsx when quota status changes. */
+  setQuotaMode(mode: QuotaStatus['mode']) {
+    dbg('setQuotaMode:', mode);
+    this.quotaMode = mode;
+  }
+
+  getQuotaMode(): QuotaStatus['mode'] {
+    return this.quotaMode;
   }
 
   setProgressCallback(callback: (bookId: string, updates: Partial<BookProject>) => void) {
@@ -346,44 +359,60 @@ User Input: "${userInput}"`;
 
   // ============================================================================
   // SETTINGS VALIDATION
-  // - Proxy mode: all providers route through zhipu proxy
-  // - Direct mode: zhipu is proxy-only; others require API key
+  // - Proxy mode (free tier): zhipu/mistral route through platform proxy
+  // - BYOK mode: user's own key, any provider
+  // - Blocked: no quota and no key
   // ============================================================================
   validateSettings(): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
     const useProxy = (import.meta as any).env.VITE_USE_PROXY === 'true';
 
     dbg('validateSettings', {
+      quotaMode: this.quotaMode,
       useProxy,
       provider: this.settings.selectedProvider,
       model: this.settings.selectedModel,
-      VITE_USE_PROXY: (import.meta as any).env.VITE_USE_PROXY,
     });
 
     if (!this.settings.selectedProvider) errors.push('No AI provider selected');
     if (!this.settings.selectedModel) errors.push('No model selected');
 
-    if (useProxy) {
-      // Proxy mode: zhipu and mistral are supported; others auto-correct to the default proxy provider
-      const proxyProviders: ModelProvider[] = ['zhipu', 'mistral'];
+    if (this.quotaMode === 'blocked') {
+      errors.push(
+        'Free book quota exhausted. Add your own API key in Settings to continue generating.'
+      );
+      return { isValid: false, errors };
+    }
+
+    if (this.quotaMode === 'proxy') {
+      // Proxy mode: zhipu and mistral are supported; others auto-correct
+      const proxyProviders: ProviderID[] = ['zhipu', 'mistral'];
       if (!proxyProviders.includes(this.settings.selectedProvider)) {
         dbg('Auto-correcting provider to zhipu for proxy mode');
         this.settings.selectedProvider = ZHIPU_PROVIDER;
         this.settings.selectedModel = DEFAULT_ZHIPU_MODEL;
       }
       // No API key validation needed in proxy mode
-    } else {
-      // Direct mode:
-      // - zhipu is proxy-only → show error
-      // - others: require API key
-      if (this.settings.selectedProvider === ZHIPU_PROVIDER) {
-        errors.push(
-          'Zhipu GLM models require the proxy (VITE_USE_PROXY=true). ' +
-          'Set VITE_USE_PROXY=true in your Vercel environment variables and redeploy.'
-        );
+    } else if (this.quotaMode === 'byok') {
+      // BYOK mode: user must have a key for the selected provider
+      const providerConfig = getProviderConfig(this.settings.selectedProvider);
+      if (!providerConfig.supportsBYOK) {
+        // Selected provider doesn't support BYOK — find one that does
+        const configured = byokStorage.getConfiguredProviders();
+        if (configured.length > 0) {
+          const firstConfigured = configured[0];
+          const config = getProviderConfig(firstConfigured);
+          dbg(`Auto-switching to BYOK provider: ${firstConfigured}`);
+          this.settings.selectedProvider = firstConfigured;
+          this.settings.selectedModel = config.defaultModel;
+        } else {
+          errors.push('No API key configured. Add a key in Settings.');
+        }
       } else {
         const apiKey = this.getApiKeyForProvider(this.settings.selectedProvider);
-        if (!apiKey) errors.push(`No API key configured for ${this.settings.selectedProvider}`);
+        if (!apiKey) {
+          errors.push(`No API key configured for ${providerConfig.name}. Add it in Settings.`);
+        }
       }
     }
 
@@ -395,22 +424,13 @@ User Input: "${userInput}"`;
   }
 
   private getApiKeyForProvider(provider: string): string | null {
-    switch (provider) {
-      case 'google':      return this.settings.googleApiKey || null;
-      case 'mistral':     return this.settings.mistralApiKey || null;
-      case 'groq':        return this.settings.groqApiKey || null;
-      case 'xai':         return this.settings.xaiApiKey || null;
-      case 'openrouter':  return this.settings.openRouterApiKey || null;
-      case 'cohere':      return this.settings.cohereApiKey || null;
-      // zhipu is proxy-only  -  no local key
-      case 'zhipu':       return null;
-      default:            return null;
-    }
+    // All BYOK keys are stored in byokStorage now
+    return byokStorage.getKey(provider as ProviderID);
   }
 
   private getApiKey(): string {
     const key = this.getApiKeyForProvider(this.settings.selectedProvider);
-    if (!key) throw new Error(`${this.settings.selectedProvider} API key not configured`);
+    if (!key) throw new Error(`${this.settings.selectedProvider} API key not configured. Add it in Settings.`);
     return key;
   }
 
@@ -479,6 +499,25 @@ User Input: "${userInput}"`;
     return undefined;
   }
 
+  /**
+   * Timeout for BYOK (user's own API key) requests.
+   * No Render cold-start penalty — tighter timeouts than proxy mode.
+   */
+  private getBYOKTimeoutMs(taskType?: string): number {
+    switch (taskType) {
+      case 'enhance':
+      case 'glossary':
+        return 90_000;   // 90s
+      case 'roadmap':
+        return 120_000;  // 2 min
+      case 'assemble':
+        return 240_000;  // 4 min
+      case 'module':
+      default:
+        return 300_000;  // 5 min
+    }
+  }
+
   setRetryDecision(bookId: string, decision: 'retry' | 'switch' | 'skip') {
     this.userRetryDecisions.set(bookId, decision);
   }
@@ -534,15 +573,61 @@ User Input: "${userInput}"`;
 
     const useProxy = (import.meta as any).env.VITE_USE_PROXY === 'true';
 
-    dbg('generateWithAI', { taskType, useProxy, bookId, provider: this.settings.selectedProvider });
+    dbg('generateWithAI', {
+      taskType, useProxy, bookId,
+      provider: this.settings.selectedProvider,
+      quotaMode: this.quotaMode,
+    });
 
     const requestId = bookId || generateId();
     const abortController = new AbortController();
     this.activeRequests.set(requestId, abortController);
 
-    // ── Proxy path ───────────────────────────────────────────────────────────
-    if (useProxy) {
-      dbg('→ taking proxy path');
+    // ── BYOK path — user's own API key, direct to provider ──────────────
+    if (this.quotaMode === 'byok') {
+      dbg('→ taking BYOK path:', this.settings.selectedProvider);
+      const apiKey = this.getApiKeyForProvider(this.settings.selectedProvider);
+      if (!apiKey) {
+        throw new Error(`No API key configured for ${this.settings.selectedProvider}. Add it in Settings.`);
+      }
+
+      const timeoutMs = this.getBYOKTimeoutMs(taskType);
+      const timeoutId = setTimeout(() => {
+        abortController.abort();
+        err(`BYOK request timed out after ${Math.round(timeoutMs / 1000)}s`);
+      }, timeoutMs);
+
+      try {
+        const result = await generateText(
+          this.settings.selectedProvider,
+          this.settings.selectedModel,
+          apiKey,
+          prompt,
+          {
+            signal: abortController.signal,
+            onChunk,
+            taskType,
+            timeoutMs,
+          }
+        );
+
+        dbg('BYOK generateText returned', result.length, 'chars');
+        return result;
+      } catch (byokError) {
+        const msg = byokError instanceof Error ? byokError.message : String(byokError);
+        err('BYOK generateText ERROR:', msg);
+        throw byokError;
+      } finally {
+        clearTimeout(timeoutId);
+        if (this.activeRequests.get(requestId) === abortController) {
+          this.activeRequests.delete(requestId);
+        }
+      }
+    }
+
+    // ── Proxy path — platform API keys (free tier) ──────────────────────
+    if (useProxy && this.quotaMode === 'proxy') {
+      dbg('→ taking proxy path (free tier)');
       let proxyTimeoutId: ReturnType<typeof setTimeout> | null = null;
       const resolvedTask = (taskType as ProxyTaskType) || 'module';
       const timeoutMs = this.getProxyTimeoutMs(resolvedTask);
@@ -559,6 +644,7 @@ User Input: "${userInput}"`;
       });
 
       try {
+        // Proxy only supports zhipu and mistral
         const provider = this.settings.selectedProvider;
         dbg('Calling generateViaProxy with task:', resolvedTask, 'model:', proxyModel || '[server default]', 'provider:', provider);
 
@@ -593,7 +679,7 @@ User Input: "${userInput}"`;
       }
     }
 
-    // ── Direct provider path (non-proxy mode) ──
+    // ── Direct provider path (fallback for non-proxy, non-BYOK setups) ──
     dbg('→ taking direct provider path:', this.settings.selectedProvider);
     const timeoutId = setTimeout(() => {
       abortController.abort();

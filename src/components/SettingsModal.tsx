@@ -1,12 +1,16 @@
 // src/components/SettingsModal.tsx
 import React from 'react';
-import { X, Database, Download, Upload, Trash2, Settings, Sparkles, Globe, Cpu, BookOpen, ChevronRight, Crown, Sun, Moon, Info, Shield } from 'lucide-react';
+import { X, Database, Download, Upload, Trash2, Settings, Sparkles, Globe, Cpu, BookOpen, ChevronRight, Crown, Sun, Moon, Info, Shield, Key, Eye, EyeOff, CheckCircle, XCircle, Loader2, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { APISettings } from '../types';
+import type { ProviderID, QuotaStatus } from '../types/providers';
 import { storageUtils } from '../utils/storage';
+import { byokStorage } from '../utils/byokStorage';
 import { DisclaimerPage } from './DisclaimerPage';
 import NebulaBackground from './NebulaBackground';
-import { AI_SUITE_NAME, APP_AI_BRANDLINE, PROVIDERS } from '../constants/ai';
+import { AI_SUITE_NAME, APP_AI_BRANDLINE, PROVIDERS, BYOK_PROVIDERS, PROXY_PROVIDERS } from '../constants/ai';
+import { getProviderConfig, getModelsForProvider, getDefaultModel } from '../services/providerRegistry';
+import { validateApiKey } from '../services/providerService';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -18,6 +22,7 @@ interface SettingsModalProps {
   onOpenAPIDocs: () => void;
   onOpenUsageGuide: () => void;
   onOpenCompliance: () => void;
+  quotaStatus?: QuotaStatus | null;
   showAlertDialog: (props: {
     type: 'info' | 'warning' | 'error' | 'success' | 'confirm';
     title: string;
@@ -28,8 +33,7 @@ interface SettingsModalProps {
   }) => void;
 }
 
-// Only three real tabs  -  'keys' was broken (immediately redirected away) so removed
-type ActiveTab = 'personality' | 'data' | 'about';
+type ActiveTab = 'personality' | 'apikeys' | 'data' | 'about';
 
 interface ImportPreview {
   books: any[];
@@ -50,6 +54,7 @@ export function SettingsModal({
   onOpenAPIDocs,
   onOpenUsageGuide,
   onOpenCompliance,
+  quotaStatus,
   showAlertDialog,
 }: SettingsModalProps) {
   const [localSettings, setLocalSettings] = React.useState<APISettings>(settings);
@@ -61,17 +66,109 @@ export function SettingsModal({
   const [isSaving, setIsSaving] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // BYOK state
+  const [keyInputs, setKeyInputs] = React.useState<Record<string, string>>({});
+  const [visibleKeys, setVisibleKeys] = React.useState<Record<string, boolean>>({});
+  const [validating, setValidating] = React.useState<Record<string, boolean>>({});
+  const [validationStatus, setValidationStatus] = React.useState<Record<string, 'valid' | 'invalid' | null>>({});
+
   React.useEffect(() => {
     setLocalSettings(settings);
   }, [settings, isOpen]);
 
+  // Initialize key inputs from byokStorage when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      const storedKeys = byokStorage.getKeys();
+      setKeyInputs(storedKeys);
+      setVisibleKeys({});
+      setValidationStatus({});
+      setValidating({});
+    }
+  }, [isOpen]);
+
   const handleSave = () => {
     setIsSaving(true);
+
+    // Save BYOK keys to localStorage
+    for (const [provider, key] of Object.entries(keyInputs)) {
+      if (key && key.trim()) {
+        byokStorage.setKey(provider as ProviderID, key.trim());
+      } else {
+        byokStorage.removeKey(provider as ProviderID);
+      }
+    }
+
     onSaveSettings(localSettings);
     setTimeout(() => {
       setIsSaving(false);
       onClose();
     }, 300);
+  };
+
+  const handleValidateKey = async (providerId: ProviderID) => {
+    const key = keyInputs[providerId];
+    if (!key?.trim()) return;
+
+    setValidating(prev => ({ ...prev, [providerId]: true }));
+    setValidationStatus(prev => ({ ...prev, [providerId]: null }));
+
+    try {
+      const result = await validateApiKey(providerId, key.trim());
+      setValidationStatus(prev => ({
+        ...prev,
+        [providerId]: result.valid ? 'valid' : 'invalid',
+      }));
+
+      if (!result.valid) {
+        showAlertDialog({
+          type: 'error',
+          title: 'Invalid Key',
+          message: result.error || 'The API key could not be validated.',
+          confirmText: 'OK',
+        });
+      }
+    } catch {
+      setValidationStatus(prev => ({ ...prev, [providerId]: 'invalid' }));
+    } finally {
+      setValidating(prev => ({ ...prev, [providerId]: false }));
+    }
+  };
+
+  const handleRemoveKey = (providerId: ProviderID) => {
+    showAlertDialog({
+      type: 'confirm',
+      title: 'Remove API Key',
+      message: `Remove the API key for ${getProviderConfig(providerId).name}?`,
+      confirmText: 'Remove',
+      cancelText: 'Cancel',
+      onConfirm: () => {
+        byokStorage.removeKey(providerId);
+        setKeyInputs(prev => {
+          const next = { ...prev };
+          delete next[providerId];
+          return next;
+        });
+        setValidationStatus(prev => ({ ...prev, [providerId]: null }));
+      },
+    });
+  };
+
+  // When provider is selected in BYOK section, update settings
+  const handleSelectProvider = (providerId: ProviderID) => {
+    const config = getProviderConfig(providerId);
+    setLocalSettings(prev => ({
+      ...prev,
+      selectedProvider: providerId,
+      selectedModel: config.defaultModel,
+    }));
+  };
+
+  const handleSelectModel = (modelId: string) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      selectedModel: modelId,
+    }));
   };
 
   const handleExportData = () => {
@@ -193,8 +290,13 @@ export function SettingsModal({
 
   if (!isOpen) return null;
 
+  // Get models for currently selected provider
+  const selectedProviderModels = getModelsForProvider(localSettings.selectedProvider);
+  const configuredBYOKProviders = byokStorage.getConfiguredProviders();
+
   const NAV_TABS: { id: ActiveTab; label: string; icon: React.ElementType }[] = [
     { id: 'personality', label: 'Persona & Identity', icon: Sparkles },
+    { id: 'apikeys',     label: 'API Keys',           icon: Key },
     { id: 'data',        label: 'Data & Backup',      icon: Database },
     { id: 'about',       label: 'About',               icon: Cpu },
   ];
@@ -259,6 +361,11 @@ export function SettingsModal({
                         className="shrink-0"
                       />
                       <span>{tab.label}</span>
+                      {tab.id === 'apikeys' && configuredBYOKProviders.length > 0 && (
+                        <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[var(--brand)]/20 text-[10px] font-black text-[var(--brand)]">
+                          {configuredBYOKProviders.length}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </nav>
@@ -397,6 +504,212 @@ export function SettingsModal({
                 </div>
               )}
 
+              {/* ── API KEYS TAB ── */}
+              {activeTab === 'apikeys' && (
+                <div className="space-y-8">
+                  <header>
+                    <h3 className="mb-1 text-lg font-bold text-[var(--text-primary)]">API Keys & Provider</h3>
+                    <p className="text-sm text-[var(--text-secondary)]">Manage your AI provider keys and select your preferred model.</p>
+                  </header>
+
+                  {/* ── Quota Status ── */}
+                  {quotaStatus && (
+                    <section className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)]/50 p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Zap size={16} className="text-[var(--brand)]" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Free Usage</span>
+                        </div>
+                        <span className="text-sm font-bold text-[var(--text-primary)]">
+                          {quotaStatus.booksUsed} / {quotaStatus.freeLimit} {quotaStatus.booksUsed === 1 ? 'book' : 'books'} used
+                        </span>
+                      </div>
+                      {/* Progress bar */}
+                      <div className="h-2 w-full rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            quotaStatus.remaining <= 0
+                              ? 'bg-red-500'
+                              : quotaStatus.remaining === 1
+                                ? 'bg-amber-500'
+                                : 'bg-[var(--brand)]'
+                          }`}
+                          style={{
+                            width: `${Math.min(100, (quotaStatus.booksUsed / Math.max(1, quotaStatus.freeLimit)) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <p className="mt-2 text-[10px] text-[var(--text-muted)]">
+                        {quotaStatus.remaining > 0
+                          ? `${quotaStatus.remaining} free ${quotaStatus.remaining === 1 ? 'generation' : 'generations'} remaining. Using platform AI.`
+                          : quotaStatus.hasBYOK
+                            ? 'Free quota used. Using your own API key.'
+                            : 'Free quota exhausted. Add an API key below to continue generating.'}
+                      </p>
+                    </section>
+                  )}
+
+                  {/* ── Active Provider & Model Selector ── */}
+                  <section className="space-y-4 pt-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Active Provider</label>
+                    <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+                      {/* Show proxy providers when user has free quota */}
+                      {quotaStatus?.hasFreeQuota && PROXY_PROVIDERS.map(p => (
+                        <button
+                          key={p.id}
+                          onClick={() => handleSelectProvider(p.id)}
+                          className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-all duration-200 ${
+                            localSettings.selectedProvider === p.id
+                              ? 'border-[var(--brand)]/50 bg-[var(--brand)]/10 shadow-sm'
+                              : 'border-[var(--border-subtle)] bg-[var(--bg-surface)]/30 hover:border-[var(--brand)]/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 w-full">
+                            <span className={`text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                              localSettings.selectedProvider === p.id ? 'bg-[var(--brand)]/20 text-[var(--brand)]' : 'bg-white/5 text-[var(--text-muted)]'
+                            }`}>{p.badge}</span>
+                            <span className="text-xs font-bold text-[var(--text-primary)] truncate">{p.name}</span>
+                            <span className="ml-auto text-[9px] font-bold text-green-500 uppercase">Free</span>
+                          </div>
+                          <p className="text-[10px] text-[var(--text-muted)] line-clamp-1">{p.tagline}</p>
+                        </button>
+                      ))}
+                      {/* Show BYOK providers that have keys configured */}
+                      {configuredBYOKProviders.map(pid => {
+                        const p = BYOK_PROVIDERS.find(bp => bp.id === pid);
+                        if (!p) return null;
+                        // Skip if already shown as proxy provider
+                        if (PROXY_PROVIDERS.some(pp => pp.id === pid)) return null;
+                        return (
+                          <button
+                            key={p.id}
+                            onClick={() => handleSelectProvider(p.id)}
+                            className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-all duration-200 ${
+                              localSettings.selectedProvider === p.id
+                                ? 'border-[var(--brand)]/50 bg-[var(--brand)]/10 shadow-sm'
+                                : 'border-[var(--border-subtle)] bg-[var(--bg-surface)]/30 hover:border-[var(--brand)]/20'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 w-full">
+                              <span className={`text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                                localSettings.selectedProvider === p.id ? 'bg-[var(--brand)]/20 text-[var(--brand)]' : 'bg-white/5 text-[var(--text-muted)]'
+                              }`}>{p.badge}</span>
+                              <span className="text-xs font-bold text-[var(--text-primary)] truncate">{p.name}</span>
+                              <span className="ml-auto text-[9px] font-bold text-[var(--brand)] uppercase">BYOK</span>
+                            </div>
+                            <p className="text-[10px] text-[var(--text-muted)] line-clamp-1">{p.tagline}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Model selector */}
+                    <div className="mt-4">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2 block">Model</label>
+                      <select
+                        value={localSettings.selectedModel}
+                        onChange={(e) => handleSelectModel(e.target.value)}
+                        className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm font-bold text-[var(--text-primary)] focus:border-[var(--brand)]/50 focus:outline-none transition-colors"
+                      >
+                        {selectedProviderModels.map(m => (
+                          <option key={m.id} value={m.id}>{m.name} ({Math.round(m.contextWindow / 1000)}K ctx)</option>
+                        ))}
+                      </select>
+                    </div>
+                  </section>
+
+                  {/* ── BYOK Key Management ── */}
+                  <section className="space-y-4 pt-6 border-t border-[var(--border-subtle)]">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Your API Keys</label>
+                        <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Keys are stored locally on your device. Never sent to our servers.</p>
+                      </div>
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20">
+                        <Shield size={10} className="text-green-500" />
+                        <span className="text-[9px] font-bold text-green-500 uppercase">Local Only</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {BYOK_PROVIDERS.map(provider => {
+                        const hasKey = !!keyInputs[provider.id]?.trim();
+                        const isVisible = visibleKeys[provider.id];
+                        const isValidating = validating[provider.id];
+                        const status = validationStatus[provider.id];
+
+                        return (
+                          <div
+                            key={provider.id}
+                            className={`rounded-lg border p-4 transition-all duration-200 ${
+                              hasKey
+                                ? 'border-[var(--brand)]/20 bg-[var(--brand)]/5'
+                                : 'border-[var(--border-subtle)] bg-[var(--bg-surface)]/30'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5 text-[var(--text-muted)]">
+                                  {provider.badge}
+                                </span>
+                                <span className="text-xs font-bold text-[var(--text-primary)]">{provider.name}</span>
+                                {status === 'valid' && <CheckCircle size={14} className="text-green-500" />}
+                                {status === 'invalid' && <XCircle size={14} className="text-red-500" />}
+                              </div>
+                              {hasKey && (
+                                <button
+                                  onClick={() => handleRemoveKey(provider.id)}
+                                  className="text-[10px] font-bold text-red-500/70 hover:text-red-500 transition-colors uppercase tracking-wider"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <div className="relative flex-1">
+                                <input
+                                  type={isVisible ? 'text' : 'password'}
+                                  value={keyInputs[provider.id] || ''}
+                                  onChange={(e) => {
+                                    setKeyInputs(prev => ({ ...prev, [provider.id]: e.target.value }));
+                                    setValidationStatus(prev => ({ ...prev, [provider.id]: null }));
+                                  }}
+                                  placeholder={`Enter ${provider.name} API key...`}
+                                  className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] px-3 py-2 pr-10 text-xs font-mono text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:border-[var(--brand)]/50 focus:outline-none transition-colors"
+                                />
+                                <button
+                                  onClick={() => setVisibleKeys(prev => ({ ...prev, [provider.id]: !prev[provider.id] }))}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                                >
+                                  {isVisible ? <EyeOff size={14} /> : <Eye size={14} />}
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => handleValidateKey(provider.id)}
+                                disabled={!hasKey || isValidating}
+                                className={`shrink-0 flex items-center gap-1.5 rounded-md border px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                  hasKey
+                                    ? 'border-[var(--brand)]/30 bg-[var(--brand)]/10 text-[var(--brand)] hover:bg-[var(--brand)]/20'
+                                    : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] cursor-not-allowed'
+                                }`}
+                              >
+                                {isValidating ? (
+                                  <Loader2 size={12} className="animate-spin" />
+                                ) : (
+                                  <CheckCircle size={12} />
+                                )}
+                                Verify
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                </div>
+              )}
+
               {/* ── DATA TAB ── */}
               {activeTab === 'data' && (
                 <div className="space-y-8">
@@ -458,9 +771,9 @@ export function SettingsModal({
                   <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                     {[
                       { label: 'AI Framework', val: 'Smart Orchestration' },
-                      { label: 'Providers',    val: `${PROVIDERS.length} (Z AI, Fast Mistral)` },
+                      { label: 'Providers',    val: `${PROVIDERS.length} providers supported` },
                       { label: 'Architecture', val: 'Hybrid PWA' },
-                      { label: 'Security',    val: 'Client-side Encryption' },
+                      { label: 'Security',    val: 'Client-side Key Storage' },
                     ].map(({ label, val }) => (
                       <div key={label} className="space-y-1.5 text-left">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">{label}</p>

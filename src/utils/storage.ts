@@ -1,6 +1,8 @@
 // src/utils/storage.ts
-import { APISettings, BookProject, ModelID, ModelProvider } from '../types';
-import { DEFAULT_ZHIPU_MODEL, ZHIPU_PROVIDER } from '../constants/ai';
+import { APISettings, BookProject } from '../types';
+import type { ProviderID } from '../types/providers';
+import { ZHIPU_PROVIDER } from '../constants/ai';
+import { getAllProviderIds, getProviderConfig, isValidModel } from '../services/providerRegistry';
 
 const SETTINGS_KEY = 'pustakam-settings';
 const BOOKS_KEY = 'pustakam-books';
@@ -14,27 +16,14 @@ const getUserBooksKey = (userId?: string | null): string => {
 };
 
 const defaultSettings: APISettings = {
-  googleApiKey: '',
-  mistralApiKey: '',
-  groqApiKey: '',
-  xaiApiKey: '',
-  openRouterApiKey: '',
-  cohereApiKey: '',
   selectedProvider: ZHIPU_PROVIDER,
-  selectedModel: DEFAULT_ZHIPU_MODEL,
+  selectedModel: 'glm-5',
   defaultGenerationMode: 'stellar',
   defaultLanguage: 'en',
 };
 
-// Only two providers are supported  -  Z AI (Zhipu) and Mistral.
-// Model selection is handled by server-side orchestration; these lists
-// are used only for storage validation (fallback defaults).
-const validProviders: ModelProvider[] = ['zhipu', 'mistral'];
-
-const validModels: Record<ModelProvider, ModelID[]> = {
-  zhipu:   ['glm-5', 'glm-5-turbo', 'glm-4.7-flashx'],
-  mistral: ['mistral-small-latest', 'mistral-medium-latest', 'mistral-large-latest', 'labs-mistral-small-creative'],
-};
+// Valid providers are derived from the registry (no more hardcoding)
+const validProviders: ProviderID[] = getAllProviderIds();
 
 export const storageUtils = {
   getSettings(): APISettings {
@@ -50,6 +39,15 @@ export const storageUtils = {
         ...parsed,
       };
 
+      // Strip out legacy API key fields that may exist in old storage
+      // (they've been moved to byokStorage)
+      delete (settings as any).googleApiKey;
+      delete (settings as any).mistralApiKey;
+      delete (settings as any).groqApiKey;
+      delete (settings as any).xaiApiKey;
+      delete (settings as any).openRouterApiKey;
+      delete (settings as any).cohereApiKey;
+
       // Validate provider
       if (!settings.selectedProvider || !validProviders.includes(settings.selectedProvider)) {
         console.warn('Invalid selectedProvider found in storage:', settings.selectedProvider);
@@ -60,11 +58,11 @@ export const storageUtils = {
         settings.selectedProvider = ZHIPU_PROVIDER;
       }
 
-      // Validate models
-      const providerModels = validModels[settings.selectedProvider];
-      if (!providerModels.includes(settings.selectedModel)) {
-        console.warn(`Invalid model ${settings.selectedModel} for provider ${settings.selectedProvider}`);
-        settings.selectedModel = providerModels[0];
+      // Validate model against the provider's model list
+      if (!isValidModel(settings.selectedProvider, settings.selectedModel)) {
+        const defaultModel = getProviderConfig(settings.selectedProvider).defaultModel;
+        console.warn(`Invalid model ${settings.selectedModel} for provider ${settings.selectedProvider}, falling back to ${defaultModel}`);
+        settings.selectedModel = defaultModel;
       }
 
       return settings;
@@ -77,12 +75,12 @@ export const storageUtils = {
 
   saveSettings(settings: APISettings): void {
     try {
-      const useProxy = import.meta.env.VITE_USE_PROXY === 'true';
       if (!settings.selectedProvider || !validProviders.includes(settings.selectedProvider)) {
         console.error('Attempted to save invalid selectedProvider:', settings.selectedProvider);
         settings.selectedProvider = defaultSettings.selectedProvider;
       }
 
+      const useProxy = import.meta.env.VITE_USE_PROXY === 'true';
       if (useProxy && !settings.selectedProvider) {
         settings.selectedProvider = ZHIPU_PROVIDER;
       }

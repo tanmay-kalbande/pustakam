@@ -5,6 +5,7 @@ import { BookProject } from '../types/book';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { motion } from 'framer-motion';
 import { AI_SUITE_NAME, PROVIDERS } from '../constants/ai';
+import { getDefaultModel } from '../services/providerRegistry';
 
 interface TopHeaderProps {
     settings: APISettings;
@@ -123,7 +124,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                                                         id={`provider-option-${provider.id}`}
                                                         onClick={() => {
                                                             onModelChange(
-                                                                provider.id === 'zhipu' ? 'glm-5' : 'mistral-medium-latest',
+                                                                getDefaultModel(provider.id),
                                                                 provider.id
                                                             );
                                                             setShowModelMenu(false);
