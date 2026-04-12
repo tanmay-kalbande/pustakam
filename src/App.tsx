@@ -255,7 +255,7 @@ function App() {
   useEffect(() => {
     if (!isLoading && hasLoadedUserBooksRef.current) {
       const timer = setTimeout(() => {
-        storageUtils.saveBooks(books, user?.id);
+        void storageUtils.saveBooks(books, user?.id);
       }, 250);
 
       return () => clearTimeout(timer);
@@ -302,39 +302,47 @@ function App() {
   useEffect(() => {
     if (isLoading) return;
 
+    let isCancelled = false;
     let welcomeTimer: ReturnType<typeof setTimeout> | undefined;
     let exitTimer: ReturnType<typeof setTimeout> | undefined;
     let exitCleanupTimer: ReturnType<typeof setTimeout> | undefined;
 
-    if (isAuthenticated && !sessionStorage.getItem('welcome_shown')) {
-      // Small delay so it pops up cleanly after other loading finishes
-      welcomeTimer = setTimeout(() => setShowWelcomeModal(true), 2500);
-      sessionStorage.setItem('welcome_shown', 'true');
-    }
+    const loadBooks = async () => {
+      if (isAuthenticated && !sessionStorage.getItem('welcome_shown')) {
+        // Small delay so it pops up cleanly after other loading finishes
+        welcomeTimer = setTimeout(() => setShowWelcomeModal(true), 2500);
+        sessionStorage.setItem('welcome_shown', 'true');
+      }
 
-    const loadedBooks = storageUtils.getBooks(user?.id);
-    setBooks(loadedBooks);
-    hasLoadedUserBooksRef.current = true;
+      const loadedBooks = await storageUtils.getBooks(user?.id);
+      if (isCancelled) return;
 
-    // Ensure a smooth transition even for fasting loading landing page
-    const holdTime = user ? 1500 : 1000;
-    exitTimer = setTimeout(() => {
-      setIsLoadingScreenExiting(true);
-      exitCleanupTimer = setTimeout(() => {
-        setIsLoadingScreenVisible(false);
-        setIsLoadingScreenExiting(false);
-      }, 700);
-    }, holdTime);
+      setBooks(loadedBooks);
+      hasLoadedUserBooksRef.current = true;
 
-    if (user?.id && loadedBooks.length > 0) {
-      planService.syncBooksCount(loadedBooks.length)
-        .then(synced => { if (synced) refreshProfile(); })
-        .catch(() => {});
-    }
+      // Ensure a smooth transition even for fast-loading landing page
+      const holdTime = user ? 1500 : 1000;
+      exitTimer = setTimeout(() => {
+        setIsLoadingScreenExiting(true);
+        exitCleanupTimer = setTimeout(() => {
+          setIsLoadingScreenVisible(false);
+          setIsLoadingScreenExiting(false);
+        }, 700);
+      }, holdTime);
 
-    setCurrentBookId(null);
+      if (user?.id && loadedBooks.length > 0) {
+        planService.syncBooksCount(loadedBooks.length)
+          .then(synced => { if (synced && !isCancelled) refreshProfile(); })
+          .catch(() => {});
+      }
+
+      setCurrentBookId(null);
+    };
+
+    void loadBooks();
 
     return () => {
+      isCancelled = true;
       if (welcomeTimer) clearTimeout(welcomeTimer);
       if (exitTimer) clearTimeout(exitTimer);
       if (exitCleanupTimer) clearTimeout(exitCleanupTimer);
@@ -435,7 +443,7 @@ function App() {
     const bookId = generateId();
     try {
       localStorage.removeItem(`pause_flag_${bookId}`);
-      localStorage.removeItem(`checkpoint_${bookId}`);
+      void bookService.clearPersistedState(bookId);
     } catch {}
 
     const newBook: BookProject = {
@@ -599,10 +607,7 @@ function App() {
       onConfirm: () => {
         setBooks(prev => prev.filter(b => b.id !== id));
         if (currentBookId === id) { setCurrentBookId(null); setView('list'); }
-        try {
-          localStorage.removeItem(`checkpoint_${id}`);
-          localStorage.removeItem(`pause_flag_${id}`);
-        } catch {}
+        void bookService.clearPersistedState(id);
         showToast('Book deleted.', 'info');
       },
     });

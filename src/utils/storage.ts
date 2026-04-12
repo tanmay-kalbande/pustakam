@@ -3,9 +3,11 @@ import { APISettings, BookProject } from '../types';
 import type { ProviderID } from '../types/providers';
 import { ZHIPU_PROVIDER } from '../constants/ai';
 import { getAllProviderIds, getProviderConfig, isValidModel } from '../services/providerRegistry';
+import { persistence } from './persistence';
 
 const SETTINGS_KEY = 'pustakam-settings';
 const BOOKS_KEY = 'pustakam-books';
+const BOOK_INDEX_KEY = 'pustakam-book-module-counts';
 
 // Get user-scoped books key
 const getUserBooksKey = (userId?: string | null): string => {
@@ -24,6 +26,50 @@ const defaultSettings: APISettings = {
 
 // Valid providers are derived from the registry (no more hardcoding)
 const validProviders: ProviderID[] = getAllProviderIds();
+
+const reviveBooks = (books: BookProject[]): BookProject[] => books.map((book: BookProject) => ({
+  ...book,
+  createdAt: new Date(book.createdAt),
+  updatedAt: new Date(book.updatedAt),
+}));
+
+const buildBookIndex = (books: BookProject[]) => Object.fromEntries(
+  books.map(book => [book.id, Array.isArray(book.modules) ? book.modules.length : 0])
+);
+
+const saveBookIndex = (bookIndex: Record<string, number>) => {
+  try {
+    localStorage.setItem(BOOK_INDEX_KEY, JSON.stringify(bookIndex));
+  } catch (error) {
+    console.warn('Error saving book index:', error);
+  }
+};
+
+const readLegacyBooks = (userId?: string | null): BookProject[] => {
+  try {
+    const key = getUserBooksKey(userId);
+    const stored = localStorage.getItem(key);
+
+    if (!stored && userId) {
+      const oldBooks = localStorage.getItem(BOOKS_KEY);
+      if (oldBooks) {
+        console.log('Migrated books from generic key to user-specific key');
+        localStorage.removeItem(BOOKS_KEY);
+        const books = reviveBooks(JSON.parse(oldBooks));
+        saveBookIndex(buildBookIndex(books));
+        return books;
+      }
+    }
+
+    if (!stored) return [];
+    const books = reviveBooks(JSON.parse(stored));
+    saveBookIndex(buildBookIndex(books));
+    return books;
+  } catch (error) {
+    console.error('Error loading legacy books:', error);
+    return [];
+  }
+};
 
 export const storageUtils = {
   getSettings(): APISettings {
@@ -92,61 +138,68 @@ export const storageUtils = {
     }
   },
 
-  getBooks(userId?: string | null): BookProject[] {
-    try {
-      const key = getUserBooksKey(userId);
-      const stored = localStorage.getItem(key);
+  async getBooks(userId?: string | null): Promise<BookProject[]> {
+    const key = getUserBooksKey(userId);
 
-      // Migration: If user-specific key is empty and user is logged in,
-      // check if there are books in the old generic key and migrate them
-      if (!stored && userId) {
-        const oldBooks = localStorage.getItem(BOOKS_KEY);
-        if (oldBooks) {
-          // Migrate old books to user-specific key
-          localStorage.setItem(key, oldBooks);
-          // Clear old generic key to prevent duplicate loading
-          localStorage.removeItem(BOOKS_KEY);
-          console.log('Migrated books from generic key to user-specific key');
-          const books = JSON.parse(oldBooks);
-          return books.map((book: BookProject) => ({
-            ...book,
-            createdAt: new Date(book.createdAt),
-            updatedAt: new Date(book.updatedAt),
-          }));
-        }
+    try {
+      const record = await persistence.getBooks(key);
+      if (record?.books && Array.isArray(record.books)) {
+        saveBookIndex(record.bookIndex || {});
+        return reviveBooks(record.books as BookProject[]);
       }
-
-      if (!stored) return [];
-      const books = JSON.parse(stored);
-      return books.map((book: BookProject) => ({
-        ...book,
-        createdAt: new Date(book.createdAt),
-        updatedAt: new Date(book.updatedAt),
-      }));
     } catch (error) {
-      console.error('Error loading books:', error);
-      return [];
+      console.warn('IndexedDB books load failed, falling back to localStorage:', error);
     }
+
+    const legacyBooks = readLegacyBooks(userId);
+    if (legacyBooks.length > 0) {
+      void this.saveBooks(legacyBooks, userId);
+    }
+    return legacyBooks;
   },
 
-  saveBooks(books: BookProject[], userId?: string | null): void {
+  async saveBooks(books: BookProject[], userId?: string | null): Promise<void> {
+    const key = getUserBooksKey(userId);
+    const bookIndex = buildBookIndex(books);
+    saveBookIndex(bookIndex);
+
     try {
-      const key = getUserBooksKey(userId);
-      localStorage.setItem(key, JSON.stringify(books));
+      await persistence.saveBooks(key, books, bookIndex);
+
+      // Remove the large legacy payload once IndexedDB becomes the source of truth.
+      localStorage.removeItem(key);
+      if (userId) {
+        localStorage.removeItem(BOOKS_KEY);
+      }
     } catch (error) {
-      console.error('Error saving books:', error);
-      // Silently fail - books are also saved in state
+      console.error('Error saving books to IndexedDB, falling back to localStorage:', error);
+      localStorage.setItem(key, JSON.stringify(books));
     }
   },
 
-  clearBooks(userId?: string | null): void {
-    const key = getUserBooksKey(userId);
-    localStorage.removeItem(key);
+  getBookModuleCounts(): Record<string, number> {
+    try {
+      const stored = localStorage.getItem(BOOK_INDEX_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch (error) {
+      console.warn('Error loading book index:', error);
+      return {};
+    }
   },
 
-  clearAll(userId?: string | null): void {
-    localStorage.removeItem(SETTINGS_KEY);
+  async clearBooks(userId?: string | null): Promise<void> {
     const key = getUserBooksKey(userId);
     localStorage.removeItem(key);
+    saveBookIndex({});
+    try {
+      await persistence.deleteBooks(key);
+    } catch (error) {
+      console.warn('Error clearing books from IndexedDB:', error);
+    }
+  },
+
+  async clearAll(userId?: string | null): Promise<void> {
+    localStorage.removeItem(SETTINGS_KEY);
+    await this.clearBooks(userId);
   },
 };

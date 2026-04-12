@@ -221,11 +221,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // Remove only identified auth keys
             keysToRemove.forEach(key => localStorage.removeItem(key));
 
-            // Clear cookies (mainly for Supabase auth if used)
-            document.cookie.split(";").forEach((c) => {
-                document.cookie = c
-                    .replace(/^ +/, "")
-                    .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            // Clear only auth/session cookies we own so unrelated site cookies survive sign-out.
+            const authCookieMatchers = ['sb-', 'supabase', 'auth', 'kitaab', 'pustakam'];
+            document.cookie.split(';').forEach((cookie) => {
+                const [rawName] = cookie.split('=');
+                const name = rawName?.trim();
+                if (!name) return;
+
+                const shouldClear = authCookieMatchers.some(matcher => name.toLowerCase().includes(matcher));
+                if (!shouldClear) return;
+
+                document.cookie = `${name}=;expires=${new Date(0).toUTCString()};path=/`;
             });
 
             console.log('🧹 Purged authentication-specific data:', keysToRemove);

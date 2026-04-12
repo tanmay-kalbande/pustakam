@@ -1,5 +1,6 @@
 // src/utils/readingProgress.ts - ENHANCED VERSION
 import { ReadingBookmark } from '../types/book';
+import { storageUtils } from './storage';
 
 const BOOKMARK_KEY = 'pustakam-reading-bookmarks';
 
@@ -126,22 +127,7 @@ export const readingProgressUtils = {
   // Get book module count (helper)
   getBookModuleCount(bookId: string): number {
     try {
-      const keys = ['pustakam-books', ...Object.keys(localStorage).filter(key => key.startsWith('pustakam-books-'))];
-
-      for (const key of keys) {
-        const booksJson = localStorage.getItem(key);
-        if (!booksJson) continue;
-
-        const books = JSON.parse(booksJson);
-        if (!Array.isArray(books)) continue;
-
-        const book = books.find((entry: { id?: string; modules?: unknown[] }) => entry.id === bookId);
-        if (book) {
-          return book.modules?.length || 0;
-        }
-      }
-
-      return 0;
+      return storageUtils.getBookModuleCounts()[bookId] || 0;
     } catch (error) {
       return 0;
     }

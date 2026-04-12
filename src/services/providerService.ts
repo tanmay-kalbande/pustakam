@@ -16,6 +16,51 @@ import { getProviderConfig, getEndpointUrl } from './providerRegistry';
 const dbg = (...args: unknown[]) => console.log('[ProviderService]', ...args);
 const err = (...args: unknown[]) => console.error('[ProviderService]', ...args);
 
+function createTimeoutSignal(timeoutMs: number): { signal: AbortSignal; cleanup: () => void } {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => {
+    controller.abort(new DOMException(`Request timed out after ${Math.round(timeoutMs / 1000)}s`, 'TimeoutError'));
+  }, timeoutMs);
+
+  return {
+    signal: controller.signal,
+    cleanup: () => globalThis.clearTimeout(timeoutId),
+  };
+}
+
+function mergeAbortSignals(...signals: Array<AbortSignal | undefined>): { signal?: AbortSignal; cleanup: () => void } {
+  const activeSignals = signals.filter(Boolean) as AbortSignal[];
+  if (activeSignals.length === 0) return { signal: undefined, cleanup: () => {} };
+  if (activeSignals.length === 1) return { signal: activeSignals[0], cleanup: () => {} };
+
+  const controller = new AbortController();
+  const cleanups: Array<() => void> = [];
+
+  const abortFromSignal = (source: AbortSignal) => {
+    cleanups.forEach(cleanup => cleanup());
+    controller.abort(source.reason);
+  };
+
+  for (const source of activeSignals) {
+    if (source.aborted) {
+      abortFromSignal(source);
+      return {
+        signal: controller.signal,
+        cleanup: () => cleanups.forEach(cleanup => cleanup()),
+      };
+    }
+
+    const onAbort = () => abortFromSignal(source);
+    source.addEventListener('abort', onAbort, { once: true });
+    cleanups.push(() => source.removeEventListener('abort', onAbort));
+  }
+
+  return {
+    signal: controller.signal,
+    cleanup: () => cleanups.forEach(cleanup => cleanup()),
+  };
+}
+
 // ============================================================================
 // SSE Stream Parsers — handle different provider response formats
 // ============================================================================
@@ -168,21 +213,15 @@ export async function generateText(
   // For Google, streaming is achieved via the URL (alt=sse), not the body
   // The body doesn't need a "stream" field
 
-  // Set up abort controller with timeout
-  const abortController = new AbortController();
-  const mergedSignal = signal || abortController.signal;
-
-  const timeoutId = setTimeout(() => {
-    abortController.abort();
-    err(`Request timed out after ${Math.round(timeoutMs / 1000)}s`);
-  }, timeoutMs);
+  const timeout = createTimeoutSignal(timeoutMs);
+  const mergedSignal = mergeAbortSignals(signal, timeout.signal);
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
-      signal: mergedSignal,
+      signal: mergedSignal.signal,
     });
 
     if (!response.ok) {
@@ -224,14 +263,19 @@ export async function generateText(
     return fullContent;
 
   } catch (fetchErr) {
-    if (fetchErr instanceof Error && fetchErr.name === 'AbortError') {
+    if (mergedSignal.signal?.aborted && timeout.signal.aborted) {
+      err(`Request timed out after ${Math.round(timeoutMs / 1000)}s`);
+    }
+
+    if (fetchErr instanceof Error && (fetchErr.name === 'AbortError' || fetchErr.name === 'TimeoutError')) {
       throw fetchErr; // Let caller handle abort
     }
     const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
     err(`${config.name} error:`, msg);
     throw fetchErr;
   } finally {
-    clearTimeout(timeoutId);
+    mergedSignal.cleanup();
+    timeout.cleanup();
   }
 }
 
@@ -264,12 +308,18 @@ export async function validateApiKey(
       body = { model, messages: [{ role: 'user', content: 'Say "ok"' }], max_tokens: 5 };
     }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(10000), // 10s timeout for validation
-    });
+    const timeout = createTimeoutSignal(10000);
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+        signal: timeout.signal,
+      });
+    } finally {
+      timeout.cleanup();
+    }
 
     if (response.ok) {
       return { valid: true };

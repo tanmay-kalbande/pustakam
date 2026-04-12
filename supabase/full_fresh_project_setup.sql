@@ -90,7 +90,8 @@ CREATE TABLE public.book_history (
   generation_mode TEXT        NOT NULL DEFAULT 'stellar',
   modules_count   INTEGER     NOT NULL DEFAULT 0,
   word_count      INTEGER     NOT NULL DEFAULT 0,
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, book_id)
 );
 
 CREATE TABLE public.app_activity (
@@ -263,7 +264,12 @@ BEGIN
     COALESCE(p_generation_mode, 'stellar'),
     COALESCE(p_modules_count, 0),
     COALESCE(p_word_count, 0)
-  );
+  )
+  ON CONFLICT (user_id, book_id) DO NOTHING;
+
+  IF NOT FOUND THEN
+    RETURN TRUE;
+  END IF;
 
   UPDATE public.profiles
   SET books_created         = books_created + 1,

@@ -307,7 +307,7 @@ const BLOG_POSTS: BlogPost[] = [
                 <ul>
                     <li><strong>Proxy Pipeline</strong> that enforces secure routing and prevents local browser hangs</li>
                     <li><strong>Jittered auto-retry</strong> on 429 and network errors with exponential backoff</li>
-                    <li><strong>Checkpointing</strong> that saves every completed module to localStorage instantly</li>
+                    <li><strong>Checkpointing</strong> that saves every completed module into resilient on-device storage instantly</li>
                     <li><strong>Local Consistency Mode</strong>  -  pausing generation saves identical state</li>
                 </ul>
 

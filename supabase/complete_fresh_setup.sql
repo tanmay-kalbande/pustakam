@@ -61,7 +61,8 @@ CREATE TABLE public.book_generations (
   generation_mode TEXT DEFAULT 'stellar',
   modules_count INTEGER DEFAULT 0,
   word_count INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (user_id, book_id)
 );
 
 -- App activity log
@@ -152,7 +153,12 @@ BEGIN
     user_id, book_id, title, goal, generation_mode, modules_count, word_count
   ) VALUES (
     v_user_id, p_book_id, p_title, p_goal, p_generation_mode, p_modules_count, p_word_count
-  );
+  )
+  ON CONFLICT (user_id, book_id) DO NOTHING;
+
+  IF NOT FOUND THEN
+    RETURN TRUE;
+  END IF;
 
   RETURN TRUE;
 EXCEPTION WHEN OTHERS THEN

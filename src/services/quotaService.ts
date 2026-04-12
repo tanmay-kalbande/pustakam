@@ -6,6 +6,7 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { byokStorage } from '../utils/byokStorage';
 import type { QuotaStatus } from '../types/providers';
+import { storageUtils } from '../utils/storage';
 
 let cachedFreeLimit: number | null = null;
 let freeLimitCacheTimestamp = 0;
@@ -67,17 +68,13 @@ export const quotaService = {
   /**
    * Get the number of books the user has created.
    * Reads from profiles.books_created if Supabase is configured,
-   * otherwise counts localStorage books.
+   * otherwise counts locally persisted completed books.
    */
   async getBooksUsed(userId?: string | null): Promise<number> {
     if (!supabase || !isSupabaseConfigured() || !userId) {
       try {
-        const key = userId ? `pustakam-books-${userId}` : 'pustakam-books';
-        const raw = localStorage.getItem(key);
-        if (!raw) return 0;
-
-        const books = JSON.parse(raw);
-        return Array.isArray(books) ? books.filter((book: { status?: string }) => book.status === 'completed').length : 0;
+        const books = await storageUtils.getBooks(userId);
+        return books.filter(book => book.status === 'completed').length;
       } catch {
         return 0;
       }

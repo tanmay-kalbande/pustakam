@@ -171,9 +171,9 @@ export function SettingsModal({
     }));
   };
 
-  const handleExportData = () => {
+  const handleExportData = async () => {
     const data = {
-      books: storageUtils.getBooks(user?.id),
+      books: await storageUtils.getBooks(user?.id),
       settings: storageUtils.getSettings(),
       exportDate: new Date().toISOString(),
       version: '1.0.0',
@@ -192,10 +192,10 @@ export function SettingsModal({
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const importData = JSON.parse(e.target?.result as string);
-        const existingBooks = storageUtils.getBooks(user?.id);
+        const existingBooks = await storageUtils.getBooks(user?.id);
         const existingSettings = storageUtils.getSettings();
 
         const duplicateBooks = importData.books
@@ -227,25 +227,25 @@ export function SettingsModal({
     event.target.value = '';
   };
 
-  const executeImport = (mode: 'merge' | 'replace') => {
+  const executeImport = async (mode: 'merge' | 'replace') => {
     if (!importPreview) return;
 
     try {
       if (mode === 'replace') {
-        storageUtils.saveBooks(importPreview.books, user?.id);
+        await storageUtils.saveBooks(importPreview.books, user?.id);
         if (importPreview.settings) {
           setLocalSettings(importPreview.settings);
           storageUtils.saveSettings(importPreview.settings);
         }
       } else {
-        const existingBooks = storageUtils.getBooks(user?.id);
+        const existingBooks = await storageUtils.getBooks(user?.id);
         const mergedBooks = [...existingBooks];
         importPreview.books.forEach((importBook: any) => {
           if (!mergedBooks.some((eb) => eb.id === importBook.id)) {
             mergedBooks.push(importBook);
           }
         });
-        storageUtils.saveBooks(mergedBooks, user?.id);
+        await storageUtils.saveBooks(mergedBooks, user?.id);
         storageUtils.saveSettings(importPreview.settings);
         setLocalSettings(importPreview.settings);
       }

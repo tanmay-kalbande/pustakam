@@ -22,6 +22,7 @@ import { generateViaProxy, TaskType as ProxyTaskType } from './proxyService';
 import { generateText } from './providerService';
 import { byokStorage } from '../utils/byokStorage';
 import { getProviderConfig } from './providerRegistry';
+import { persistence } from '../utils/persistence';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -297,6 +298,10 @@ User Input: "${userInput}"`;
     this.currentGeneratedTexts.delete(bookId);
   }
 
+  private getCheckpointStorageKey(bookId: string): string {
+    return `checkpoint_${bookId}`;
+  }
+
   private saveCheckpoint(
     bookId: string,
     completedModuleIds: string[],
@@ -316,20 +321,49 @@ User Input: "${userInput}"`;
     };
     this.checkpoints.set(bookId, checkpoint);
     try {
-      localStorage.setItem(`checkpoint_${bookId}`, JSON.stringify(checkpoint));
+      localStorage.setItem(this.getCheckpointStorageKey(bookId), JSON.stringify({
+        timestamp: checkpoint.timestamp,
+        completedCount: checkpoint.completedModuleIds.length,
+        failedCount: checkpoint.failedModuleIds.length,
+      }));
     } catch (error) {
       err('[CHECKPOINT] Failed to save:', error);
     }
+    void persistence.saveCheckpoint(this.getCheckpointStorageKey(bookId), checkpoint)
+      .catch(error => err('[CHECKPOINT] Failed to persist to IndexedDB:', error));
   }
 
-  private loadCheckpoint(bookId: string): GenerationCheckpoint | null {
+  private async loadCheckpoint(bookId: string): Promise<GenerationCheckpoint | null> {
     if (this.checkpoints.has(bookId)) return this.checkpoints.get(bookId)!;
+
+    const storageKey = this.getCheckpointStorageKey(bookId);
+
     try {
-      const stored = localStorage.getItem(`checkpoint_${bookId}`);
+      const storedCheckpoint = await persistence.getCheckpoint<GenerationCheckpoint>(storageKey);
+      if (storedCheckpoint?.completedModuleIds && Array.isArray(storedCheckpoint.completedModuleIds)) {
+        this.checkpoints.set(bookId, storedCheckpoint);
+        try {
+          localStorage.setItem(storageKey, JSON.stringify({
+            timestamp: storedCheckpoint.timestamp,
+            completedCount: storedCheckpoint.completedModuleIds.length,
+            failedCount: storedCheckpoint.failedModuleIds.length,
+          }));
+        } catch {}
+        return storedCheckpoint;
+      }
+    } catch (error) {
+      err('[CHECKPOINT] Failed to load from IndexedDB:', error);
+    }
+
+    try {
+      const stored = localStorage.getItem(storageKey);
       if (stored) {
         const checkpoint: GenerationCheckpoint = JSON.parse(stored);
         if (!checkpoint.completedModuleIds || !Array.isArray(checkpoint.completedModuleIds)) return null;
         this.checkpoints.set(bookId, checkpoint);
+        void persistence.saveCheckpoint(storageKey, checkpoint).catch(error => {
+          err('[CHECKPOINT] Failed to migrate legacy checkpoint:', error);
+        });
         return checkpoint;
       }
     } catch (error) {
@@ -340,7 +374,11 @@ User Input: "${userInput}"`;
 
   private clearCheckpoint(bookId: string) {
     this.checkpoints.delete(bookId);
-    try { localStorage.removeItem(`checkpoint_${bookId}`); } catch {}
+    const storageKey = this.getCheckpointStorageKey(bookId);
+    try { localStorage.removeItem(storageKey); } catch {}
+    void persistence.deleteCheckpoint(storageKey).catch(error => {
+      err('[CHECKPOINT] Failed to clear persisted checkpoint:', error);
+    });
   }
 
   pauseGeneration(bookId: string) {
@@ -350,6 +388,11 @@ User Input: "${userInput}"`;
   }
 
   resumeGeneration(bookId: string) {
+    try { localStorage.removeItem(`pause_flag_${bookId}`); } catch {}
+  }
+
+  async clearPersistedState(bookId: string): Promise<void> {
+    this.clearCheckpoint(bookId);
     try { localStorage.removeItem(`pause_flag_${bookId}`); } catch {}
   }
 
@@ -843,7 +886,7 @@ User Input: "${userInput}"`;
     dbg('generateRoadmap start', bookId);
     try {
       localStorage.removeItem(`pause_flag_${bookId}`);
-      localStorage.removeItem(`checkpoint_${bookId}`);
+      await this.clearPersistedState(bookId);
     } catch {}
 
     this.updateProgress(bookId, { status: 'generating_roadmap', progress: 5 });
@@ -1125,7 +1168,7 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
     this.resumeGeneration(book.id);
 
     try {
-    const checkpoint = this.loadCheckpoint(book.id);
+    const checkpoint = await this.loadCheckpoint(book.id);
     let completedModules   = [...book.modules.filter(m => m.status === 'completed')];
     const completedIds     = new Set<string>(completedModules.map(m => m.roadmapModuleId).filter(Boolean));
     const failedIds        = new Set<string>();
@@ -1507,11 +1550,11 @@ Format:
   }
 
   hasCheckpoint(bookId: string): boolean {
-    return this.checkpoints.has(bookId) || localStorage.getItem(`checkpoint_${bookId}`) !== null;
+    return this.checkpoints.has(bookId) || localStorage.getItem(this.getCheckpointStorageKey(bookId)) !== null;
   }
 
-  getCheckpointInfo(bookId: string): { completed: number; failed: number; total: number; lastSaved: string } | null {
-    const cp = this.loadCheckpoint(bookId);
+  async getCheckpointInfo(bookId: string): Promise<{ completed: number; failed: number; total: number; lastSaved: string } | null> {
+    const cp = await this.loadCheckpoint(bookId);
     if (!cp) return null;
     const completed = Array.isArray(cp.completedModuleIds) ? cp.completedModuleIds.length : 0;
     const failed    = Array.isArray(cp.failedModuleIds) ? cp.failedModuleIds.length : 0;

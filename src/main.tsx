@@ -18,10 +18,16 @@ inject();
 // Service Worker update checker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then(registration => {
-    // Check for updates every 5 minutes
-    setInterval(() => {
-      registration.update();
-    }, 5 * 60 * 1000);
+    const checkForUpdates = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) {
+        void registration.update();
+      }
+    };
+
+    // Check for updates every 5 minutes, but only when the tab is active and online.
+    const updateTimer = window.setInterval(checkForUpdates, 5 * 60 * 1000);
+    document.addEventListener('visibilitychange', checkForUpdates);
+    window.addEventListener('online', checkForUpdates);
 
     // Listen for new service worker
     registration.addEventListener('updatefound', () => {
@@ -33,6 +39,12 @@ if ('serviceWorker' in navigator) {
         });
       }
     });
+
+    window.addEventListener('beforeunload', () => {
+      window.clearInterval(updateTimer);
+      document.removeEventListener('visibilitychange', checkForUpdates);
+      window.removeEventListener('online', checkForUpdates);
+    }, { once: true });
   });
 }
 
