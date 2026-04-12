@@ -1300,5 +1300,6 @@ export function StudyModePage({
         ) : null}
       </AnimatePresence>
     </div>
+    </div>
   );
 }
