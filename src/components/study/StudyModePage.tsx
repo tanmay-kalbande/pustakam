@@ -413,6 +413,7 @@ export function StudyModePage({
   });
   const [readerSurface, setReaderSurface] = useState<ReaderSurface>(resumeState?.mode || 'module');
   const [activeTool, setActiveTool] = useState<StudyTool>('doubt');
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(!isMobile);
   const [studyPanelOpen, setStudyPanelOpen] = useState(!isMobile);
   const [selectedText, setSelectedText] = useState('');
   const [questionInput, setQuestionInput] = useState('');
@@ -452,6 +453,7 @@ export function StudyModePage({
   const content = readerSurface === 'full_book' ? book.finalBook || '' : currentModule?.content || '';
 
   useEffect(() => {
+    setLeftSidebarOpen(!isMobile);
     setStudyPanelOpen(!isMobile);
   }, [isMobile]);
 
@@ -621,6 +623,15 @@ export function StudyModePage({
   const fullBookProgress = readingProgressUtils.getFullBookProgress(book.id)?.percentComplete || 0;
   const bookWordCount = (book.finalBook || orderedModules.map(module => module.content).join(' ')).split(/\s+/).filter(Boolean).length;
   const estimatedReadMinutes = Math.max(6, Math.round(bookWordCount / 220));
+  const desktopGridClass = isMobile
+    ? 'grid-cols-1'
+    : leftSidebarOpen && studyPanelOpen
+      ? 'xl:grid-cols-[240px_minmax(0,1fr)_360px]'
+      : leftSidebarOpen
+        ? 'xl:grid-cols-[240px_minmax(0,1fr)]'
+        : studyPanelOpen
+          ? 'xl:grid-cols-[minmax(0,1fr)_360px]'
+          : 'grid-cols-1';
 
   const handleAskDoubt = async (payload?: { question: string; selectedText?: string }) => {
     const effectiveQuestion = payload?.question || questionInput;
@@ -749,11 +760,13 @@ export function StudyModePage({
               Ask questions, reframe difficult sections, and build recall without leaving the chapter.
             </p>
           </div>
-          {isMobile ? (
-            <button onClick={() => setStudyPanelOpen(false)} className="rounded-full border border-white/10 p-2 text-[var(--text-secondary)]">
-              <X className="h-4 w-4" />
-            </button>
-          ) : null}
+          <button onClick={() => setStudyPanelOpen(false)} className="rounded-full border border-white/10 p-2 text-[var(--text-secondary)] transition hover:bg-white/[0.04] hover:text-[var(--text-primary)]">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="mt-4 rounded-[20px] border border-white/8 bg-white/[0.02] px-4 py-3 text-xs leading-6 text-[var(--text-secondary)]">
+          Responses are generated with AI and may contain mistakes. Use this panel for guided recall and focused help.
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -1010,6 +1023,32 @@ export function StudyModePage({
             </div>
 
             <div className="flex flex-wrap items-center gap-2 md:gap-3">
+              {!isMobile ? (
+                <>
+                  <button
+                    onClick={() => setLeftSidebarOpen(previous => !previous)}
+                    className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                      leftSidebarOpen
+                        ? 'border-white/10 bg-white/[0.05] text-[var(--text-primary)]'
+                        : 'border-white/8 bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <BookOpen className="mr-2 inline h-3.5 w-3.5" />
+                    {leftSidebarOpen ? 'Hide chapters' : 'Show chapters'}
+                  </button>
+                  <button
+                    onClick={() => setStudyPanelOpen(previous => !previous)}
+                    className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                      studyPanelOpen
+                        ? 'border-white/10 bg-white/[0.05] text-[var(--text-primary)]'
+                        : 'border-white/8 bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <Brain className="mr-2 inline h-3.5 w-3.5" />
+                    {studyPanelOpen ? 'Hide assistant' : 'Show assistant'}
+                  </button>
+                </>
+              ) : null}
               {[
                 { label: 'Chapters', value: `${completedModules}/${orderedModules.length}` },
                 { label: 'Read', value: `${readerSurface === 'full_book' ? fullBookProgress : moduleProgress}%` },
@@ -1024,84 +1063,81 @@ export function StudyModePage({
           </div>
         </header>
 
-        <div className={`grid gap-5 ${studyPanelOpen && !isMobile ? 'xl:grid-cols-[260px_minmax(0,1fr)_380px]' : 'xl:grid-cols-[260px_minmax(0,1fr)]'}`}>
-          <aside className="space-y-4 xl:sticky xl:top-[6.75rem] xl:self-start">
-            <div className="overflow-hidden rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(14,16,17,0.95),rgba(9,11,12,0.98))]">
-              <div className="border-b border-white/8 px-5 py-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Workspace</p>
-                <div className="mt-3">
-                  <SurfaceToggle value={readerSurface} onChange={setReaderSurface} />
-                </div>
-              </div>
-
-              <div className="space-y-4 px-5 py-5">
-                <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Now reading</p>
-                  <h2 className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{currentModule.title}</h2>
-                  <p className="mt-2 text-xs leading-6 text-[var(--text-secondary)]">
-                    {roadmapModule?.description || 'Switch chapters to keep questions, explanations, and flashcards tied to the right context.'}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-[20px] border border-white/8 bg-white/[0.02] p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Companion</p>
-                    <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{studyPanelOpen ? 'Open' : 'Closed'}</p>
+        <div className={`grid gap-5 ${desktopGridClass}`}>
+          {leftSidebarOpen && !isMobile ? (
+            <aside className="xl:sticky xl:top-[6.75rem] xl:self-start xl:max-h-[calc(100vh-8rem)]">
+              <div className="flex h-full min-h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(14,16,17,0.95),rgba(9,11,12,0.98))]">
+                <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Chapters</p>
+                    <p className="mt-1 text-xs text-[var(--text-secondary)]">{orderedModules.length} sections in this workspace</p>
                   </div>
-                  <div className="rounded-[20px] border border-white/8 bg-white/[0.02] p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Progress</p>
-                    <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{readerSurface === 'full_book' ? fullBookProgress : moduleProgress}%</p>
+                  <button onClick={() => setLeftSidebarOpen(false)} className="rounded-full border border-white/10 p-2 text-[var(--text-secondary)] transition hover:bg-white/[0.04] hover:text-[var(--text-primary)]">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="border-b border-white/8 px-4 py-4">
+                  <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Current chapter</p>
+                        <h2 className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{currentModule.title}</h2>
+                      </div>
+                      <span className="rounded-full border border-white/8 px-2.5 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
+                        {moduleProgress}%
+                      </span>
+                    </div>
+                    <p className="mt-3 text-xs leading-6 text-[var(--text-secondary)]">
+                      {roadmapModule?.description || 'Pick a chapter to keep the assistant and reading context aligned.'}
+                    </p>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="overflow-hidden rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(14,16,17,0.95),rgba(9,11,12,0.98))]">
-              <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Chapter index</p>
-                <span className="rounded-full border border-white/8 px-2.5 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
-                  {selectedModuleIndex + 1}/{orderedModules.length}
-                </span>
-              </div>
-              <div className="custom-scrollbar space-y-1.5 px-3 py-3 xl:max-h-[calc(100vh-18rem)] xl:overflow-y-auto">
-                {orderedModules.map((module, index) => {
-                  const progress = readingProgressUtils.getModuleProgress(book.id, index)?.percentComplete || 0;
-                  const isActive = index === selectedModuleIndex && readerSurface === 'module';
+                <div className="custom-scrollbar flex-1 space-y-2 overflow-y-auto px-3 py-3">
+                  {orderedModules.map((module, index) => {
+                    const progress = readingProgressUtils.getModuleProgress(book.id, index)?.percentComplete || 0;
+                    const isActive = index === selectedModuleIndex && readerSurface === 'module';
 
-                  return (
-                    <button
-                      key={module.id}
-                      onClick={() => {
-                        setSelectedModuleIndex(index);
-                        setReaderSurface('module');
-                        setSelectedText('');
-                      }}
-                      className={`group w-full rounded-[22px] border px-4 py-3 text-left transition ${
-                        isActive
-                          ? 'border-[var(--brand)]/25 bg-[rgba(254,205,140,0.09)]'
-                          : 'border-transparent bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Chapter {index + 1}</p>
-                          <p className="mt-1 truncate text-sm font-semibold text-[var(--text-primary)]">{module.title}</p>
-                          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                            <div className="h-full rounded-full bg-[var(--brand)]/80 transition-all" style={{ width: `${progress}%` }} />
+                    return (
+                      <button
+                        key={module.id}
+                        onClick={() => {
+                          setSelectedModuleIndex(index);
+                          setReaderSurface('module');
+                          setSelectedText('');
+                        }}
+                        className={`group w-full rounded-[20px] border px-3 py-3 text-left transition ${
+                          isActive
+                            ? 'border-[var(--brand)]/25 bg-[rgba(254,205,140,0.09)]'
+                            : 'border-transparent bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                            isActive ? 'bg-[var(--brand)] text-black' : 'border border-white/10 text-[var(--text-secondary)]'
+                          }`}>
+                            {index + 1}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{module.title}</p>
+                            <div className="mt-2 flex items-center gap-2">
+                              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                                <div className="h-full rounded-full bg-[var(--brand)]/80 transition-all" style={{ width: `${progress}%` }} />
+                              </div>
+                              <span className="text-[10px] font-semibold text-[var(--text-secondary)]">{progress}%</span>
+                            </div>
                           </div>
                         </div>
-                        <span className="rounded-full border border-white/8 px-2 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
-                          {progress}%
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </aside>
+            </aside>
+          ) : null}
 
-        <section className="space-y-4">
+        <section className="min-w-0 space-y-4">
           {isMobile ? (
             <div className="overflow-x-auto pb-1">
               <div className="flex gap-2">
@@ -1151,10 +1187,18 @@ export function StudyModePage({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <button onClick={() => setStudyPanelOpen(true)} className="btn btn-secondary py-2">
-                    <Brain className="h-4 w-4" />
-                    Open companion
-                  </button>
+                  {!studyPanelOpen && !isMobile ? (
+                    <button onClick={() => setStudyPanelOpen(true)} className="btn btn-secondary py-2">
+                      <Brain className="h-4 w-4" />
+                      Open assistant
+                    </button>
+                  ) : null}
+                  {!leftSidebarOpen && !isMobile ? (
+                    <button onClick={() => setLeftSidebarOpen(true)} className="btn btn-secondary py-2">
+                      <BookOpen className="h-4 w-4" />
+                      Open chapters
+                    </button>
+                  ) : null}
                   {readerSurface === 'full_book' ? (
                     isEditing ? (
                       <>
@@ -1192,62 +1236,64 @@ export function StudyModePage({
             </div>
 
             <div className="border-b border-white/8 px-5 py-4 md:px-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1 rounded-full border border-white/8 p-1" style={{ backgroundColor: currentTheme.contentBg }}>
-                  {(['light', 'sepia', 'dark'] as const).map(mode => (
-                    <button
-                      key={mode}
-                      onClick={() => setSettings(previous => ({ ...previous, theme: mode }))}
-                      className="rounded-full p-2 transition"
-                      style={{
-                        backgroundColor: settings.theme === mode ? currentTheme.accent : 'transparent',
-                        color: settings.theme === mode ? '#FFF' : currentTheme.secondary,
-                      }}
-                    >
-                      {mode === 'light' ? <Sun size={14} /> : mode === 'sepia' ? <Palette size={14} /> : <Moon size={14} />}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-2 py-1">
-                  <button onClick={() => setSettings(previous => ({ ...previous, fontSize: Math.max(12, previous.fontSize - 1) }))} className="rounded-full p-2 transition hover:bg-white/[0.05]" style={{ color: currentTheme.secondary }}>
-                    <ZoomOut size={16} />
-                  </button>
-                  <span className="min-w-[2.5rem] text-center text-sm font-mono" style={{ color: currentTheme.secondary }}>
-                    {settings.fontSize}px
-                  </span>
-                  <button onClick={() => setSettings(previous => ({ ...previous, fontSize: Math.min(28, previous.fontSize + 1) }))} className="rounded-full p-2 transition hover:bg-white/[0.05]" style={{ color: currentTheme.secondary }}>
-                    <ZoomIn size={16} />
-                  </button>
-                </div>
-
-                <div className="relative hidden items-center group md:flex">
-                  <button className="flex items-center gap-2 rounded-full border border-white/8 px-3 py-2 text-sm font-medium" style={{ backgroundColor: currentTheme.contentBg, color: currentTheme.text }}>
-                    <span className="opacity-70">Font</span>
-                    <span>{FONT_LABELS[settings.fontFamily]}</span>
-                    <ChevronDown size={14} className="opacity-50" />
-                  </button>
-                  <div className="absolute left-0 top-full z-30 mt-2 hidden w-44 overflow-hidden rounded-2xl border border-white/10 shadow-xl group-hover:block" style={{ backgroundColor: currentTheme.contentBg }}>
-                    {(['rubik', 'nunito', 'crimson', 'mono'] as const).map(font => (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1 rounded-full border border-white/8 p-1" style={{ backgroundColor: currentTheme.contentBg }}>
+                    {(['light', 'sepia', 'dark'] as const).map(mode => (
                       <button
-                        key={font}
-                        onClick={() => setSettings(previous => ({ ...previous, fontFamily: font }))}
-                        className="flex w-full items-center justify-between px-4 py-2.5 text-sm"
+                        key={mode}
+                        onClick={() => setSettings(previous => ({ ...previous, theme: mode }))}
+                        className="rounded-full p-2 transition"
                         style={{
-                          fontFamily: FONT_FAMILIES[font],
-                          color: settings.fontFamily === font ? currentTheme.accent : currentTheme.text,
-                          backgroundColor: settings.fontFamily === font ? `${currentTheme.accent}15` : 'transparent',
+                          backgroundColor: settings.theme === mode ? currentTheme.accent : 'transparent',
+                          color: settings.theme === mode ? '#FFF' : currentTheme.secondary,
                         }}
                       >
-                        <span>{FONT_LABELS[font]}</span>
-                        {settings.fontFamily === font ? <Check size={14} /> : null}
+                        {mode === 'light' ? <Sun size={14} /> : mode === 'sepia' ? <Palette size={14} /> : <Moon size={14} />}
                       </button>
                     ))}
                   </div>
-                </div>
-              </div>
 
-              <SurfaceToggle value={readerSurface} onChange={setReaderSurface} />
+                  <div className="flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-2 py-1">
+                    <button onClick={() => setSettings(previous => ({ ...previous, fontSize: Math.max(12, previous.fontSize - 1) }))} className="rounded-full p-2 transition hover:bg-white/[0.05]" style={{ color: currentTheme.secondary }}>
+                      <ZoomOut size={16} />
+                    </button>
+                    <span className="min-w-[2.5rem] text-center text-sm font-mono" style={{ color: currentTheme.secondary }}>
+                      {settings.fontSize}px
+                    </span>
+                    <button onClick={() => setSettings(previous => ({ ...previous, fontSize: Math.min(28, previous.fontSize + 1) }))} className="rounded-full p-2 transition hover:bg-white/[0.05]" style={{ color: currentTheme.secondary }}>
+                      <ZoomIn size={16} />
+                    </button>
+                  </div>
+
+                  <div className="relative hidden items-center group md:flex">
+                    <button className="flex items-center gap-2 rounded-full border border-white/8 px-3 py-2 text-sm font-medium" style={{ backgroundColor: currentTheme.contentBg, color: currentTheme.text }}>
+                      <span className="opacity-70">Font</span>
+                      <span>{FONT_LABELS[settings.fontFamily]}</span>
+                      <ChevronDown size={14} className="opacity-50" />
+                    </button>
+                    <div className="absolute left-0 top-full z-30 mt-2 hidden w-44 overflow-hidden rounded-2xl border border-white/10 shadow-xl group-hover:block" style={{ backgroundColor: currentTheme.contentBg }}>
+                      {(['rubik', 'nunito', 'crimson', 'mono'] as const).map(font => (
+                        <button
+                          key={font}
+                          onClick={() => setSettings(previous => ({ ...previous, fontFamily: font }))}
+                          className="flex w-full items-center justify-between px-4 py-2.5 text-sm"
+                          style={{
+                            fontFamily: FONT_FAMILIES[font],
+                            color: settings.fontFamily === font ? currentTheme.accent : currentTheme.text,
+                            backgroundColor: settings.fontFamily === font ? `${currentTheme.accent}15` : 'transparent',
+                          }}
+                        >
+                          <span>{FONT_LABELS[font]}</span>
+                          {settings.fontFamily === font ? <Check size={14} /> : null}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <SurfaceToggle value={readerSurface} onChange={setReaderSurface} />
+              </div>
             </div>
 
             <div className="px-5 py-6 md:px-7">
@@ -1296,7 +1342,7 @@ export function StudyModePage({
           </div>
         </section>
 
-        {studyPanelOpen && !isMobile ? <section className="xl:sticky xl:top-[6.75rem] xl:self-start xl:max-h-[calc(100vh-8rem)]">{renderStudyPanel()}</section> : null}
+        {studyPanelOpen && !isMobile ? <section className="xl:sticky xl:top-[6.75rem] xl:h-[calc(100vh-8rem)] xl:self-start">{renderStudyPanel()}</section> : null}
       </div>
 
       {!studyPanelOpen || isMobile ? (
@@ -1305,7 +1351,7 @@ export function StudyModePage({
           className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-2 rounded-full border border-[var(--brand)]/20 bg-[linear-gradient(135deg,rgba(254,205,140,0.95),rgba(254,205,140,0.78))] px-4 py-3 text-sm font-semibold text-black shadow-[0_20px_50px_rgba(0,0,0,0.34)] transition hover:translate-y-[-1px]"
         >
           <Brain className="h-4 w-4" />
-          Open companion
+          Open assistant
         </button>
       ) : null}
 
