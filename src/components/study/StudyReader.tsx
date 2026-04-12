@@ -23,7 +23,6 @@ import {
   Save,
   Sparkles,
   Sun,
-  Target,
   X,
   ZoomIn,
   ZoomOut,
@@ -225,37 +224,61 @@ const StudyTabButton = ({
   </button>
 );
 
-const HistoryCard = ({ interaction }: { interaction: StudyInteraction }) => (
-  <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 p-4">
-    <div className="flex items-center justify-between gap-3">
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">
-          {interaction.type === 'doubt' ? 'Question' : interaction.mode?.replace(/_/g, ' ')}
-        </p>
-        <h4 className="mt-1 text-sm font-semibold text-[var(--text-primary)]">{interaction.title}</h4>
-      </div>
-      <span className="rounded-full border border-[var(--border-subtle)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-        {interaction.answer.confidence || 'medium'}
-      </span>
-    </div>
-    {interaction.sourceText ? (
-      <div className="mt-3 rounded-xl border border-[var(--border-subtle)] bg-white/[0.03] p-3 text-xs leading-relaxed text-[var(--text-secondary)]">
-        “{interaction.sourceText}”
-      </div>
-    ) : null}
-    <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[var(--text-secondary)]">{interaction.answer.answer}</p>
-    {interaction.answer.followUpSuggestions?.length ? (
-      <div className="mt-4 flex flex-wrap gap-2">
-        {interaction.answer.followUpSuggestions.map(item => (
-          <span
-            key={item}
-            className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]"
-          >
-            {item}
+const HistoryCard = ({
+  interaction,
+  onFollowUpClick,
+}: {
+  interaction: StudyInteraction;
+  onFollowUpClick?: (prompt: string) => void;
+}) => (
+  <div className="space-y-3 rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-4">
+    {interaction.question?.question ? (
+      <div className="ml-8 rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3">
+        <div className="mb-1 flex items-center justify-between gap-3">
+          <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">
+            {interaction.type === 'doubt' ? 'You asked' : EXPLANATION_MODE_LABELS[interaction.mode || 'simpler']}
           </span>
-        ))}
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            {interaction.answer.confidence || 'medium'}
+          </span>
+        </div>
+        <p className="text-sm leading-7 text-[var(--text-primary)]">{interaction.question.question}</p>
       </div>
     ) : null}
+
+    <div className="mr-4 rounded-[22px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 px-4 py-4">
+      <div className="mb-2 flex items-center gap-2">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--brand)]/10 text-[var(--brand)]">
+          {interaction.type === 'doubt' ? <MessageCircle className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">
+          {interaction.type === 'doubt' ? 'Companion' : 'Reframed explanation'}
+        </span>
+      </div>
+
+      {interaction.sourceText ? (
+        <div className="mb-3 rounded-2xl border border-[var(--border-subtle)] bg-white/[0.03] px-3 py-2 text-xs leading-6 text-[var(--text-secondary)]">
+          "{interaction.sourceText}"
+        </div>
+      ) : null}
+
+      <p className="whitespace-pre-wrap text-sm leading-7 text-[var(--text-secondary)]">{interaction.answer.answer}</p>
+
+      {interaction.answer.followUpSuggestions?.length ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {interaction.answer.followUpSuggestions.map(item => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => onFollowUpClick?.(item)}
+              className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-1.5 text-[10px] font-semibold tracking-wide text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   </div>
 );
 
@@ -585,6 +608,13 @@ export function StudyReader({
   ]
     .filter(Boolean)
     .join(' ');
+  const quickQuestionPrompts = [
+    `What is the core idea in ${currentModule.title}?`,
+    'What should I not confuse this with?',
+    'Give me one practical example from this chapter.',
+  ];
+  const selectedContextText = selectedText || moduleOverviewSnippet;
+  const selectedTextPreview = selectedText ? `${selectedText.slice(0, 220)}${selectedText.length > 220 ? '...' : ''}` : '';
 
   const handleAskDoubt = async (payload?: { question: string; selectedText?: string }) => {
     const effectiveQuestion = payload?.question || questionInput;
@@ -616,6 +646,24 @@ export function StudyReader({
       showToast(message, 'error');
     } finally {
       setDoubtLoading(false);
+    }
+  };
+
+  const handleFollowUpPrompt = (prompt: string, sourceText?: string) => {
+    setActiveTool('doubt');
+    setQuestionInput(prompt);
+    void handleAskDoubt({
+      question: prompt,
+      selectedText: sourceText || selectedContextText || undefined,
+    });
+  };
+
+  const handleComposerKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      if (!doubtLoading) {
+        void handleAskDoubt();
+      }
     }
   };
 
@@ -685,14 +733,14 @@ export function StudyReader({
   };
 
   const renderStudyPanel = () => (
-    <div className="flex h-full flex-col overflow-hidden rounded-[28px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] shadow-[0_28px_80px_rgba(0,0,0,0.26)]">
-      <div className="border-b border-[var(--border-subtle)] px-5 py-4">
+    <div className="flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(12,16,15,0.96),rgba(8,10,10,0.98))] shadow-[0_24px_70px_rgba(0,0,0,0.28)]">
+      <div className="border-b border-[var(--border-subtle)] px-4 py-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)]">Study companion</p>
-            <h3 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">{currentModule.title}</h3>
+            <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Companion</p>
+            <h3 className="mt-1 text-base font-semibold text-[var(--text-primary)]">{currentModule.title}</h3>
             <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">
-              Ask doubts, shift the explanation style, or turn this chapter into active recall.
+              Ask, reframe, and drill this chapter without losing reading context.
             </p>
           </div>
           {isMobile ? (
@@ -703,17 +751,17 @@ export function StudyReader({
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <StudyTabButton label="Doubts" icon={MessageCircle} active={activeTool === 'doubt'} onClick={() => setActiveTool('doubt')} />
-          <StudyTabButton label="Re-explain" icon={Sparkles} active={activeTool === 'explain'} onClick={() => setActiveTool('explain')} />
+          <StudyTabButton label="Ask" icon={MessageCircle} active={activeTool === 'doubt'} onClick={() => setActiveTool('doubt')} />
+          <StudyTabButton label="Reframe" icon={Sparkles} active={activeTool === 'explain'} onClick={() => setActiveTool('explain')} />
           <StudyTabButton label="Flashcards" icon={Brain} active={activeTool === 'flashcards'} onClick={() => setActiveTool('flashcards')} />
         </div>
 
         {selectedText ? (
-          <div className="mt-4 rounded-2xl border border-[var(--brand)]/20 bg-[var(--brand)]/7 p-3">
+          <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/8 px-3 py-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--brand)]">Selected text</p>
-                <p className="mt-2 text-xs leading-6 text-[var(--text-secondary)]">“{selectedText}”</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300">Using selection</p>
+                <p className="mt-2 text-xs leading-6 text-[var(--text-secondary)]">"{selectedTextPreview}"</p>
               </div>
               <button onClick={() => setSelectedText('')} className="rounded-full p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                 <X className="h-3.5 w-3.5" />
@@ -723,63 +771,54 @@ export function StudyReader({
         ) : null}
       </div>
 
-      <div className="custom-scrollbar flex-1 overflow-y-auto px-5 py-5">
+      <div className="custom-scrollbar flex-1 overflow-y-auto px-4 py-4">
         {activeTool === 'doubt' ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/80 p-4">
-              <label className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Ask this chapter</label>
-              <textarea
-                value={questionInput}
-                onChange={event => setQuestionInput(event.target.value)}
-                placeholder="Why does this concept matter, and how would I know when to use it?"
-                className="mt-3 min-h-[120px] w-full resize-none rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 text-sm leading-7 text-[var(--text-primary)] outline-none"
-              />
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button onClick={() => void handleAskDoubt()} disabled={doubtLoading} className="btn btn-primary py-2.5">
-                  {doubtLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
-                  {doubtLoading ? 'Thinking' : 'Ask this chapter'}
-                </button>
-                {moduleOverviewSnippet ? (
-                  <button onClick={() => setSelectedText(moduleOverviewSnippet)} className="btn btn-secondary py-2.5">
-                    <Target className="h-4 w-4" />
-                    Use chapter overview
-                  </button>
-                ) : null}
-              </div>
-              {doubtError ? (
-                <div className="mt-3 rounded-2xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-300">
-                  <div>{doubtError}</div>
-                  {lastDoubtPayload ? (
-                    <button onClick={() => void handleAskDoubt(lastDoubtPayload)} className="mt-3 inline-flex items-center gap-2 font-semibold text-red-200">
-                      <RefreshCw className="h-3.5 w-3.5" />
-                      Retry
-                    </button>
-                  ) : null}
+            <div className="rounded-[20px] border border-[var(--border-subtle)] bg-white/[0.02] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Thread</p>
+                  <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">A cleaner running conversation for this chapter.</p>
                 </div>
-              ) : null}
+                {isThreadLoading ? <Loader2 className="h-4 w-4 animate-spin text-[var(--text-muted)]" /> : null}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {quickQuestionPrompts.map(prompt => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => setQuestionInput(prompt)}
+                    className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-base)] px-3 py-1.5 text-[11px] font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Recent thread</p>
-                {isThreadLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--text-muted)]" /> : null}
+            {doubtHistory.length === 0 && !isThreadLoading ? (
+              <div className="rounded-[20px] border border-dashed border-[var(--border-subtle)] px-4 py-5 text-sm leading-7 text-[var(--text-secondary)]">
+                Start with a direct question, or highlight a part of the chapter first.
               </div>
-              {doubtHistory.length === 0 && !isThreadLoading ? (
-                <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] p-4 text-sm leading-7 text-[var(--text-secondary)]">
-                  No questions saved for this chapter yet.
-                </div>
-              ) : null}
-              {doubtHistory.map(interaction => (
-                <HistoryCard key={interaction.id} interaction={interaction} />
-              ))}
-            </div>
+            ) : null}
+
+            {doubtHistory.map(interaction => (
+              <HistoryCard
+                key={interaction.id}
+                interaction={interaction}
+                onFollowUpClick={prompt => handleFollowUpPrompt(prompt, interaction.sourceText)}
+              />
+            ))}
           </div>
         ) : null}
 
         {activeTool === 'explain' ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/80 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Explain differently</p>
+            <div className="rounded-[20px] border border-[var(--border-subtle)] bg-white/[0.02] p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Transforms</p>
+              <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">
+                Pick the lens first. Keep the context tight.
+              </p>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {EXPLANATION_OPTIONS.map(mode => (
                   <button
@@ -788,8 +827,8 @@ export function StudyReader({
                     disabled={Boolean(explainLoadingMode)}
                     className={`rounded-2xl border px-3 py-3 text-left text-xs font-semibold transition ${
                       explainLoadingMode === mode
-                        ? 'border-[var(--brand)]/30 bg-[var(--brand)]/10 text-[var(--text-primary)]'
-                        : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        ? 'border-emerald-400/30 bg-emerald-400/10 text-[var(--text-primary)]'
+                        : 'border-[var(--border-subtle)] bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -799,6 +838,11 @@ export function StudyReader({
                   </button>
                 ))}
               </div>
+              {selectedContextText ? (
+                <div className="mt-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] px-3 py-2 text-xs leading-6 text-[var(--text-secondary)]">
+                  Current context: "{selectedContextText.slice(0, 220)}{selectedContextText.length > 220 ? '...' : ''}"
+                </div>
+              ) : null}
               {explainError ? (
                 <div className="mt-3 rounded-2xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-300">
                   <div>{explainError}</div>
@@ -815,38 +859,45 @@ export function StudyReader({
               ) : null}
             </div>
 
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Saved transforms</p>
-              {explainHistory.length === 0 && !isThreadLoading ? (
-                <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] p-4 text-sm leading-7 text-[var(--text-secondary)]">
-                  Tap a mode to create the first alternate explanation for this chapter.
-                </div>
-              ) : null}
-              {explainHistory.map(interaction => (
-                <HistoryCard key={interaction.id} interaction={interaction} />
-              ))}
-            </div>
+            {explainHistory.length === 0 && !isThreadLoading ? (
+              <div className="rounded-[20px] border border-dashed border-[var(--border-subtle)] px-4 py-5 text-sm leading-7 text-[var(--text-secondary)]">
+                Pick a transform to create your first alternate explanation.
+              </div>
+            ) : null}
+
+            {explainHistory.map(interaction => (
+              <HistoryCard
+                key={interaction.id}
+                interaction={interaction}
+                onFollowUpClick={prompt => handleFollowUpPrompt(prompt, interaction.sourceText)}
+              />
+            ))}
           </div>
         ) : null}
 
         {activeTool === 'flashcards' ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/80 p-4">
+            <div className="rounded-[20px] border border-[var(--border-subtle)] bg-white/[0.02] p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Chapter to flashcards</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Flashcards</p>
                   <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">
-                    Build a lightweight deck straight from this chapter’s objectives and content.
+                    Turn this chapter into a compact recall deck and review it right here.
                   </p>
                 </div>
                 {isDeckLoading ? <Loader2 className="h-4 w-4 animate-spin text-[var(--text-muted)]" /> : null}
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap items-center gap-2">
                 <button onClick={() => void handleGenerateFlashcards()} disabled={flashcardsLoading} className="btn btn-primary py-2.5">
                   {flashcardsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
-                  {deck ? 'Regenerate deck' : 'Generate flashcards'}
+                  {deck ? 'Refresh deck' : 'Generate deck'}
                 </button>
+                {deck ? (
+                  <span className="rounded-full border border-[var(--border-subtle)] px-3 py-1.5 text-[11px] font-medium text-[var(--text-secondary)]">
+                    {deck.cards.length} cards saved
+                  </span>
+                ) : null}
               </div>
 
               {flashcardsError ? (
@@ -879,42 +930,88 @@ export function StudyReader({
                 onRate={difficulty => void handleRateCard(difficulty)}
               />
             ) : !isDeckLoading ? (
-              <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] p-4 text-sm leading-7 text-[var(--text-secondary)]">
-                Generate the first deck for this chapter and it will stay saved locally for later review.
+              <div className="rounded-[20px] border border-dashed border-[var(--border-subtle)] px-4 py-5 text-sm leading-7 text-[var(--text-secondary)]">
+                Generate a deck once and it will stay attached to this chapter locally.
               </div>
             ) : null}
           </div>
         ) : null}
       </div>
+
+      {activeTool === 'doubt' ? (
+        <div className="border-t border-[var(--border-subtle)] bg-[rgba(9,12,11,0.96)] px-4 py-4">
+          <div className="rounded-[22px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 p-3">
+            <textarea
+              value={questionInput}
+              onChange={event => setQuestionInput(event.target.value)}
+              onKeyDown={handleComposerKeyDown}
+              placeholder="Ask about the current chapter..."
+              className="min-h-[88px] w-full resize-none bg-transparent text-sm leading-7 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
+            />
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap gap-2">
+                {selectedText ? (
+                  <button onClick={() => setSelectedText('')} className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-medium text-emerald-300">
+                    Clear selection
+                  </button>
+                ) : null}
+                {moduleOverviewSnippet ? (
+                  <button onClick={() => setSelectedText(moduleOverviewSnippet)} className="rounded-full border border-[var(--border-subtle)] px-3 py-1.5 text-[11px] font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]">
+                    Use chapter overview
+                  </button>
+                ) : null}
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[11px] text-[var(--text-muted)]">Enter to ask</span>
+                <button onClick={() => void handleAskDoubt()} disabled={doubtLoading} className="btn btn-primary py-2.5">
+                  {doubtLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
+                  {doubtLoading ? 'Thinking' : 'Ask'}
+                </button>
+              </div>
+            </div>
+            {doubtError ? (
+              <div className="mt-3 rounded-2xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-300">
+                <div>{doubtError}</div>
+                {lastDoubtPayload ? (
+                  <button onClick={() => void handleAskDoubt(lastDoubtPayload)} className="mt-3 inline-flex items-center gap-2 font-semibold text-red-200">
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    Retry
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 
   return (
-    <div className="relative space-y-6">
-      <div className={`grid gap-6 ${studyPanelOpen && !isMobile ? 'xl:grid-cols-[260px_minmax(0,1fr)_360px]' : 'xl:grid-cols-[260px_minmax(0,1fr)]'}`}>
-        <aside className="space-y-4">
-          <div className="rounded-[28px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5">
+    <div className="relative space-y-5">
+      <div className={`grid gap-5 ${studyPanelOpen && !isMobile ? 'xl:grid-cols-[220px_minmax(0,1fr)_380px]' : 'xl:grid-cols-[220px_minmax(0,1fr)]'}`}>
+        <aside className="space-y-3 xl:sticky xl:top-24 xl:self-start">
+          <div className="rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Reader mode</p>
             <div className="mt-3">
               <SurfaceToggle value={readerSurface} onChange={setReaderSurface} />
             </div>
-            <div className="mt-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Study context</p>
-              <h3 className="mt-2 text-base font-semibold text-[var(--text-primary)]">{currentModule.title}</h3>
-              <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
+            <div className="mt-4 rounded-[18px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">Now reading</p>
+              <h3 className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{currentModule.title}</h3>
+              <p className="mt-2 text-xs leading-6 text-[var(--text-secondary)]">
                 {roadmapModule?.description || 'Switch chapters to target doubts, explanations, and flashcards precisely.'}
               </p>
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3">
+          <div className="rounded-[22px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3">
             <div className="mb-3 flex items-center justify-between px-2">
               <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Chapters</p>
               <span className="rounded-full border border-[var(--border-subtle)] px-2 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
                 {selectedModuleIndex + 1}/{orderedModules.length}
               </span>
             </div>
-            <div className="space-y-2">
+            <div className="custom-scrollbar space-y-1.5 xl:max-h-[70vh] xl:overflow-y-auto">
               {orderedModules.map((module, index) => {
                 const progress = readingProgressUtils.getModuleProgress(book.id, index)?.percentComplete || 0;
                 const isActive = index === selectedModuleIndex && readerSurface === 'module';
@@ -926,10 +1023,10 @@ export function StudyReader({
                       setReaderSurface('module');
                       setSelectedText('');
                     }}
-                    className={`group w-full rounded-2xl border p-3 text-left transition ${
+                    className={`group w-full rounded-[18px] border px-3 py-3 text-left transition ${
                       isActive
-                        ? 'border-[var(--brand)]/30 bg-[var(--brand)]/10'
-                        : 'border-[var(--border-subtle)] bg-[var(--bg-base)] hover:border-[var(--border-default)]'
+                        ? 'border-emerald-400/20 bg-emerald-400/8'
+                        : 'border-transparent bg-[var(--bg-base)] hover:border-[var(--border-default)]'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -938,6 +1035,9 @@ export function StudyReader({
                           Chapter {index + 1}
                         </p>
                         <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">{module.title}</p>
+                        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
+                          <div className="h-full rounded-full bg-emerald-300/70 transition-all" style={{ width: `${progress}%` }} />
+                        </div>
                       </div>
                       {progress > 0 ? (
                         <span className="rounded-full bg-white/5 px-2 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
@@ -977,7 +1077,7 @@ export function StudyReader({
           ) : null}
 
           <div
-            className="reading-container overflow-hidden rounded-[32px] border border-[var(--border-subtle)] shadow-[0_30px_100px_rgba(0,0,0,0.32)]"
+            className="reading-container overflow-hidden rounded-[26px] border border-[var(--border-subtle)] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
             style={{ backgroundColor: currentTheme.bg, color: currentTheme.text, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
           >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-4 py-3" style={{ backgroundColor: currentTheme.bg }}>
@@ -1060,34 +1160,38 @@ export function StudyReader({
               </div>
             </div>
 
-            <div className="px-4 py-5 sm:px-8">
+            <div className="px-4 py-5 sm:px-7">
               {readerSurface === 'module' ? (
-                <div className="mb-6 rounded-[28px] border border-[var(--border-subtle)] bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))] p-5">
+                <div className="mb-5 rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] p-4">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--text-muted)]">Active chapter</p>
-                      <h2 className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">{currentModule.title}</h2>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full border border-[var(--border-subtle)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                          Chapter {selectedModuleIndex + 1}
+                        </span>
+                        {roadmapModule?.estimatedTime ? (
+                          <span className="rounded-full border border-[var(--border-subtle)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                            {roadmapModule.estimatedTime}
+                          </span>
+                        ) : null}
+                      </div>
+                      <h2 className="mt-3 text-[1.7rem] font-semibold leading-tight text-[var(--text-primary)]">{currentModule.title}</h2>
                       <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--text-secondary)]">
                         {roadmapModule?.description || 'This chapter is now the center of your study workflow, so doubts and flashcards stay context-aware.'}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {roadmapModule?.estimatedTime ? (
-                        <span className="rounded-full border border-[var(--border-subtle)] px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                          {roadmapModule.estimatedTime}
-                        </span>
-                      ) : null}
                       <button onClick={() => setStudyPanelOpen(true)} className="btn btn-secondary py-2">
                         <Brain className="h-4 w-4" />
-                        Ask this chapter
+                        Open companion
                       </button>
                     </div>
                   </div>
 
                   {roadmapModule?.objectives?.length ? (
-                    <div className="mt-5 grid gap-3 md:grid-cols-2">
+                    <div className="mt-4 grid gap-2.5 md:grid-cols-2">
                       {roadmapModule.objectives.slice(0, 4).map(objective => (
-                        <div key={objective} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 px-4 py-3 text-sm leading-6 text-[var(--text-secondary)]">
+                        <div key={objective} className="rounded-[18px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 px-3.5 py-3 text-sm leading-6 text-[var(--text-secondary)]">
                           <div className="flex items-start gap-3">
                             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--brand)]" />
                             <span>{objective}</span>
@@ -1098,7 +1202,7 @@ export function StudyReader({
                   ) : null}
                 </div>
               ) : (
-                <div className="mb-6 rounded-[28px] border border-[var(--border-subtle)] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 text-sm leading-7 text-[var(--text-secondary)]">
+                <div className="mb-5 rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-4 text-sm leading-7 text-[var(--text-secondary)]">
                   The full-book surface stays available for long-form review and editing. Study tools still stay pinned to the currently selected chapter so answers remain precise.
                 </div>
               )}
@@ -1148,7 +1252,7 @@ export function StudyReader({
           </div>
         </section>
 
-        {studyPanelOpen && !isMobile ? <section>{renderStudyPanel()}</section> : null}
+        {studyPanelOpen && !isMobile ? <section className="xl:sticky xl:top-24 xl:self-start xl:max-h-[calc(100vh-7rem)]">{renderStudyPanel()}</section> : null}
       </div>
 
       {!studyPanelOpen || isMobile ? (
@@ -1157,7 +1261,7 @@ export function StudyReader({
           className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-2 rounded-full border border-[var(--brand)]/20 bg-[linear-gradient(135deg,rgba(254,205,140,0.95),rgba(254,205,140,0.78))] px-4 py-3 text-sm font-semibold text-black shadow-[0_20px_50px_rgba(0,0,0,0.34)] transition hover:translate-y-[-1px]"
         >
           <Brain className="h-4 w-4" />
-          Ask this chapter
+          Open companion
         </button>
       ) : null}
 
