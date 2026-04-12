@@ -658,6 +658,7 @@ const HomeView = ({
   onOpenSettings,
   settings,
   onModelChange,
+  quotaStatus,
 }: {
   onNewBook: () => void;
   onShowList: () => void;
