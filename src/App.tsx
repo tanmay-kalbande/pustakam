@@ -42,6 +42,7 @@ type AppView = 'list' | 'create' | 'detail';
 type Theme = 'light' | 'dark';
 const MAX_BOOK_TITLE_LENGTH = 72;
 const BookView = lazy(() => import('./components/BookView').then(module => ({ default: module.BookView })));
+const StudyModePage = lazy(() => import('./components/study/StudyModePage').then(module => ({ default: module.StudyModePage })));
 
 function formatBookTitle(session: Pick<BookSession, 'title' | 'goal'>): string {
   const rawTitle = (session.title || session.goal || 'Untitled Book').replace(/\s+/g, ' ').trim();
@@ -109,6 +110,7 @@ function App() {
   const [showCompliancePage, setShowCompliancePage] = useState(false);
   const [showDisclaimerPage, setShowDisclaimerPage] = useState(false);
   const [showBlogPage, setShowBlogPage] = useState(false);
+  const [studyModeBookId, setStudyModeBookId] = useState<string | null>(null);
 
   // Quota / BYOK state
   const [quotaStatus, setQuotaStatus] = useState<QuotaStatus | null>(null);
@@ -809,6 +811,7 @@ function App() {
                     settings={settings}
                     onModelChange={handleModelChange}
                     quotaStatus={quotaStatus}
+                    onOpenStudyMode={(bookId: string) => setStudyModeBookId(bookId)}
                   />
                 </Suspense>
               </main>
@@ -890,6 +893,34 @@ function App() {
       {showCompliancePage && <CompliancePage onClose={() => setShowCompliancePage(false)} />}
       {showDisclaimerPage && <DisclaimerPage isOpen={showDisclaimerPage} onClose={() => setShowDisclaimerPage(false)} />}
       {showBlogPage && <BlogPage onClose={() => setShowBlogPage(false)} />}
+
+      {/* Study Mode - Separate Full Page */}
+      {studyModeBookId && (() => {
+        const studyBook = books.find(b => b.id === studyModeBookId);
+        if (!studyBook || studyBook.status !== 'completed') return null;
+        return (
+          <div className="fixed inset-0 z-[200]" style={{ background: '#050505' }}>
+            <NebulaBackground theme={theme} />
+            <div className="relative z-10 h-full">
+              <Suspense fallback={<WorkspaceFallback />}>
+                <StudyModePage
+                  book={studyBook}
+                  theme={theme}
+                  isEditing={false}
+                  editedContent=""
+                  onEditFullBook={() => {}}
+                  onSaveFullBook={() => {}}
+                  onCancelEdit={() => {}}
+                  onContentChange={() => {}}
+                  showToast={showToast}
+                  isMobile={isMobile}
+                  onBack={() => setStudyModeBookId(null)}
+                />
+              </Suspense>
+            </div>
+          </div>
+        );
+      })()}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <Analytics />
