@@ -1124,6 +1124,7 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
     this.activeGenerations.add(book.id);
     this.resumeGeneration(book.id);
 
+    try {
     const checkpoint = this.loadCheckpoint(book.id);
     let completedModules   = [...book.modules.filter(m => m.status === 'completed')];
     const completedIds     = new Set<string>(completedModules.map(m => m.roadmapModuleId).filter(Boolean));
@@ -1235,8 +1236,10 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
     this.updateGenerationStatus(book.id, { status: 'completed', totalProgress: 100, logMessage: 'All modules generated successfully' });
 
     const totalWords = completedModules.reduce((s, m) => s + m.wordCount, 0);
-    planService.recordBookCompleted(book.id, book.title || session.goal.slice(0, 50), session.goal, session.generationMode || 'stellar', book.roadmap?.totalModules || completedModules.length, totalWords).catch(() => {});
-    this.activeGenerations.delete(book.id);
+    await planService.recordBookCompleted(book.id, book.title || session.goal.slice(0, 50), session.goal, session.generationMode || 'stellar', book.roadmap?.totalModules || completedModules.length, totalWords);
+    } finally {
+      this.activeGenerations.delete(book.id);
+    }
   }
 
   async retryFailedModules(book: BookProject, session: BookSession): Promise<void> {

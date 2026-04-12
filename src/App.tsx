@@ -1,7 +1,7 @@
 // ============================================================================
 // FILE: src/App.tsx
 // ============================================================================
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useMemo, useCallback } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { LoadingScreen } from './components/LoadingScreen';
 import { InstallPrompt } from './components/InstallPrompt';
@@ -16,7 +16,6 @@ import { bookService } from './services/bookService';
 import { planService } from './services/planService';
 import { quotaService } from './services/quotaService';
 import { byokStorage } from './utils/byokStorage';
-import { BookView } from './components/BookView';
 import { BookProject, BookSession } from './types/book';
 import { generateId } from './utils/helpers';
 import { TopHeader } from './components/TopHeader';
@@ -35,12 +34,13 @@ import CompliancePage from './components/CompliancePage';
 import { DisclaimerPage } from './components/DisclaimerPage';
 import BlogPage from './components/BlogPage';
 import { Toast, ToastType } from './components/Toast';
-import { APP_AI_BRANDLINE, PROVIDERS } from './constants/ai';
+import { PROVIDERS } from './constants/ai';
 import { getDefaultModel, getProviderConfig } from './services/providerRegistry';
 
 type AppView = 'list' | 'create' | 'detail';
 type Theme = 'light' | 'dark';
 const MAX_BOOK_TITLE_LENGTH = 72;
+const BookView = lazy(() => import('./components/BookView').then(module => ({ default: module.BookView })));
 
 function formatBookTitle(session: Pick<BookSession, 'title' | 'goal'>): string {
   const rawTitle = (session.title || session.goal || 'Untitled Book').replace(/\s+/g, ' ').trim();
@@ -51,6 +51,16 @@ function formatBookTitle(session: Pick<BookSession, 'title' | 'goal'>): string {
   const safeSlice = lastSpace >= 40 ? slice.slice(0, lastSpace) : slice;
 
   return `${safeSlice.trim().replace(/[.,:;!?-]+$/, '')}...`;
+}
+
+function WorkspaceFallback() {
+  return (
+    <div className="w-full max-w-5xl mx-auto px-6 pt-24 pb-10">
+      <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 text-sm text-[var(--text-secondary)] animate-fade-in-up">
+        Loading your workspace...
+      </div>
+    </div>
+  );
 }
 
 interface GenerationStatus {
@@ -70,7 +80,6 @@ function App() {
   const [view, setView] = useState<AppView>('list');
   const [showListInMain, setShowListInMain] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showOfflineMessage, setShowOfflineMessage] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>({ status: 'idle', totalProgress: 0, totalWordsGenerated: 0 });
@@ -78,7 +87,6 @@ function App() {
   const [showModelSwitch, setShowModelSwitch] = useState(false);
   const [modelSwitchOptions, setModelSwitchOptions] = useState<Array<{ provider: ModelProvider; model: string; name: string }>>([]);
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('pustakam-theme') as Theme) || 'dark');
-  const [isReadingMode, setIsReadingMode] = useState(false);
 
   // Auth state
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -193,7 +201,7 @@ function App() {
         catch (e) { console.warn('Failed to clear pause flag:', e); }
       }
     });
-  }, []);
+  }, [books]);
 
   useEffect(() => {
     bookService.updateSettings(settings);
@@ -213,19 +221,22 @@ function App() {
   }, [user?.id]);
 
   // Fetch quota status when auth resolves or settings change
-  const refreshQuota = useCallback(async () => {
+  const refreshQuota = useCallback(async (options: { forceRefresh?: boolean; silent?: boolean } = {}) => {
     try {
-      const status = await quotaService.getQuotaStatus(user?.id);
+      const status = await quotaService.getQuotaStatus(user?.id, { forceRefresh: options.forceRefresh });
       setQuotaStatus(status);
       bookService.setQuotaMode(status.mode);
     } catch (err) {
       console.warn('[App] Failed to fetch quota:', err);
+      if (!options.silent) {
+        showToast('Could not refresh usage limits right now.', 'warning');
+      }
     }
-  }, [user?.id]);
+  }, [showToast, user?.id]);
 
   useEffect(() => {
     if (!isLoading) {
-      refreshQuota();
+      refreshQuota({ silent: true });
     }
   }, [isLoading, user?.id, refreshQuota]);
 
@@ -234,7 +245,7 @@ function App() {
   useEffect(() => {
     if (!isLoading && hasLoadedUserBooksRef.current) {
       // Small timeout ensures Supabase triggers have fired after storage sync
-      const timer = setTimeout(() => refreshQuota(), 1500);
+      const timer = setTimeout(() => refreshQuota({ forceRefresh: true, silent: true }), 1500);
       return () => clearTimeout(timer);
     }
   }, [completedBooksCount, isLoading, refreshQuota]);
@@ -243,7 +254,11 @@ function App() {
 
   useEffect(() => {
     if (!isLoading && hasLoadedUserBooksRef.current) {
-      storageUtils.saveBooks(books, user?.id);
+      const timer = setTimeout(() => {
+        storageUtils.saveBooks(books, user?.id);
+      }, 250);
+
+      return () => clearTimeout(timer);
     }
   }, [books, user?.id, isLoading]);
 
@@ -287,9 +302,13 @@ function App() {
   useEffect(() => {
     if (isLoading) return;
 
+    let welcomeTimer: ReturnType<typeof setTimeout> | undefined;
+    let exitTimer: ReturnType<typeof setTimeout> | undefined;
+    let exitCleanupTimer: ReturnType<typeof setTimeout> | undefined;
+
     if (isAuthenticated && !sessionStorage.getItem('welcome_shown')) {
       // Small delay so it pops up cleanly after other loading finishes
-      setTimeout(() => setShowWelcomeModal(true), 2500);
+      welcomeTimer = setTimeout(() => setShowWelcomeModal(true), 2500);
       sessionStorage.setItem('welcome_shown', 'true');
     }
 
@@ -299,9 +318,9 @@ function App() {
 
     // Ensure a smooth transition even for fasting loading landing page
     const holdTime = user ? 1500 : 1000;
-    setTimeout(() => {
+    exitTimer = setTimeout(() => {
       setIsLoadingScreenExiting(true);
-      setTimeout(() => {
+      exitCleanupTimer = setTimeout(() => {
         setIsLoadingScreenVisible(false);
         setIsLoadingScreenExiting(false);
       }, 700);
@@ -314,12 +333,17 @@ function App() {
     }
 
     setCurrentBookId(null);
+
+    return () => {
+      if (welcomeTimer) clearTimeout(welcomeTimer);
+      if (exitTimer) clearTimeout(exitTimer);
+      if (exitCleanupTimer) clearTimeout(exitCleanupTimer);
+    };
   }, [user?.id, isLoading, refreshProfile, isAuthenticated]);
 
   useEffect(() => {
-    const handleOnline = () => { setIsOnline(true); setShowOfflineMessage(false); };
+    const handleOnline = () => { setShowOfflineMessage(false); };
     const handleOffline = () => {
-      setIsOnline(false);
       setShowOfflineMessage(true);
       setTimeout(() => setShowOfflineMessage(false), 5000);
     };
@@ -590,7 +614,7 @@ function App() {
     setSettingsOpen(false);
     showToast('Settings saved.', 'success');
     // Refresh quota since BYOK keys may have changed
-    refreshQuota();
+    refreshQuota({ forceRefresh: true });
   };
 
   const handleModelChange = (model: string, provider: ModelProvider) => {
@@ -742,41 +766,42 @@ function App() {
                   </div>
                 )}
 
-                <BookView
-                  books={books}
-                  currentBookId={currentBookId}
-                  onCreateBookRoadmap={handleCreateBookRoadmap}
-                  onGenerateAllModules={handleGenerateAllModules}
-                  onRetryFailedModules={handleRetryFailedModules}
-                  onAssembleBook={handleAssembleBook}
-                  onSelectBook={handleSelectBook}
-                  onDeleteBook={handleDeleteBook}
-                  onUpdateBookStatus={handleUpdateBookStatus}
-                  hasApiKey={hasApiKey}
-                  view={view}
-                  setView={setView}
-                  onUpdateBookContent={(bookId, content) =>
-                    setBooks(prev => prev.map(b => b.id === bookId ? { ...b, finalBook: content, updatedAt: new Date() } : b))
-                  }
-                  showListInMain={showListInMain}
-                  setShowListInMain={setShowListInMain}
-                  isMobile={isMobile}
-                  generationStatus={generationStatus}
-                  generationStats={generationStats}
-                  onPauseGeneration={handlePauseGeneration}
-                  onResumeGeneration={handleResumeGeneration}
-                  isGenerating={isGenerating}
-                  onRetryDecision={handleRetryDecision}
-                  availableModels={alternativeModels}
-                  theme={theme}
-                  onOpenSettings={() => setSettingsOpen(true)}
-                  showAlertDialog={showAlertDialog}
-                  showToast={showToast}
-                  onReadingModeChange={setIsReadingMode}
-                  settings={settings}
-                  onModelChange={handleModelChange}
-                  quotaStatus={quotaStatus}
-                />
+                <Suspense fallback={<WorkspaceFallback />}>
+                  <BookView
+                    books={books}
+                    currentBookId={currentBookId}
+                    onCreateBookRoadmap={handleCreateBookRoadmap}
+                    onGenerateAllModules={handleGenerateAllModules}
+                    onRetryFailedModules={handleRetryFailedModules}
+                    onAssembleBook={handleAssembleBook}
+                    onSelectBook={handleSelectBook}
+                    onDeleteBook={handleDeleteBook}
+                    onUpdateBookStatus={handleUpdateBookStatus}
+                    hasApiKey={hasApiKey}
+                    view={view}
+                    setView={setView}
+                    onUpdateBookContent={(bookId, content) =>
+                      setBooks(prev => prev.map(b => b.id === bookId ? { ...b, finalBook: content, updatedAt: new Date() } : b))
+                    }
+                    showListInMain={showListInMain}
+                    setShowListInMain={setShowListInMain}
+                    isMobile={isMobile}
+                    generationStatus={generationStatus}
+                    generationStats={generationStats}
+                    onPauseGeneration={handlePauseGeneration}
+                    onResumeGeneration={handleResumeGeneration}
+                    isGenerating={isGenerating}
+                    onRetryDecision={handleRetryDecision}
+                    availableModels={alternativeModels}
+                    theme={theme}
+                    onOpenSettings={() => setSettingsOpen(true)}
+                    showAlertDialog={showAlertDialog}
+                    showToast={showToast}
+                    settings={settings}
+                    onModelChange={handleModelChange}
+                    quotaStatus={quotaStatus}
+                  />
+                </Suspense>
               </main>
 
               <SettingsModal

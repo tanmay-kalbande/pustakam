@@ -1,18 +1,22 @@
 // src/services/quotaService.ts
 // ============================================================================
-// Quota Service — Tracks free usage limits via Supabase
-// Free limit is admin-configurable from the platform_config table.
-// No hardcoding — update the DB and it takes effect immediately.
+// Quota Service - Tracks free usage limits via Supabase
 // ============================================================================
 
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { byokStorage } from '../utils/byokStorage';
 import type { QuotaStatus } from '../types/providers';
 
-// Cache the free limit to avoid hitting Supabase on every check
 let cachedFreeLimit: number | null = null;
-let cacheTimestamp = 0;
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+let freeLimitCacheTimestamp = 0;
+
+const FREE_LIMIT_CACHE_TTL_MS = 5 * 60 * 1000;
+const QUOTA_STATUS_CACHE_TTL_MS = 30 * 1000;
+
+const quotaStatusCache = new Map<string, { status: QuotaStatus; timestamp: number }>();
+const quotaStatusRequests = new Map<string, Promise<QuotaStatus>>();
+
+const getQuotaCacheKey = (userId?: string | null): string => userId || 'anonymous';
 
 // ============================================================================
 // Quota Service
@@ -26,14 +30,13 @@ export const quotaService = {
   async getFreeLimit(): Promise<number> {
     const now = Date.now();
 
-    // Return cached value if still fresh
-    if (cachedFreeLimit !== null && now - cacheTimestamp < CACHE_TTL_MS) {
+    if (cachedFreeLimit !== null && now - freeLimitCacheTimestamp < FREE_LIMIT_CACHE_TTL_MS) {
       return cachedFreeLimit;
     }
 
     if (!supabase || !isSupabaseConfigured()) {
       cachedFreeLimit = 2;
-      cacheTimestamp = now;
+      freeLimitCacheTimestamp = now;
       return 2;
     }
 
@@ -48,17 +51,16 @@ export const quotaService = {
         console.warn('[Quota] Could not fetch free_book_limit from platform_config, using default 2');
         cachedFreeLimit = 2;
       } else {
-        // value is stored as JSONB — could be a number directly or a string
         const raw = data.value;
         const parsed = typeof raw === 'number' ? raw : parseInt(String(raw), 10);
-        cachedFreeLimit = isNaN(parsed) ? 2 : parsed;
+        cachedFreeLimit = Number.isNaN(parsed) ? 2 : parsed;
       }
     } catch (err) {
       console.error('[Quota] Exception fetching free limit:', err);
       cachedFreeLimit = 2;
     }
 
-    cacheTimestamp = now;
+    freeLimitCacheTimestamp = now;
     return cachedFreeLimit!;
   },
 
@@ -69,13 +71,13 @@ export const quotaService = {
    */
   async getBooksUsed(userId?: string | null): Promise<number> {
     if (!supabase || !isSupabaseConfigured() || !userId) {
-      // Fallback: count books in localStorage
       try {
         const key = userId ? `pustakam-books-${userId}` : 'pustakam-books';
         const raw = localStorage.getItem(key);
         if (!raw) return 0;
+
         const books = JSON.parse(raw);
-        return Array.isArray(books) ? books.filter((b: any) => b.status === 'completed').length : 0;
+        return Array.isArray(books) ? books.filter((book: { status?: string }) => book.status === 'completed').length : 0;
       } catch {
         return 0;
       }
@@ -102,47 +104,84 @@ export const quotaService = {
 
   /**
    * Get the full quota status for a user.
-   * This is the primary method — call this before every book generation.
+   * Dedupe in-flight reads so rapid UI refreshes do not fan out into multiple requests.
    */
-  async getQuotaStatus(userId?: string | null): Promise<QuotaStatus> {
-    const [freeLimit, booksUsed] = await Promise.all([
-      this.getFreeLimit(),
-      this.getBooksUsed(userId),
-    ]);
+  async getQuotaStatus(
+    userId?: string | null,
+    options: { forceRefresh?: boolean } = {}
+  ): Promise<QuotaStatus> {
+    const cacheKey = getQuotaCacheKey(userId);
+    const now = Date.now();
 
-    const remaining = Math.max(0, freeLimit - booksUsed);
-    const hasFreeQuota = remaining > 0;
-    
-    // Ensure the namespace matches the user checking quota 
-    byokStorage.setNamespace(userId || null);
-    const hasBYOK = byokStorage.hasAnyKey();
+    if (!options.forceRefresh) {
+      const cached = quotaStatusCache.get(cacheKey);
+      if (cached && now - cached.timestamp < QUOTA_STATUS_CACHE_TTL_MS) {
+        return cached.status;
+      }
 
-    let mode: QuotaStatus['mode'];
-    if (hasFreeQuota) {
-      mode = 'proxy';  // Use platform proxy (free tier)
-    } else if (hasBYOK) {
-      mode = 'byok';   // Use user's own API key
-    } else {
-      mode = 'blocked'; // Cannot generate
+      const inFlight = quotaStatusRequests.get(cacheKey);
+      if (inFlight) {
+        return inFlight;
+      }
     }
 
-    return {
-      freeLimit,
-      booksUsed,
-      remaining,
-      hasFreeQuota,
-      hasBYOK,
-      canGenerate: hasFreeQuota || hasBYOK,
-      mode,
-    };
+    const request = (async () => {
+      const [freeLimit, booksUsed] = await Promise.all([
+        this.getFreeLimit(),
+        this.getBooksUsed(userId),
+      ]);
+
+      const remaining = Math.max(0, freeLimit - booksUsed);
+      const hasFreeQuota = remaining > 0;
+
+      byokStorage.setNamespace(userId || null);
+      const hasBYOK = byokStorage.hasAnyKey();
+
+      let mode: QuotaStatus['mode'];
+      if (hasFreeQuota) {
+        mode = 'proxy';
+      } else if (hasBYOK) {
+        mode = 'byok';
+      } else {
+        mode = 'blocked';
+      }
+
+      const status: QuotaStatus = {
+        freeLimit,
+        booksUsed,
+        remaining,
+        hasFreeQuota,
+        hasBYOK,
+        canGenerate: hasFreeQuota || hasBYOK,
+        mode,
+      };
+
+      quotaStatusCache.set(cacheKey, { status, timestamp: Date.now() });
+      return status;
+    })().finally(() => {
+      quotaStatusRequests.delete(cacheKey);
+    });
+
+    quotaStatusRequests.set(cacheKey, request);
+    return request;
   },
 
   /**
-   * Force-refresh the cached free limit (e.g., after admin changes it)
+   * Force-refresh the cached free limit and quota status.
    */
-  invalidateCache(): void {
+  invalidateCache(userId?: string | null): void {
     cachedFreeLimit = null;
-    cacheTimestamp = 0;
+    freeLimitCacheTimestamp = 0;
+
+    if (typeof userId === 'undefined') {
+      quotaStatusCache.clear();
+      quotaStatusRequests.clear();
+      return;
+    }
+
+    const cacheKey = getQuotaCacheKey(userId);
+    quotaStatusCache.delete(cacheKey);
+    quotaStatusRequests.delete(cacheKey);
   },
 };
 

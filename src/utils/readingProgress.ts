@@ -5,18 +5,22 @@ const BOOKMARK_KEY = 'pustakam-reading-bookmarks';
 
 export const readingProgressUtils = {
   // Save bookmark for a book
-  saveBookmark(bookId: string, moduleIndex: number, scrollPosition: number): void {
+  saveBookmark(bookId: string, moduleIndex: number, scrollPosition: number, percentComplete?: number): void {
     try {
       const bookmarks = this.getAllBookmarks();
-      const totalModules = this.getBookModuleCount(bookId);
-      const percentComplete = totalModules > 0 ? ((moduleIndex + 1) / totalModules) * 100 : 0;
+      const resolvedPercent = typeof percentComplete === 'number'
+        ? Math.max(0, Math.min(100, Math.round(percentComplete)))
+        : (() => {
+            const totalModules = this.getBookModuleCount(bookId);
+            return totalModules > 0 ? Math.round(((moduleIndex + 1) / totalModules) * 100) : 0;
+          })();
 
       bookmarks[bookId] = {
         bookId,
         moduleIndex,
         scrollPosition,
         lastReadAt: new Date(),
-        percentComplete: Math.round(percentComplete)
+        percentComplete: resolvedPercent
       };
 
       localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmarks));
@@ -122,12 +126,22 @@ export const readingProgressUtils = {
   // Get book module count (helper)
   getBookModuleCount(bookId: string): number {
     try {
-      const booksJson = localStorage.getItem('pustakam-books');
-      if (!booksJson) return 0;
-      
-      const books = JSON.parse(booksJson);
-      const book = books.find((b: any) => b.id === bookId);
-      return book?.modules?.length || 0;
+      const keys = ['pustakam-books', ...Object.keys(localStorage).filter(key => key.startsWith('pustakam-books-'))];
+
+      for (const key of keys) {
+        const booksJson = localStorage.getItem(key);
+        if (!booksJson) continue;
+
+        const books = JSON.parse(booksJson);
+        if (!Array.isArray(books)) continue;
+
+        const book = books.find((entry: { id?: string; modules?: unknown[] }) => entry.id === bookId);
+        if (book) {
+          return book.modules?.length || 0;
+        }
+      }
+
+      return 0;
     } catch (error) {
       return 0;
     }

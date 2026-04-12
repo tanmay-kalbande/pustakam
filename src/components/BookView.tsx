@@ -20,7 +20,6 @@ import { BookProject, BookSession, ReadingBookmark } from '../types/book';
 import { bookService } from '../services/bookService';
 import { BookAnalytics } from './BookAnalytics';
 import { CustomSelect } from './CustomSelect';
-import { pdfService } from '../services/pdfService';
 import { readingProgressUtils } from '../utils/readingProgress';
 import { ZHIPU_PROVIDER, DEFAULT_ZHIPU_MODEL } from '../constants/ai';
 
@@ -463,6 +462,11 @@ const ReadingMode: React.FC<ReadingModeProps> = ({
   const [bookmark,            setBookmark]            = useState<ReadingBookmark | null>(null);
 
   const getScrollEl = () => document.getElementById('main-scroll-area') || document.documentElement;
+  const getScrollPercent = () => {
+    const el = getScrollEl();
+    const maxScroll = Math.max(1, el.scrollHeight - el.clientHeight);
+    return Math.min(100, Math.max(0, (el.scrollTop / maxScroll) * 100));
+  };
 
   useEffect(() => {
     const bm = readingProgressUtils.getBookmark(bookId);
@@ -482,7 +486,9 @@ const ReadingMode: React.FC<ReadingModeProps> = ({
       clearTimeout(t);
       t = setTimeout(() => {
         const pos = getScrollEl().scrollTop;
-        if (pos > 100) readingProgressUtils.saveBookmark(bookId, currentModuleIndex, pos);
+        if (pos > 100) {
+          readingProgressUtils.saveBookmark(bookId, currentModuleIndex, pos, getScrollPercent());
+        }
       }, 500);
     };
     el.addEventListener('scroll', onScroll, { passive: true });
@@ -498,7 +504,7 @@ const ReadingMode: React.FC<ReadingModeProps> = ({
       setBookmark(null);
     } else {
       const pos = getScrollEl().scrollTop;
-      readingProgressUtils.saveBookmark(bookId, currentModuleIndex, pos);
+      readingProgressUtils.saveBookmark(bookId, currentModuleIndex, pos, getScrollPercent());
       setBookmark(readingProgressUtils.getBookmark(bookId));
       setIsBookmarked(true);
     }
@@ -696,8 +702,8 @@ const HomeView = ({
       
       {/* Spacer for smooth vertical centering transition */}
       <div 
-        className="w-full transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]" 
-        style={{ height: showAdvanced ? '8rem' : '22vh' }}
+        className="w-full transition-all duration-1000"
+        style={{ height: showAdvanced ? '8rem' : '22vh', transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)' }}
       />
 
       <div className="w-full max-w-2xl mx-auto animate-subtle-fade relative z-10 shrink-0 pb-32">
@@ -1191,11 +1197,17 @@ export function BookView({
     if (!currentBook) return;
     setPdfProgress(1);
     try {
+      const { pdfService } = await import('../services/pdfService');
       await pdfService.generatePdf(currentBook, setPdfProgress);
       showToast('PDF downloaded!', 'success');
       setTimeout(() => setPdfProgress(0), 2000);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'PDF generation failed';
+      if (msg.toLowerCase().includes('cancel')) {
+        showToast('PDF download cancelled.', 'info');
+        setPdfProgress(0);
+        return;
+      }
       showAlertDialog({ type: 'error', title: 'PDF Generation Failed', message: msg, confirmText: 'Dismiss' });
       setPdfProgress(0);
     }
