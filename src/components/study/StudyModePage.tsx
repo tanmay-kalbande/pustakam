@@ -385,7 +385,7 @@ export function StudyModePage({
 
   const handleAskDoubt = async (payload?: { question: string; selectedText?: string }) => {
     const q = payload?.question || questionInput;
-    const st = payload?.selectedText ?? selectedText || undefined;
+    const st = payload?.selectedText ?? selectedText ?? undefined;
     if (!q.trim()) { showToast('Enter a question first.', 'warning'); return; }
     setDoubtLoading(true); setDoubtError(null);
     setLastDoubtPayload({ question: q, selectedText: st });
