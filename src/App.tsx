@@ -707,6 +707,7 @@ function App() {
                     ? <h1 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">My Books</h1>
                     : null
                 }
+                quotaStatus={quotaStatus}
               />
 
               <main id="main-scroll-area" className="main-content">

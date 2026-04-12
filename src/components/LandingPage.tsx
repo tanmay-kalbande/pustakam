@@ -105,9 +105,9 @@ const renderHome = (
     <div className="mb-4 grid w-full max-w-[920px] grid-cols-1 gap-2.5 md:grid-cols-4">
       {[
         {
-          title: 'GLM-5 Engine',
-          desc: 'Flagship depth for long-form chapter writing.',
-          sub: 'More engines coming soon',
+          title: 'Multi-AI Engine',
+          desc: '13+ providers including GPT-5.4, Claude, Gemini, Gemma, Grok & more.',
+          sub: 'Bring your own key or use the free tier',
           span: 2,
         },
         {
@@ -209,7 +209,7 @@ const renderProcess = () => (
       {[
         { step: '01', title: 'Define Goal', desc: 'Start with one clear learning outcome.', icon: Compass },
         { step: '02', title: 'Generate Roadmap', desc: 'Build the chapter plan automatically.', icon: Home },
-        { step: '03', title: 'Write Modules', desc: 'Stream chapter content through the GLM proxy.', icon: BookOpen },
+        { step: '03', title: 'Write Modules', desc: 'Stream chapter content through the AI engine.', icon: BookOpen },
         { step: '04', title: 'Export Book', desc: 'Ship a polished final book with supporting sections.', icon: HardDriveDownload },
       ].map((item) => (
         <motion.div
@@ -434,12 +434,12 @@ const LandingPage = ({
             </p>
             <div className="grid grid-cols-2 gap-3 text-center">
               <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
-                <p className="text-lg font-black text-white">4</p>
-                <p className="text-[11px] uppercase tracking-wide text-white/50">GLM Models</p>
+                <p className="text-lg font-black text-white">13+</p>
+                <p className="text-[11px] uppercase tracking-wide text-white/50">AI Providers</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
-                <p className="text-lg font-black text-white">Edge</p>
-                <p className="text-[11px] uppercase tracking-wide text-white/50">Proxy Runtime</p>
+                <p className="text-lg font-black text-white">BYOK</p>
+                <p className="text-[11px] uppercase tracking-wide text-white/50">Your Own Keys</p>
               </div>
             </div>
             <button

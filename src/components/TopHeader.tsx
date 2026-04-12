@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Settings, User, LogOut, ChevronDown, ChevronUp, BookOpen, Shield } from 'lucide-react';
+import { Settings, User, LogOut, ChevronDown, ChevronUp, BookOpen, Shield, Zap } from 'lucide-react';
 import { APISettings, ModelProvider } from '../types';
 import { BookProject } from '../types/book';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -28,6 +28,7 @@ interface TopHeaderProps {
     onOpenDocs?: () => void;
     onOpenAPIDocs?: () => void;
     centerContent?: React.ReactNode;
+    quotaStatus?: import('../types/providers').QuotaStatus | null;
 }
 
 
@@ -46,7 +47,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     onOpenDocs,
     onOpenAPIDocs,
     showModelSelector = true,
-    centerContent
+    centerContent,
+    quotaStatus
 }) => {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showModelMenu, setShowModelMenu] = useState(false);
@@ -242,6 +244,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                         </div>
                     )}
  
+                    {/* Free Books Quota Badge */}
+                    {quotaStatus && !quotaStatus.hasBYOK && (
+                        <div className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 rounded-md border border-[var(--brand)]/20 bg-[var(--brand)]/5" title="Free Books Remaining Today">
+                            <Zap size={13} className="text-[var(--brand)]" />
+                            <span className="text-[10px] font-bold text-[var(--brand)]">
+                                {Math.max(0, quotaStatus.freeLimit - quotaStatus.booksUsed)} Left
+                            </span>
+                        </div>
+                    )}
+
                     {/* Usage Guide */}
                     <button
                         onClick={onOpenDocs}
