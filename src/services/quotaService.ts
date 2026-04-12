@@ -112,6 +112,9 @@ export const quotaService = {
 
     const remaining = Math.max(0, freeLimit - booksUsed);
     const hasFreeQuota = remaining > 0;
+    
+    // Ensure the namespace matches the user checking quota 
+    byokStorage.setNamespace(userId || null);
     const hasBYOK = byokStorage.hasAnyKey();
 
     let mode: QuotaStatus['mode'];

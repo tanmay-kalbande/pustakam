@@ -15,6 +15,7 @@ import { storageUtils } from './utils/storage';
 import { bookService } from './services/bookService';
 import { planService } from './services/planService';
 import { quotaService } from './services/quotaService';
+import { byokStorage } from './utils/byokStorage';
 import { BookView } from './components/BookView';
 import { BookProject, BookSession } from './types/book';
 import { generateId } from './utils/helpers';
@@ -205,6 +206,11 @@ function App() {
       }));
     });
   }, [settings]);
+
+  // Bind BYOK storage to the current user's profile to prevent cross-account API key leaks
+  useEffect(() => {
+    byokStorage.setNamespace(user?.id || null);
+  }, [user?.id]);
 
   // Fetch quota status when auth resolves or settings change
   const refreshQuota = useCallback(async () => {

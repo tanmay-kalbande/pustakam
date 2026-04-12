@@ -7,7 +7,7 @@
 
 import { ProviderID } from '../types/providers';
 
-const BYOK_STORAGE_KEY = 'pustakam-byok-keys';
+let BYOK_STORAGE_KEY = 'pustakam-byok-keys';
 
 // Simple obfuscation (NOT encryption — just prevents casual reads in DevTools)
 function obfuscate(text: string): string {
@@ -57,6 +57,13 @@ function writeStore(store: StoredKeys): void {
 // ============================================================================
 
 export const byokStorage = {
+  /**
+   * Set dynamic namespace based on authenticated user ID
+   */
+  setNamespace(userId: string | null): void {
+    BYOK_STORAGE_KEY = userId ? `pustakam-byok-keys-${userId}` : 'pustakam-byok-keys';
+  },
+
   /**
    * Get all stored keys (deobfuscated)
    */
