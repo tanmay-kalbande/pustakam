@@ -75,8 +75,8 @@ export const ORCHESTRATION_MAP = {
     assemble: 'glm-5',
   },
   mistral: {
-    enhance: 'labs-mistral-small-creative',
-    glossary: 'labs-mistral-small-creative',
+    enhance: 'mistral-small-latest',
+    glossary: 'mistral-small-latest',
     roadmap: 'mistral-large-latest',
     module: 'mistral-medium-latest',
     assemble: 'mistral-large-latest',
@@ -84,4 +84,4 @@ export const ORCHESTRATION_MAP = {
 } as const;
 
 export const DEFAULT_ZHIPU_MODEL = 'glm-5' as const;
-export const DEFAULT_MISTRAL_MODEL = 'mistral-medium-latest' as const;
+export const DEFAULT_MISTRAL_MODEL = 'mistral-small-latest' as const;
