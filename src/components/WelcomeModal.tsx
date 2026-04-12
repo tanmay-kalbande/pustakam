@@ -25,54 +25,53 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                     <X size={16} />
                 </button>
 
-                <div className="relative p-8 pt-10 text-center">
+                <div className="relative p-6 pt-8 text-center max-h-[85vh] overflow-y-auto custom-scrollbar">
                     {/* Logo */}
-                    <div className="inline-flex mb-6">
+                    <div className="inline-flex mb-4">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-[var(--brand)]/15 blur-2xl rounded-full scale-150" />
-                            <div className="relative w-14 h-14 bg-[var(--bg-surface)] rounded-2xl flex items-center justify-center border border-[var(--border-subtle)] shadow-lg">
-                                <img src="/white-logo.png" alt="Pustakam" className="w-7 h-7" />
+                            <div className="absolute inset-0 bg-[var(--brand)]/15 blur-xl rounded-full scale-125" />
+                            <div className="relative w-10 h-10 bg-[var(--bg-surface)] rounded-xl flex items-center justify-center border border-[var(--border-subtle)] shadow-md">
+                                <img src="/white-logo.png" alt="Pustakam" className="w-5 h-5" />
                             </div>
                         </div>
                     </div>
 
                     {/* Greeting */}
-                    <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1">
+                    <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1">
                         Welcome, {firstName} ✦
                     </h1>
-                    <p className="text-[var(--text-muted)] text-sm mb-8 leading-relaxed max-w-xs mx-auto">
+                    <p className="text-[var(--text-muted)] text-xs md:text-sm mb-6 leading-relaxed max-w-xs mx-auto">
                         Your account is ready. Start generating structured learning books from any topic.
                     </p>
 
                     {/* Feature pills */}
-                    <div className="grid grid-cols-3 gap-2 mb-8">
+                    <div className="grid grid-cols-3 gap-2 mb-6">
                         {[
-                            { icon: Cpu, label: '13+ AI Models', sub: 'Multi-provider' },
-                            { icon: Sparkles, label: 'Free Tier', sub: 'No key needed' },
+                            { icon: Cpu, label: '13+ Models', sub: 'Multi-provider' },
+                            { icon: Sparkles, label: 'Free Tier', sub: 'Included' },
                             { icon: Download, label: 'PDF Export', sub: 'Full books' },
                         ].map(({ icon: Icon, label, sub }) => (
-                            <div key={label} className="group p-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl transition-all hover:border-[var(--brand)]/20 hover:bg-[var(--brand)]/5">
-                                <Icon size={16} className="text-[var(--brand)] mx-auto mb-2 opacity-70 group-hover:opacity-100 transition-opacity" />
-                                <span className="text-[11px] font-bold text-[var(--text-primary)] block leading-tight">{label}</span>
-                                <span className="text-[9px] text-[var(--text-muted)] block mt-0.5">{sub}</span>
+                            <div key={label} className="group p-2.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg transition-all hover:border-[var(--brand)]/20 hover:bg-[var(--brand)]/5 flex flex-col items-center justify-center">
+                                <Icon size={14} className="text-[var(--brand)] mb-1.5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                                <span className="text-[10px] md:text-[11px] font-bold text-[var(--text-primary)] leading-tight text-center">{label}</span>
                             </div>
                         ))}
                     </div>
 
                     {/* How it works - compact */}
-                    <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-4 mb-8 text-left">
-                        <p className="text-[9px] font-bold text-[var(--brand)] uppercase tracking-[0.2em] mb-3">Quick Start</p>
-                        <div className="space-y-2.5">
+                    <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg p-3.5 mb-6 text-left">
+                        <p className="text-[8px] md:text-[9px] font-bold text-[var(--brand)] uppercase tracking-[0.2em] mb-2.5">Quick Start</p>
+                        <div className="space-y-2">
                             {[
                                 'Type any topic or learning goal',
                                 'Generate a structured roadmap',
                                 'Build chapter-by-chapter content',
                             ].map((step, idx) => (
-                                <div key={step} className="flex items-center gap-2.5">
-                                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--brand)]/10 text-[var(--brand)] text-[10px] font-bold flex items-center justify-center">
+                                <div key={step} className="flex items-center gap-2">
+                                    <span className="flex-shrink-0 w-4 h-4 rounded-full bg-[var(--brand)]/10 text-[var(--brand)] text-[8px] font-bold flex items-center justify-center">
                                         {idx + 1}
                                     </span>
-                                    <span className="text-xs text-[var(--text-secondary)]">{step}</span>
+                                    <span className="text-[11px] md:text-xs text-[var(--text-secondary)] leading-none">{step}</span>
                                 </div>
                             ))}
                         </div>
@@ -81,13 +80,13 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                     {/* CTA */}
                     <button
                         onClick={onClose}
-                        className="btn btn-primary w-full py-3.5 rounded-xl uppercase tracking-widest text-xs font-bold"
+                        className="btn btn-primary w-full py-3 rounded-lg uppercase tracking-widest text-[11px] font-bold"
                     >
-                        <Check size={16} strokeWidth={3} />
+                        <Check size={14} strokeWidth={3} />
                         <span>Start Building</span>
                     </button>
 
-                    <p className="text-[var(--text-muted)] text-[10px] mt-5 font-medium">
+                    <p className="text-[var(--text-muted)] text-[9px] mt-4 font-medium opacity-80">
                         Free books included • Bring your own API key for unlimited use
                     </p>
                 </div>

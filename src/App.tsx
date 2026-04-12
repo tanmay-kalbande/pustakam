@@ -229,6 +229,16 @@ function App() {
     }
   }, [isLoading, user?.id, refreshQuota]);
 
+  // Keep quota perfectly in sync across the session by re-fetching when a book finishes
+  const completedBooksCount = React.useMemo(() => books.filter(b => b.status === 'completed').length, [books]);
+  useEffect(() => {
+    if (!isLoading && hasLoadedUserBooksRef.current) {
+      // Small timeout ensures Supabase triggers have fired after storage sync
+      const timer = setTimeout(() => refreshQuota(), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [completedBooksCount, isLoading, refreshQuota]);
+
   const hasLoadedUserBooksRef = React.useRef(false);
 
   useEffect(() => {

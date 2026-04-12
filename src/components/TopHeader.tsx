@@ -246,7 +246,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
  
                     {/* Quota Badge */}
                     {quotaStatus && (
-                        <div className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 rounded-md border border-[var(--brand)]/20 bg-[var(--brand)]/5" title={quotaStatus.hasBYOK ? "Unlimited Generation (BYOK Active)" : "Free Books Remaining Today"}>
+                        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md border border-[var(--brand)]/20 bg-[var(--brand)]/5" title={quotaStatus.hasBYOK ? "Unlimited Generation (BYOK Active)" : "Free Books Remaining Today"}>
                             <Zap size={13} className="text-[var(--brand)]" />
                             <span className="text-[10px] font-bold text-[var(--brand)]">
                                 {quotaStatus.hasBYOK ? '∞ Unlimited' : `${Math.max(0, quotaStatus.freeLimit - quotaStatus.booksUsed)} Left`}
