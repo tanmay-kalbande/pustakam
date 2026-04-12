@@ -67,6 +67,34 @@
     --color-accent-primary-hover: var(--brand-hover);
   }
 
+  /* PROFESSIONAL LIGHT THEME */
+  .light {
+    --bg-base:     rgba(250, 250, 250, 0); 
+    --bg-surface:  rgba(255, 255, 255, 0.75); 
+    --bg-elevated: rgba(255, 255, 255, 0.95);
+
+    --border-subtle:  rgba(0,0,0,0.06);
+    --border-default: rgba(0,0,0,0.12);
+
+    --text-primary:   #171717;
+    --text-secondary: #52525b;
+    --text-muted:     #a1a1aa;
+
+    --brand:      #eab308;   /* warm gold for light mode */
+    --brand-hover:#ca8a04;
+    --brand-dim:  #fde047;
+
+    /* Legacy compatibility */
+    --color-bg: var(--bg-base);
+    --color-sidebar: var(--bg-base);
+    --color-card: var(--bg-surface);
+    --color-border: var(--border-subtle);
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-accent-primary: var(--brand);
+    --color-accent-primary-hover: var(--brand-hover);
+  }
+
   * {
     box-sizing: border-box;
   }

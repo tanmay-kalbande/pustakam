@@ -83,7 +83,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <header className="fixed top-0 left-0 right-0 z-50 h-16 pointer-events-none">
             {/* Precious Fade-in Background */}
             <div 
-                className="absolute inset-0 bg-[#050505]/45 backdrop-blur-xl border-b border-[var(--border-subtle)]"
+                className={`absolute inset-0 backdrop-blur-xl border-b border-[var(--border-subtle)] ${theme === 'dark' ? 'bg-[#050505]/45' : 'bg-white/80'}`}
                 style={{
                     maskImage: 'linear-gradient(to bottom, black 0%, black 25%, rgba(0,0,0,0.6) 65%, rgba(0,0,0,0.2) 85%, transparent 100%)',
                     WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 25%, rgba(0,0,0,0.6) 65%, rgba(0,0,0,0.2) 85%, transparent 100%)'
@@ -244,12 +244,12 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                         </div>
                     )}
  
-                    {/* Free Books Quota Badge */}
-                    {quotaStatus && !quotaStatus.hasBYOK && (
-                        <div className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 rounded-md border border-[var(--brand)]/20 bg-[var(--brand)]/5" title="Free Books Remaining Today">
+                    {/* Quota Badge */}
+                    {quotaStatus && (
+                        <div className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 rounded-md border border-[var(--brand)]/20 bg-[var(--brand)]/5" title={quotaStatus.hasBYOK ? "Unlimited Generation (BYOK Active)" : "Free Books Remaining Today"}>
                             <Zap size={13} className="text-[var(--brand)]" />
                             <span className="text-[10px] font-bold text-[var(--brand)]">
-                                {Math.max(0, quotaStatus.freeLimit - quotaStatus.booksUsed)} Left
+                                {quotaStatus.hasBYOK ? '∞ Unlimited' : `${Math.max(0, quotaStatus.freeLimit - quotaStatus.booksUsed)} Left`}
                             </span>
                         </div>
                     )}

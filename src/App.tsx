@@ -271,6 +271,12 @@ function App() {
   useEffect(() => {
     if (isLoading) return;
 
+    if (isAuthenticated && !sessionStorage.getItem('welcome_shown')) {
+      // Small delay so it pops up cleanly after other loading finishes
+      setTimeout(() => setShowWelcomeModal(true), 2500);
+      sessionStorage.setItem('welcome_shown', 'true');
+    }
+
     const loadedBooks = storageUtils.getBooks(user?.id);
     setBooks(loadedBooks);
     hasLoadedUserBooksRef.current = true;
@@ -292,7 +298,7 @@ function App() {
     }
 
     setCurrentBookId(null);
-  }, [user?.id, isLoading, refreshProfile]);
+  }, [user?.id, isLoading, refreshProfile, isAuthenticated]);
 
   useEffect(() => {
     const handleOnline = () => { setIsOnline(true); setShowOfflineMessage(false); };
