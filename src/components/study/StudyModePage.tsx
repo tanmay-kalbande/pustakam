@@ -36,7 +36,7 @@ import { readingProgressUtils } from '../../utils/readingProgress';
 type ReaderSurface = 'module' | 'full_book';
 type StudyTool = 'doubt' | 'explain' | 'flashcards';
 
-interface StudyReaderProps {
+interface StudyModePageProps {
   book: BookProject;
   theme: 'light' | 'dark';
   isEditing: boolean;
@@ -381,7 +381,7 @@ const FlashcardDeckView = ({
   );
 };
 
-export function StudyReader({
+export function StudyModePage({
   book,
   theme,
   isEditing,
@@ -392,7 +392,8 @@ export function StudyReader({
   onContentChange,
   showToast,
   isMobile = false,
-}: StudyReaderProps) {
+  onBack,
+}: StudyModePageProps & { onBack: () => void }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const orderedModules = useMemo(() => {
     if (!book.roadmap?.modules?.length) return [...book.modules];
@@ -987,7 +988,20 @@ export function StudyReader({
   );
 
   return (
-    <div className="relative space-y-5">
+    <div className="min-h-screen bg-[var(--bg-base)] flex flex-col">
+      <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] px-6 py-4 shadow-sm">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="btn btn-secondary px-3 py-2">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Book
+          </button>
+          <div className="hidden md:block">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Study Mode</span>
+            <h1 className="text-sm font-semibold text-[var(--text-primary)] truncate max-w-sm">{book.title}</h1>
+          </div>
+        </div>
+      </header>
+      <div className="relative flex-1 p-4 md:p-6 space-y-5 w-full max-w-full overflow-x-hidden">
       <div className={`grid gap-5 ${studyPanelOpen && !isMobile ? 'xl:grid-cols-[220px_minmax(0,1fr)_380px]' : 'xl:grid-cols-[220px_minmax(0,1fr)]'}`}>
         <aside className="space-y-3 xl:sticky xl:top-24 xl:self-start">
           <div className="rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] p-4">

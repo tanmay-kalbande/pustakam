@@ -34,6 +34,14 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        studyModeEnter: {
+          '0%': { opacity: '0', transform: 'translateY(16px) scale(0.98)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        dropdownSlideIn: {
+          '0%': { opacity: '0', transform: 'scaleY(0.92) translateY(-4px)' },
+          '100%': { opacity: '1', transform: 'scaleY(1) translateY(0)' },
+        },
       },
       // Extend typography styles
       typography: (theme) => ({

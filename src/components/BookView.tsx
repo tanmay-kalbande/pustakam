@@ -17,7 +17,8 @@ import { BookAnalytics } from './BookAnalytics';
 import { CustomSelect } from './CustomSelect';
 import { readingProgressUtils } from '../utils/readingProgress';
 import { ZHIPU_PROVIDER, DEFAULT_ZHIPU_MODEL } from '../constants/ai';
-import { StudyReader } from './study/StudyReader';
+import { ReadingMode } from './ReadingMode';
+import { StudyModePage } from './study/StudyModePage';
 
 // ============================================================================
 // TYPES
@@ -785,6 +786,7 @@ export function BookView({
   showAlertDialog, showToast, onReadingModeChange, settings, onModelChange, quotaStatus
 }: BookViewProps) {
   const [detailTab, setDetailTab] = useState<'overview' | 'analytics' | 'read'>('overview');
+  const [studyModeOpen, setStudyModeOpen] = useState(false);
   const [localIsGenerating, setLocalIsGenerating] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -1109,17 +1111,45 @@ export function BookView({
           </div>
 
           {currentBook.status === 'completed' && (
-            <div className="mb-8 flex items-center gap-3">
+            <div className="mb-8 flex flex-wrap items-center gap-3">
               <DetailTabButton label="Overview"  Icon={ListChecks} isActive={detailTab === 'overview'}  onClick={() => setDetailTab('overview')} />
               <DetailTabButton label="Analytics" Icon={BarChart3}  isActive={detailTab === 'analytics'} onClick={() => setDetailTab('analytics')} />
               <DetailTabButton label="Read Book" Icon={BookText}   isActive={detailTab === 'read'}      onClick={() => setDetailTab('read')} />
+              <button
+                onClick={() => setStudyModeOpen(true)}
+                className="group relative flex items-center gap-2 rounded-full border border-[var(--brand)]/30 bg-[linear-gradient(135deg,rgba(254,205,140,0.12),rgba(254,205,140,0.04))] px-5 py-1.5 text-xs font-bold text-[var(--brand)] transition-all duration-300 hover:border-[var(--brand)]/50 hover:bg-[linear-gradient(135deg,rgba(254,205,140,0.2),rgba(254,205,140,0.08))] hover:shadow-[0_0_20px_rgba(254,205,140,0.15)] hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <div className="absolute inset-0 rounded-full bg-[var(--brand)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Brain className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">Study Companion</span>
+                <Sparkles className="w-3 h-3 relative z-10 opacity-60" />
+              </button>
+            </div>
+          )}
+
+          {/* Study Mode overlay */}
+          {studyModeOpen && currentBook.status === 'completed' && (
+            <div className="fixed inset-0 z-[100] study-mode-overlay" style={{ animation: 'studyModeEnter 0.4s cubic-bezier(0.16,1,0.3,1) forwards' }}>
+              <StudyModePage
+                book={currentBook}
+                theme={theme}
+                isEditing={false}
+                editedContent=""
+                onEditFullBook={() => {}}
+                onSaveFullBook={() => {}}
+                onCancelEdit={() => {}}
+                onContentChange={() => {}}
+                showToast={showToast}
+                isMobile={isMobile}
+                onBack={() => setStudyModeOpen(false)}
+              />
             </div>
           )}
 
           {detailTab === 'analytics' && currentBook.status === 'completed' ? (
             <BookAnalytics book={currentBook} />
           ) : detailTab === 'read' && currentBook.status === 'completed' ? (
-            <StudyReader
+            <ReadingMode
               book={currentBook}
               theme={theme}
               isEditing={isEditing}
