@@ -384,18 +384,16 @@ User Input: "${userInput}"`;
       return { isValid: false, errors };
     }
 
-    if (this.quotaMode === 'proxy') {
-      // Proxy mode: zhipu and mistral are supported; others auto-correct
-      const proxyProviders: ProviderID[] = ['zhipu', 'mistral'];
-      if (!proxyProviders.includes(this.settings.selectedProvider)) {
-        dbg('Auto-correcting provider to zhipu for proxy mode');
-        this.settings.selectedProvider = ZHIPU_PROVIDER;
-        this.settings.selectedModel = DEFAULT_ZHIPU_MODEL;
-      }
-      // No API key validation needed in proxy mode
-    } else if (this.quotaMode === 'byok') {
-      // BYOK mode: user must have a key for the selected provider
+    // Dynamic intelligent routing:
+    // Instead of rigidly following the global quotaMode, we check if the user 
+    // actually has a key for the CURRENTLY SELECTED provider. 
+    // If they do, we enforce BYOK mode for *this specific request*.
+    const hasKeyForSelectedProvider = byokStorage.hasKey(this.settings.selectedProvider as ProviderID);
+
+    if (hasKeyForSelectedProvider || this.quotaMode === 'byok') {
+      // User is explicitly using a BYOK provider OR strictly out of free quota
       const providerConfig = getProviderConfig(this.settings.selectedProvider);
+      
       if (!providerConfig.supportsBYOK) {
         // Selected provider doesn't support BYOK — find one that does
         const configured = byokStorage.getConfiguredProviders();
@@ -414,6 +412,21 @@ User Input: "${userInput}"`;
           errors.push(`No API key configured for ${providerConfig.name}. Add it in Settings.`);
         }
       }
+
+      // Temporarily override local quotaMode for this request lifecycle so it routes correctly 
+      // in generateWithAI later in the chain.
+      this.quotaMode = 'byok';
+
+    } else if (this.quotaMode === 'proxy') {
+      // The user doesn't have a key for the selected provider, so they MUST take the proxy.
+      // Proxy mode: zhipu and mistral are supported; others auto-correct
+      const proxyProviders: ProviderID[] = ['zhipu', 'mistral'];
+      if (!proxyProviders.includes(this.settings.selectedProvider)) {
+        dbg('Auto-correcting provider to zhipu for proxy mode');
+        this.settings.selectedProvider = ZHIPU_PROVIDER;
+        this.settings.selectedModel = DEFAULT_ZHIPU_MODEL;
+      }
+      // No API key validation needed in proxy mode
     }
 
     if (errors.length > 0) {
