@@ -58,7 +58,16 @@ async function getAccessToken(): Promise<string | null> {
   return getStoredAccessToken();
 }
 
-export type TaskType = 'roadmap' | 'module' | 'enhance' | 'assemble' | 'glossary';
+export type TaskType =
+  | 'roadmap'
+  | 'module'
+  | 'enhance'
+  | 'assemble'
+  | 'glossary'
+  | 'doubt'
+  | 're_explain'
+  | 'flashcards'
+  | 'quiz';
 
 export async function generateViaProxy(
   prompt: string,

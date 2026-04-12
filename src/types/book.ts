@@ -82,4 +82,15 @@ export interface ReadingBookmark {
   scrollPosition: number;
   lastReadAt: Date;
   percentComplete: number;
+  mode?: 'module' | 'full_book';
+  moduleProgress?: Record<string, {
+    scrollPosition: number;
+    percentComplete: number;
+    lastReadAt: Date;
+  }>;
+  fullBookProgress?: {
+    scrollPosition: number;
+    percentComplete: number;
+    lastReadAt: Date;
+  };
 }

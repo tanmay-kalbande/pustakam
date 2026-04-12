@@ -1,7 +1,8 @@
 const DB_NAME = 'pustakam-storage';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const BOOKS_STORE = 'books';
 const CHECKPOINTS_STORE = 'checkpoints';
+const STUDY_STORE = 'study';
 
 interface PersistedBooksRecord {
   storageKey: string;
@@ -16,7 +17,13 @@ interface PersistedCheckpointRecord<T> {
   updatedAt: string;
 }
 
-type StoreName = typeof BOOKS_STORE | typeof CHECKPOINTS_STORE;
+interface PersistedStudyRecord<T> {
+  id: string;
+  data: T;
+  updatedAt: string;
+}
+
+type StoreName = typeof BOOKS_STORE | typeof CHECKPOINTS_STORE | typeof STUDY_STORE;
 type StoreMode = IDBTransactionMode;
 
 const hasIndexedDb = () => typeof window !== 'undefined' && 'indexedDB' in window;
@@ -44,6 +51,10 @@ function openDatabase(): Promise<IDBDatabase> {
 
       if (!db.objectStoreNames.contains(CHECKPOINTS_STORE)) {
         db.createObjectStore(CHECKPOINTS_STORE, { keyPath: 'id' });
+      }
+
+      if (!db.objectStoreNames.contains(STUDY_STORE)) {
+        db.createObjectStore(STUDY_STORE, { keyPath: 'id' });
       }
     };
 
@@ -119,5 +130,22 @@ export const persistence = {
 
   async deleteCheckpoint(id: string): Promise<void> {
     await withStore<undefined>(CHECKPOINTS_STORE, 'readwrite', store => store.delete(id));
+  },
+
+  async getStudyRecord<T>(id: string): Promise<T | null> {
+    return withStore<PersistedStudyRecord<T> | undefined>(STUDY_STORE, 'readonly', store => store.get(id))
+      .then(record => record?.data ?? null);
+  },
+
+  async saveStudyRecord<T>(id: string, data: T): Promise<void> {
+    await withStore<IDBValidKey>(STUDY_STORE, 'readwrite', store => store.put({
+      id,
+      data,
+      updatedAt: new Date().toISOString(),
+    } satisfies PersistedStudyRecord<T>));
+  },
+
+  async deleteStudyRecord(id: string): Promise<void> {
+    await withStore<undefined>(STUDY_STORE, 'readwrite', store => store.delete(id));
   },
 };

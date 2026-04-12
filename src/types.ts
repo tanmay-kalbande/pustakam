@@ -21,3 +21,4 @@ export interface APISettings {
 }
 
 export * from './types/book';
+export * from './types/study';

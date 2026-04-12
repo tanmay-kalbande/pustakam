@@ -1,27 +1,89 @@
-// src/utils/readingProgress.ts - ENHANCED VERSION
 import { ReadingBookmark } from '../types/book';
 import { storageUtils } from './storage';
 
 const BOOKMARK_KEY = 'pustakam-reading-bookmarks';
 
+type ReadingMode = 'module' | 'full_book';
+
+interface ModuleProgressEntry {
+  scrollPosition: number;
+  percentComplete: number;
+  lastReadAt: Date;
+}
+
+const clampPercent = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+
+const reviveModuleProgress = (
+  moduleProgress?: ReadingBookmark['moduleProgress']
+): Record<string, ModuleProgressEntry> => {
+  if (!moduleProgress) return {};
+
+  return Object.fromEntries(
+    Object.entries(moduleProgress).map(([key, value]) => [
+      key,
+      {
+        scrollPosition: value.scrollPosition,
+        percentComplete: value.percentComplete,
+        lastReadAt: new Date(value.lastReadAt),
+      },
+    ])
+  );
+};
+
+const reviveBookmark = (bookmark: ReadingBookmark): ReadingBookmark => ({
+  ...bookmark,
+  lastReadAt: new Date(bookmark.lastReadAt),
+  mode: bookmark.mode || 'module',
+  moduleProgress: reviveModuleProgress(bookmark.moduleProgress),
+  fullBookProgress: bookmark.fullBookProgress
+    ? {
+        ...bookmark.fullBookProgress,
+        lastReadAt: new Date(bookmark.fullBookProgress.lastReadAt),
+      }
+    : undefined,
+});
+
 export const readingProgressUtils = {
-  // Save bookmark for a book
-  saveBookmark(bookId: string, moduleIndex: number, scrollPosition: number, percentComplete?: number): void {
+  saveBookmark(
+    bookId: string,
+    moduleIndex: number,
+    scrollPosition: number,
+    percentComplete?: number,
+    mode: ReadingMode = 'module'
+  ): void {
     try {
       const bookmarks = this.getAllBookmarks();
-      const resolvedPercent = typeof percentComplete === 'number'
-        ? Math.max(0, Math.min(100, Math.round(percentComplete)))
-        : (() => {
-            const totalModules = this.getBookModuleCount(bookId);
-            return totalModules > 0 ? Math.round(((moduleIndex + 1) / totalModules) * 100) : 0;
-          })();
+      const existing = bookmarks[bookId];
+      const moduleProgress = reviveModuleProgress(existing?.moduleProgress);
+      const resolvedPercent =
+        typeof percentComplete === 'number'
+          ? clampPercent(percentComplete)
+          : 0;
+
+      if (mode === 'module') {
+        moduleProgress[String(moduleIndex)] = {
+          scrollPosition,
+          percentComplete: resolvedPercent,
+          lastReadAt: new Date(),
+        };
+      }
 
       bookmarks[bookId] = {
         bookId,
         moduleIndex,
         scrollPosition,
         lastReadAt: new Date(),
-        percentComplete: resolvedPercent
+        percentComplete: resolvedPercent,
+        mode,
+        moduleProgress,
+        fullBookProgress:
+          mode === 'full_book'
+            ? {
+                scrollPosition,
+                percentComplete: resolvedPercent,
+                lastReadAt: new Date(),
+              }
+            : existing?.fullBookProgress,
       };
 
       localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmarks));
@@ -30,37 +92,67 @@ export const readingProgressUtils = {
     }
   },
 
-  // Get bookmark for a book
   getBookmark(bookId: string): ReadingBookmark | null {
     try {
       const bookmarks = this.getAllBookmarks();
       const bookmark = bookmarks[bookId];
-      
-      if (bookmark) {
-        return {
-          ...bookmark,
-          lastReadAt: new Date(bookmark.lastReadAt)
-        };
-      }
-      return null;
+      return bookmark ? reviveBookmark(bookmark) : null;
     } catch (error) {
       console.error('Failed to get bookmark:', error);
       return null;
     }
   },
 
-  // Get all bookmarks
   getAllBookmarks(): Record<string, ReadingBookmark> {
     try {
       const stored = localStorage.getItem(BOOKMARK_KEY);
-      return stored ? JSON.parse(stored) : {};
+      if (!stored) return {};
+      const parsed = JSON.parse(stored) as Record<string, ReadingBookmark>;
+      return Object.fromEntries(
+        Object.entries(parsed).map(([bookId, bookmark]) => [bookId, reviveBookmark(bookmark)])
+      );
     } catch (error) {
       console.error('Failed to get bookmarks:', error);
       return {};
     }
   },
 
-  // Delete bookmark
+  getModuleProgress(bookId: string, moduleIndex: number): ModuleProgressEntry | null {
+    const bookmark = this.getBookmark(bookId);
+    if (!bookmark?.moduleProgress) return null;
+    return bookmark.moduleProgress[String(moduleIndex)] || null;
+  },
+
+  getFullBookProgress(bookId: string): ModuleProgressEntry | null {
+    const bookmark = this.getBookmark(bookId);
+    if (!bookmark?.fullBookProgress) return null;
+
+    return {
+      ...bookmark.fullBookProgress,
+      lastReadAt: new Date(bookmark.fullBookProgress.lastReadAt),
+    };
+  },
+
+  getResumeState(bookId: string): { mode: ReadingMode; moduleIndex: number; scrollPosition: number } | null {
+    const bookmark = this.getBookmark(bookId);
+    if (!bookmark) return null;
+
+    if (bookmark.mode === 'full_book' && bookmark.fullBookProgress) {
+      return {
+        mode: 'full_book',
+        moduleIndex: bookmark.moduleIndex,
+        scrollPosition: bookmark.fullBookProgress.scrollPosition,
+      };
+    }
+
+    const moduleProgress = this.getModuleProgress(bookId, bookmark.moduleIndex);
+    return {
+      mode: 'module',
+      moduleIndex: bookmark.moduleIndex,
+      scrollPosition: moduleProgress?.scrollPosition || bookmark.scrollPosition,
+    };
+  },
+
   deleteBookmark(bookId: string): void {
     try {
       const bookmarks = this.getAllBookmarks();
@@ -71,29 +163,32 @@ export const readingProgressUtils = {
     }
   },
 
-  // ✅ NEW: Check if a book has a bookmark
   hasBookmark(bookId: string): boolean {
-    const bookmark = this.getBookmark(bookId);
-    return bookmark !== null;
+    return this.getBookmark(bookId) !== null;
   },
 
-  // ✅ NEW: Update bookmark scroll position only (keep other data)
-  updateScrollPosition(bookId: string, scrollPosition: number): void {
+  updateScrollPosition(
+    bookId: string,
+    scrollPosition: number,
+    moduleIndex?: number,
+    mode: ReadingMode = 'module'
+  ): void {
     try {
-      const bookmarks = this.getAllBookmarks();
-      const existingBookmark = bookmarks[bookId];
-      
-      if (existingBookmark) {
-        existingBookmark.scrollPosition = scrollPosition;
-        existingBookmark.lastReadAt = new Date();
-        localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmarks));
-      }
+      const bookmark = this.getBookmark(bookId);
+      if (!bookmark) return;
+
+      this.saveBookmark(
+        bookId,
+        typeof moduleIndex === 'number' ? moduleIndex : bookmark.moduleIndex,
+        scrollPosition,
+        bookmark.percentComplete,
+        mode
+      );
     } catch (error) {
       console.error('Failed to update scroll position:', error);
     }
   },
 
-  // ✅ NEW: Get bookmark stats for a book
   getBookmarkStats(bookId: string): {
     hasBookmark: boolean;
     percentComplete: number;
@@ -101,13 +196,13 @@ export const readingProgressUtils = {
     daysAgo: number;
   } {
     const bookmark = this.getBookmark(bookId);
-    
+
     if (!bookmark) {
       return {
         hasBookmark: false,
         percentComplete: 0,
         lastReadDate: null,
-        daysAgo: 0
+        daysAgo: 0,
       };
     }
 
@@ -120,20 +215,18 @@ export const readingProgressUtils = {
       hasBookmark: true,
       percentComplete: bookmark.percentComplete,
       lastReadDate: lastRead,
-      daysAgo
+      daysAgo,
     };
   },
 
-  // Get book module count (helper)
   getBookModuleCount(bookId: string): number {
     try {
       return storageUtils.getBookModuleCounts()[bookId] || 0;
-    } catch (error) {
+    } catch {
       return 0;
     }
   },
 
-  // Format last read time
   formatLastRead(date: Date): string {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -148,7 +241,6 @@ export const readingProgressUtils = {
     return date.toLocaleDateString();
   },
 
-  // ✅ NEW: Clear old bookmarks (older than X days)
   clearOldBookmarks(daysOld: number = 30): number {
     try {
       const bookmarks = this.getAllBookmarks();
@@ -177,45 +269,47 @@ export const readingProgressUtils = {
     }
   },
 
-  // ✅ NEW: Export bookmarks for backup
   exportBookmarks(): string {
     try {
       const bookmarks = this.getAllBookmarks();
-      return JSON.stringify({
-        bookmarks,
-        exportDate: new Date().toISOString(),
-        version: '1.0'
-      }, null, 2);
+      return JSON.stringify(
+        {
+          bookmarks,
+          exportDate: new Date().toISOString(),
+          version: '2.0',
+        },
+        null,
+        2
+      );
     } catch (error) {
       console.error('Failed to export bookmarks:', error);
       return '{}';
     }
   },
 
-  // ✅ NEW: Import bookmarks from backup
   importBookmarks(jsonData: string): { success: boolean; count: number; error?: string } {
     try {
       const data = JSON.parse(jsonData);
-      
+
       if (!data.bookmarks || typeof data.bookmarks !== 'object') {
         return { success: false, count: 0, error: 'Invalid bookmark data format' };
       }
 
       const existingBookmarks = this.getAllBookmarks();
       const mergedBookmarks = { ...existingBookmarks, ...data.bookmarks };
-      
+
       localStorage.setItem(BOOKMARK_KEY, JSON.stringify(mergedBookmarks));
-      
-      return { 
-        success: true, 
-        count: Object.keys(data.bookmarks).length 
+
+      return {
+        success: true,
+        count: Object.keys(data.bookmarks).length,
       };
     } catch (error) {
-      return { 
-        success: false, 
-        count: 0, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      return {
+        success: false,
+        count: 0,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
-  }
+  },
 };

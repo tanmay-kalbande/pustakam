@@ -1,27 +1,23 @@
 // src/components/BookView.tsx
 import React, { useEffect, ReactNode, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus, prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {
   Book, Download, Trash2, Clock, CheckCircle, AlertCircle, Loader2,
   Brain, Sparkles, BarChart3, ListChecks, Play, Box, ArrowLeft, Check,
-  BookText, RefreshCw, Edit, Save, X, FileText, List, Settings, Moon,
-  ZoomIn, ZoomOut, BookOpen, BookmarkCheck, Copy, AlertTriangle,
-  CheckCircle2, Pause, Zap, Sun, Palette, Bookmark, ChevronDown,
+  BookText, RefreshCw, X, FileText, List, Settings, BookOpen, AlertTriangle,
+  CheckCircle2, Pause, Zap, Palette, ChevronDown,
   Search, Code, Music, Heart, Cpu, TrendingUp, Eye, Coins, Utensils,
   MessageCircle, Users, GraduationCap, Atom, Target, Briefcase, Crown, Key,
 } from 'lucide-react';
 import { APISettings, ModelProvider } from '../types';
 import type { QuotaStatus } from '../types/providers';
-import { BookProject, BookSession, ReadingBookmark } from '../types/book';
+import { BookProject, BookSession } from '../types/book';
 import { bookService } from '../services/bookService';
 import { BookAnalytics } from './BookAnalytics';
 import { CustomSelect } from './CustomSelect';
 import { readingProgressUtils } from '../utils/readingProgress';
 import { ZHIPU_PROVIDER, DEFAULT_ZHIPU_MODEL } from '../constants/ai';
+import { StudyReader } from './study/StudyReader';
 
 // ============================================================================
 // TYPES
@@ -89,47 +85,6 @@ interface BookViewProps {
   onModelChange: (model: string, provider: ModelProvider) => void;
   quotaStatus?: QuotaStatus | null;
 }
-
-interface ReadingModeProps {
-  content: string;
-  isEditing: boolean;
-  editedContent: string;
-  onEdit: () => void;
-  onSave: () => void;
-  onCancel: () => void;
-  onContentChange: (content: string) => void;
-  onGoBack: () => void;
-  theme: 'light' | 'dark';
-  bookId: string;
-  currentModuleIndex: number;
-}
-
-interface ReadingSettings {
-  fontSize: number;
-  lineHeight: number;
-  fontFamily: 'nunito' | 'mono' | 'crimson' | 'rubik';
-  theme: 'dark' | 'sepia' | 'light';
-  maxWidth: 'narrow' | 'medium' | 'wide';
-  textAlign: 'left' | 'justify';
-}
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-const THEMES = {
-  dark:  { bg: 'rgba(5, 5, 5, 0.4)', contentBg: 'var(--bg-surface)', text: 'var(--text-primary)', secondary: 'var(--text-secondary)', border: 'var(--border-subtle)', accent: 'var(--brand)' },
-  sepia: { bg: '#F5F1E8', contentBg: '#FAF7F0', text: '#3C2A1E', secondary: '#8B7355', border: '#D4C4A8', accent: '#B45309' },
-  light: { bg: '#FFFFFF', contentBg: '#F9F9F9', text: '#1A1A1A', secondary: '#555555', border: '#E0E0E0', accent: '#3B82F6' },
-};
-/* Note: Sepia and Light themes are kept for Reading Mode specifically as per standard patterns */
-const FONT_FAMILIES = {
-  mono:   'ui-monospace, "SF Mono", "Monaco", "Cascadia Code", monospace',
-  nunito: "'Nunito', 'Segoe UI', sans-serif",
-  crimson: "'Crimson Pro', serif",
-  rubik:  "'Outfit', sans-serif",
-};
-const FONT_LABELS = { rubik: 'Rubik', nunito: 'Smooth', crimson: 'Book', mono: 'Code' };
-const MAX_WIDTHS  = { narrow: '65ch', medium: '75ch', wide: '85ch' };
 
 // ============================================================================
 // UTILS
@@ -398,242 +353,6 @@ const EmbeddedProgressPanel = ({
         </div>
       </div>
     </div>
-  );
-};
-
-const CodeBlock = React.memo(({ children, className, theme, readingTheme }: {
-  children: ReactNode; className?: string; theme: 'light' | 'dark'; readingTheme?: string;
-}) => {
-  const [isCopied, setIsCopied] = useState(false);
-  const language = className?.replace(/language-/, '') || 'text';
-
-  const handleCopy = () => {
-    if (isCopied) return;
-    navigator.clipboard.writeText(String(children)).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    });
-  };
-
-  const themeMap: Record<string, { containerBg: string; headerBg: string; headerText: string; }> = {
-    dark:  { containerBg: '#0D1117', headerBg: 'rgba(22,27,34,0.7)',   headerText: '#8B949E' },
-    sepia: { containerBg: '#F0EAD6', headerBg: 'rgba(232,225,209,0.7)', headerText: '#8B7355' },
-    light: { containerBg: '#f8f8f8', headerBg: 'rgba(239,239,239,0.7)', headerText: '#555555' },
-  };
-  const ts = themeMap[readingTheme as string] || themeMap.dark;
-
-  return (
-    <div className="relative rounded-lg my-4 overflow-hidden" style={{ backgroundColor: ts.containerBg }}>
-      <div className="flex items-center justify-between px-4 py-2" style={{ backgroundColor: ts.headerBg, color: ts.headerText }}>
-        <span className="text-xs font-semibold uppercase tracking-wider">{language}</span>
-        <button onClick={handleCopy} className={`flex items-center gap-1.5 p-1.5 rounded-md text-xs transition-all ${isCopied ? 'text-green-400' : ''}`}>
-          {isCopied ? <Check size={14} /> : <Copy size={14} />}
-          {isCopied ? 'Copied!' : 'Copy'}
-        </button>
-      </div>
-      <SyntaxHighlighter
-        style={readingTheme === 'light' || readingTheme === 'sepia' ? prism : vscDarkPlus}
-        language={language}
-        PreTag="div"
-        customStyle={{ backgroundColor: 'transparent', padding: '1rem 1.5rem', fontSize: '0.875rem', lineHeight: '1.5' }}
-      >
-        {String(children).replace(/\n$/, '')}
-      </SyntaxHighlighter>
-    </div>
-  );
-});
-
-const ReadingMode: React.FC<ReadingModeProps> = ({
-  content, isEditing, editedContent, onEdit, onSave, onCancel, onContentChange,
-  onGoBack, theme, bookId, currentModuleIndex,
-}) => {
-  const contentRef  = useRef<HTMLDivElement>(null);
-  const [settings, setSettings] = useState<ReadingSettings>(() => {
-    const saved = localStorage.getItem('pustakam-reading-settings');
-    return {
-      fontSize: 18, lineHeight: 1.8, fontFamily: 'nunito',
-      theme: theme === 'dark' ? 'dark' : 'light',
-      maxWidth: 'medium', textAlign: 'left',
-      ...(saved ? JSON.parse(saved) : {}),
-    };
-  });
-  const [isBookmarked,       setIsBookmarked]       = useState(false);
-  const [showFloatingButtons, setShowFloatingButtons] = useState(false);
-  const [bookmark,            setBookmark]            = useState<ReadingBookmark | null>(null);
-
-  const getScrollEl = () => document.getElementById('main-scroll-area') || document.documentElement;
-  const getScrollPercent = () => {
-    const el = getScrollEl();
-    const maxScroll = Math.max(1, el.scrollHeight - el.clientHeight);
-    return Math.min(100, Math.max(0, (el.scrollTop / maxScroll) * 100));
-  };
-
-  useEffect(() => {
-    const bm = readingProgressUtils.getBookmark(bookId);
-    setBookmark(bm);
-    setIsBookmarked(!!bm && bm.moduleIndex === currentModuleIndex);
-  }, [bookId, currentModuleIndex]);
-
-  useEffect(() => {
-    setShowFloatingButtons(!isEditing);
-  }, [isEditing]);
-
-  useEffect(() => {
-    if (isEditing) return;
-    const el = document.getElementById('main-scroll-area') || window;
-    let t: ReturnType<typeof setTimeout>;
-    const onScroll = () => {
-      clearTimeout(t);
-      t = setTimeout(() => {
-        const pos = getScrollEl().scrollTop;
-        if (pos > 100) {
-          readingProgressUtils.saveBookmark(bookId, currentModuleIndex, pos, getScrollPercent());
-        }
-      }, 500);
-    };
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => { clearTimeout(t); el.removeEventListener('scroll', onScroll); };
-  }, [bookId, currentModuleIndex, isEditing]);
-
-  useEffect(() => { localStorage.setItem('pustakam-reading-settings', JSON.stringify(settings)); }, [settings]);
-
-  const toggleBookmark = () => {
-    if (isBookmarked) {
-      readingProgressUtils.deleteBookmark(bookId);
-      setIsBookmarked(false);
-      setBookmark(null);
-    } else {
-      const pos = getScrollEl().scrollTop;
-      readingProgressUtils.saveBookmark(bookId, currentModuleIndex, pos, getScrollPercent());
-      setBookmark(readingProgressUtils.getBookmark(bookId));
-      setIsBookmarked(true);
-    }
-  };
-
-  const handleGoToBookmark = () => {
-    if (bookmark) getScrollEl().scrollTo({ top: bookmark.scrollPosition, behavior: 'smooth' });
-  };
-
-  const currentTheme = THEMES[settings.theme];
-
-  if (isEditing) {
-    return (
-      <div className="animate-fade-in">
-        <div className="flex justify-between items-center mb-4 sticky top-0 bg-[rgba(5,5,5,0.5)] backdrop-blur-xl z-30 pt-4 pb-2 border-b border-[var(--border-subtle)]">
-          <h3 className="text-lg font-semibold flex items-center gap-2 text-[var(--text-primary)]">
-            <Edit className="w-4 h-4" /> Editing Mode
-          </h3>
-          <div className="flex gap-2">
-            <button onClick={onCancel} className="btn btn-secondary px-3 py-1.5"><X size={14} /> Cancel</button>
-            <button onClick={onSave} className="btn btn-primary px-3 py-1.5"><Save size={14} /> Save</button>
-          </div>
-        </div>
-        <textarea
-          className="w-full h-[70vh] glass-input rounded-md p-4 text-[var(--text-primary)] font-mono text-sm leading-relaxed resize-none focus:outline-none transition-all"
-          value={editedContent}
-          onChange={e => onContentChange(e.target.value)}
-          style={{ fontSize: `${settings.fontSize - 2}px` }}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div
-        className={`reading-container theme-${settings.theme} min-h-[calc(100vh-120px)] overflow-hidden rounded-lg border border-[var(--border-subtle)] shadow-2xl transition-colors duration-300`}
-        style={{ backgroundColor: currentTheme.bg, color: currentTheme.text, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-      >
-        {/* Toolbar */}
-        <div className="z-20 flex flex-wrap justify-between items-center px-3 py-2 sm:px-4 border-b border-[var(--border-subtle)]" style={{ backgroundColor: currentTheme.bg }}>
-          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-0">
-            <div className="flex items-center gap-0.5 p-0.5 sm:p-1 rounded-md" style={{ backgroundColor: currentTheme.contentBg }}>
-              {(['light', 'sepia', 'dark'] as const).map(t => (
-                <button key={t} onClick={() => setSettings(p => ({ ...p, theme: t }))} className="p-1.5 sm:p-2 rounded-md transition-all"
-                  style={{ backgroundColor: settings.theme === t ? currentTheme.accent : 'transparent', color: settings.theme === t ? '#FFF' : currentTheme.secondary }}>
-                  {t === 'light' ? <Sun size={14} /> : t === 'sepia' ? <Palette size={14} /> : <Moon size={14} />}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-1 sm:gap-2 ml-2">
-              <button onClick={() => setSettings(p => ({ ...p, fontSize: Math.max(12, p.fontSize - 1) }))} className="p-1.5 sm:p-2 rounded-lg hover:bg-black/5" style={{ color: currentTheme.secondary }}>
-                <ZoomOut size={16} />
-              </button>
-              <span className="min-w-[2.5rem] text-center text-sm font-mono" style={{ color: currentTheme.secondary }}>{settings.fontSize}px</span>
-              <button onClick={() => setSettings(p => ({ ...p, fontSize: Math.min(28, p.fontSize + 1) }))} className="p-1.5 sm:p-2 rounded-lg hover:bg-black/5" style={{ color: currentTheme.secondary }}>
-                <ZoomIn size={16} />
-              </button>
-            </div>
-          </div>
-          <div className="relative group hidden md:flex items-center ml-4">
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"
-              style={{ backgroundColor: currentTheme.contentBg, color: currentTheme.text, borderColor: currentTheme.border }}>
-              <span className="opacity-70">Font:</span>
-              <span>{FONT_LABELS[settings.fontFamily]}</span>
-              <ChevronDown size={14} className="opacity-50" />
-            </button>
-            <div className="absolute top-full left-0 mt-2 w-48 rounded-xl shadow-xl border overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
-              style={{ backgroundColor: currentTheme.contentBg, borderColor: currentTheme.border }}>
-              {(['rubik', 'nunito', 'crimson', 'mono'] as const).map(f => (
-                <button key={f} onClick={() => setSettings(p => ({ ...p, fontFamily: f }))}
-                  className="w-full text-left px-4 py-2.5 text-sm flex items-center justify-between hover:brightness-95"
-                  style={{ fontFamily: FONT_FAMILIES[f], color: settings.fontFamily === f ? currentTheme.accent : currentTheme.text, backgroundColor: settings.fontFamily === f ? `${currentTheme.accent}15` : 'transparent' }}>
-                  <span>{FONT_LABELS[f]}</span>
-                  {settings.fontFamily === f && <Check size={14} />}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
-            {bookmark && (
-              <button onClick={handleGoToBookmark} className="btn btn-secondary btn-sm flex items-center gap-1 sm:gap-2"
-                style={{ borderColor: currentTheme.border, color: currentTheme.secondary }}>
-                <Bookmark size={14} />
-                <span className="hidden md:flex">Go to Bookmark</span>
-              </button>
-            )}
-            <button onClick={onEdit} className="btn btn-secondary btn-sm flex items-center gap-1 sm:gap-2"
-              style={{ borderColor: currentTheme.border, color: currentTheme.secondary }}>
-              <Edit size={14} /> <span className="hidden md:flex">Edit</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div ref={contentRef} className="p-4 sm:p-8">
-          <article
-            className={`prose prose-lg max-w-none transition-all duration-300 mx-auto ${settings.theme !== 'light' ? 'prose-invert' : ''}`}
-            style={{ fontFamily: FONT_FAMILIES[settings.fontFamily], fontSize: `${settings.fontSize}px`, lineHeight: settings.lineHeight, maxWidth: MAX_WIDTHS[settings.maxWidth], textAlign: settings.textAlign as any, color: currentTheme.text }}
-          >
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                code: ({ className, children, ...props }) => {
-                  if (!className?.includes('language-')) return <code className={className} {...props}>{children}</code>;
-                  return <CodeBlock {...props} theme={theme} readingTheme={settings.theme} className={className}>{children}</CodeBlock>;
-                },
-              }}
-            >
-              {content}
-            </ReactMarkdown>
-          </article>
-        </div>
-      </div>
-
-      <div className={`reading-back-btn transition-all duration-300 ${showFloatingButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-        <button onClick={onGoBack} className="reading-floating-btn" title="Back to Library">
-          <ArrowLeft size={18} />
-          <span className="tooltip">Back</span>
-        </button>
-      </div>
-
-      <div className={`reading-floating-controls transition-all duration-300 ${showFloatingButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-        <button onClick={toggleBookmark} className={`reading-floating-btn ${isBookmarked ? 'bookmark-active' : ''}`}>
-          {isBookmarked ? <BookmarkCheck size={18} className="bookmark-check-icon" /> : <Bookmark size={18} />}
-          <span className="tooltip">{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
-        </button>
-      </div>
-    </>
   );
 };
 
@@ -1144,12 +863,6 @@ export function BookView({
     }
   };
 
-  const handleGoBackToLibrary = () => {
-    setView('list');
-    onSelectBook(null);
-    setShowListInMain(true);
-  };
-
   const handleCreateRoadmap = async (session: BookSession) => {
     if (!session.goal.trim()) { showToast('Please enter a learning goal.', 'warning'); return; }
 
@@ -1406,18 +1119,17 @@ export function BookView({
           {detailTab === 'analytics' && currentBook.status === 'completed' ? (
             <BookAnalytics book={currentBook} />
           ) : detailTab === 'read' && currentBook.status === 'completed' ? (
-            <ReadingMode
-              content={currentBook.finalBook || ''}
+            <StudyReader
+              book={currentBook}
+              theme={theme}
               isEditing={isEditing}
               editedContent={editedContent}
-              onEdit={() => { setEditedContent(currentBook.finalBook || ''); setIsEditing(true); }}
-              onSave={() => { onUpdateBookContent(currentBook.id, editedContent); setIsEditing(false); setEditedContent(''); showToast('Changes saved.', 'success'); }}
-              onCancel={() => { setIsEditing(false); setEditedContent(''); }}
+              onEditFullBook={() => { setEditedContent(currentBook.finalBook || ''); setIsEditing(true); }}
+              onSaveFullBook={() => { onUpdateBookContent(currentBook.id, editedContent); setIsEditing(false); setEditedContent(''); showToast('Changes saved.', 'success'); }}
+              onCancelEdit={() => { setIsEditing(false); setEditedContent(''); }}
               onContentChange={setEditedContent}
-              onGoBack={handleGoBackToLibrary}
-              theme={theme}
-              bookId={currentBook.id}
-              currentModuleIndex={0}
+              showToast={showToast}
+              isMobile={isMobile}
             />
           ) : (
             <>

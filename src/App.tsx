@@ -13,6 +13,7 @@ import { usePWA } from './hooks/usePWA';
 import { WifiOff } from 'lucide-react';
 import { storageUtils } from './utils/storage';
 import { bookService } from './services/bookService';
+import { learningService } from './services/learningService';
 import { planService } from './services/planService';
 import { quotaService } from './services/quotaService';
 import { byokStorage } from './utils/byokStorage';
@@ -205,6 +206,7 @@ function App() {
 
   useEffect(() => {
     bookService.updateSettings(settings);
+    learningService.updateSettings(settings);
     bookService.setProgressCallback(handleBookProgressUpdate);
     bookService.setGenerationStatusCallback((bookId, status) => {
       setGenerationStatus(prev => ({
@@ -226,6 +228,7 @@ function App() {
       const status = await quotaService.getQuotaStatus(user?.id, { forceRefresh: options.forceRefresh });
       setQuotaStatus(status);
       bookService.setQuotaMode(status.mode);
+      learningService.setQuotaMode(status.mode);
     } catch (err) {
       console.warn('[App] Failed to fetch quota:', err);
       if (!options.silent) {
@@ -608,6 +611,7 @@ function App() {
         setBooks(prev => prev.filter(b => b.id !== id));
         if (currentBookId === id) { setCurrentBookId(null); setView('list'); }
         void bookService.clearPersistedState(id);
+        void learningService.deleteStudyState(id);
         showToast('Book deleted.', 'info');
       },
     });
