@@ -214,13 +214,14 @@ const AIWaveAnimation = () => {
 };
 
 const RetryDecisionPanel = ({
-  retryInfo, onRetry, onSwitchModel, onSkip, availableModels,
+  retryInfo, onRetry, onSwitchModel, onSkip, availableModels, showHighDemandNotice = true,
 }: {
   retryInfo: { moduleTitle: string; error: string; retryCount: number; maxRetries: number; waitTime?: number; };
   onRetry: () => void;
   onSwitchModel: () => void;
   onSkip: () => void;
   availableModels: Array<{ provider: string; model: string; name: string }>;
+  showHighDemandNotice?: boolean;
 }) => {
   const [countdown, setCountdown] = useState(Math.ceil((retryInfo.waitTime || 0) / 1000));
 
@@ -233,9 +234,11 @@ const RetryDecisionPanel = ({
   return (
     <div className="bg-red-500/5 backdrop-blur-xl border border-red-500/20 rounded-lg overflow-hidden animate-fade-in-up">
       <div className="p-6">
-        <div className="mb-6">
-          <HighDemandNotice />
-        </div>
+        {showHighDemandNotice && (
+          <div className="mb-6">
+            <HighDemandNotice />
+          </div>
+        )}
 
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 flex items-center justify-center bg-red-500/20 rounded-lg border border-red-500/30">
@@ -274,7 +277,7 @@ const RetryDecisionPanel = ({
 };
 
 const EmbeddedProgressPanel = ({
-  generationStatus, stats, onCancel, onPause, onResume, onRetryDecision, availableModels, bookTitle,
+  generationStatus, stats, onCancel, onPause, onResume, onRetryDecision, availableModels, bookTitle, isByok = false,
 }: {
   generationStatus: GenerationStatus;
   stats: GenerationStats;
@@ -284,6 +287,7 @@ const EmbeddedProgressPanel = ({
   onRetryDecision?: (decision: 'retry' | 'switch' | 'skip') => void;
   availableModels?: Array<{ provider: string; model: string; name: string }>;
   bookTitle?: string;
+  isByok?: boolean;
 }) => {
   const ContextIcon    = bookTitle ? getContextualIcon(bookTitle) : Sparkles;
   const streamBoxRef   = useRef<HTMLDivElement>(null);
@@ -306,6 +310,7 @@ const EmbeddedProgressPanel = ({
         onSwitchModel={() => onRetryDecision('switch')}
         onSkip={() => onRetryDecision('skip')}
         availableModels={availableModels || []}
+        showHighDemandNotice={!isByok}
       />
     );
   }
@@ -1415,6 +1420,7 @@ export function BookView({
                     onRetryDecision={onRetryDecision}
                     availableModels={availableModels}
                     bookTitle={currentBook.title}
+                    isByok={quotaStatus?.mode === 'byok'}
                   />
                 </div>
               )}

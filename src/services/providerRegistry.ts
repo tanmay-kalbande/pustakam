@@ -198,6 +198,8 @@ export const PROVIDER_REGISTRY: Record<ProviderID, ProviderConfig> = {
     models: [
       { id: 'llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B', contextWindow: 131072, maxOutputTokens: 16384 },
       { id: 'llama3.3-70b', name: 'Llama 3.3 70B', contextWindow: 128000, maxOutputTokens: 8192 },
+      { id: 'llama3.1-8b', name: 'Llama 3.1 8B', contextWindow: 8192, maxOutputTokens: 8192 },
+      { id: 'qwen-3-235b-a22b-instruct-2507', name: 'Qwen 3 235B Instruct', contextWindow: 32000, maxOutputTokens: 8192 },
       { id: 'qwen-3-32b', name: 'Qwen 3 32B', contextWindow: 32000, maxOutputTokens: 8192 },
     ],
     defaultModel: 'llama3.3-70b',

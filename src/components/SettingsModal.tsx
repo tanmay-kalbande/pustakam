@@ -654,10 +654,13 @@ export function SettingsModal({
                                     src={`/providers/${provider.id}.svg`} 
                                     alt={provider.name} 
                                     className="w-5 h-5 object-contain"
+                                    style={['anthropic', 'groq', 'openai', 'openrouter', 'xai'].includes(provider.id) ? { filter: 'brightness(0) invert(1)' } : {}}
                                     onError={(e) => {
                                       // Fallback to text badge if logo fails to load
                                       (e.currentTarget as HTMLImageElement).style.display = 'none';
-                                      (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                      if (e.currentTarget.nextElementSibling) {
+                                        (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                      }
                                     }}
                                   />
                                   <div className="hidden items-center justify-center w-full h-full text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)]">

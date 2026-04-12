@@ -115,9 +115,17 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                                             <p className="text-[9px] text-[var(--text-muted)] mt-0.5">Model is auto-selected per task</p>
                                         </div>
 
-                                        <div className="p-2 flex flex-col gap-1">
+                                        <div 
+                                            className="overflow-y-auto max-h-[380px] p-2 flex flex-col gap-1 custom-scrollbar"
+                                            style={{
+                                                scrollbarWidth: 'thin',
+                                                scrollbarColor: 'var(--brand) transparent'
+                                            }}
+                                        >
                                             {PROVIDERS.map((provider) => {
                                                 const isActive = settings.selectedProvider === provider.id;
+                                                const needsWhiteFilter = ['anthropic', 'groq', 'openai', 'openrouter', 'xai'].includes(provider.id);
+                                                
                                                 return (
                                                     <button
                                                         key={provider.id}
@@ -131,7 +139,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                                                         }}
                                                         className={`w-full text-left px-3 py-2.5 rounded-lg transition-all flex items-center justify-between gap-3 ${
                                                             isActive
-                                                                ? 'text-[var(--brand)] bg-[var(--brand)]/10 border border-[var(--brand)]/20'
+                                                                ? 'text-[var(--brand)] bg-[var(--brand)]/10 border border-[var(--brand)]/20 shadow-[0_4px_12px_rgba(var(--brand-rgb),0.1)]'
                                                                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border border-transparent'
                                                         }`}
                                                     >
@@ -141,9 +149,12 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                                                                     src={`/providers/${provider.id}.svg`} 
                                                                     alt={provider.name} 
                                                                     className="w-4 h-4 object-contain"
+                                                                    style={needsWhiteFilter ? { filter: 'brightness(0) invert(1)' } : {}}
                                                                     onError={(e) => {
                                                                         (e.currentTarget as HTMLImageElement).style.display = 'none';
-                                                                        (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                                                        if (e.currentTarget.nextElementSibling) {
+                                                                            (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                                                        }
                                                                     }}
                                                                 />
                                                                 <div className="hidden items-center justify-center w-full h-full text-[8px] font-black uppercase text-[var(--text-muted)]">
