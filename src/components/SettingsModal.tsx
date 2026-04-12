@@ -648,11 +648,26 @@ export function SettingsModal({
                             }`}
                           >
                             <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5 text-[var(--text-muted)]">
-                                  {provider.badge}
-                                </span>
-                                <span className="text-xs font-bold text-[var(--text-primary)]">{provider.name}</span>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden border border-white/10">
+                                  <img 
+                                    src={`/providers/${provider.id}.svg`} 
+                                    alt={provider.name} 
+                                    className="w-5 h-5 object-contain"
+                                    onError={(e) => {
+                                      // Fallback to text badge if logo fails to load
+                                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                      (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                    }}
+                                  />
+                                  <div className="hidden items-center justify-center w-full h-full text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)]">
+                                    {provider.badge}
+                                  </div>
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-bold text-[var(--text-primary)]">{provider.name}</span>
+                                  <span className="text-[10px] text-[var(--text-muted)]">{provider.tagline}</span>
+                                </div>
                                 {status === 'valid' && <CheckCircle size={14} className="text-green-500" />}
                                 {status === 'invalid' && <XCircle size={14} className="text-red-500" />}
                               </div>

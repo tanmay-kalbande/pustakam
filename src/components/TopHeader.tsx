@@ -136,11 +136,20 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                                                         }`}
                                                     >
                                                         <div className="flex items-center gap-2.5 min-w-0">
-                                                            <span className={`text-[9px] font-black font-mono tracking-widest px-1.5 py-0.5 rounded flex-shrink-0 ${
-                                                                isActive ? 'bg-[var(--brand)]/20 text-[var(--brand)]' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]'
-                                                            }`}>
-                                                                {provider.badge}
-                                                            </span>
+                                                            <div className="w-6 h-6 rounded bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 flex-shrink-0">
+                                                                <img 
+                                                                    src={`/providers/${provider.id}.svg`} 
+                                                                    alt={provider.name} 
+                                                                    className="w-4 h-4 object-contain"
+                                                                    onError={(e) => {
+                                                                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                                                        (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                                                    }}
+                                                                />
+                                                                <div className="hidden items-center justify-center w-full h-full text-[8px] font-black uppercase text-[var(--text-muted)]">
+                                                                    {provider.badge}
+                                                                </div>
+                                                            </div>
                                                             <div className="min-w-0">
                                                                 <span className="font-semibold font-mono text-xs block">{provider.name}</span>
                                                                 <span className="text-[9px] text-[var(--text-muted)] block truncate">{provider.tagline}</span>
