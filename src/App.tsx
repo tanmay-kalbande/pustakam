@@ -58,46 +58,92 @@ function formatBookTitle(session: Pick<BookSession, 'title' | 'goal'>): string {
 }
 
 function WorkspaceFallback() {
+  const [phase, setPhase] = useState(0);
+  const phases = [
+    { label: "Initializing core...", sub: "Setting up secure workspace environment" },
+    { label: "Assembling chapters...", sub: "Processing generated book architecture" },
+    { label: "Priming AI companion...", sub: "Syncing contextual knowledge base" },
+    { label: "Finalizing...", sub: "Almost ready for your study session" }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhase(p => (p + 1) % phases.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [phases.length]);
+
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 pointer-events-none">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-[#080808]">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[20%] left-[10%] w-[40%] h-[40%] bg-[#FECD8C]/5 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[20%] right-[10%] w-[30%] h-[30%] bg-blue-500/5 blur-[100px] rounded-full" />
+      </div>
+
       <motion.div 
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative group overflow-hidden"
+        initial={{ opacity: 0, scale: 0.98, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative w-full max-w-[320px]"
       >
-        <div 
-          className="relative z-10 flex flex-col items-center gap-6 rounded-[32px] border border-white/10 bg-black/40 px-12 py-10 backdrop-blur-2xl shadow-[0_32px_128px_-12px_rgba(0,0,0,0.8)]"
-          style={{ 
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)',
-          }}
-        >
-          {/* Animated Spinner with Glow */}
-          <div className="relative">
-            <div className="absolute inset-0 blur-xl opacity-20 bg-[#FECD8C] animate-pulse" />
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="relative text-[#FECD8C]"
-            >
-              <Loader2 size={32} strokeWidth={1.5} />
-            </motion.div>
+        <div className="relative z-10 flex flex-col items-center">
+          {/* Advanced Loader */}
+          <div className="relative mb-10">
+            <div className="absolute inset-0 blur-2xl opacity-20 bg-[#FECD8C] animate-pulse" />
+            <div className="relative flex items-center justify-center w-16 h-16">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 border-2 border-[#FECD8C]/10 rounded-full border-t-[#FECD8C]"
+              />
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-2 border-2 border-[#FECD8C]/5 rounded-full border-b-[#FECD8C]/40"
+              />
+              <Loader2 size={24} className="text-[#FECD8C] animate-spin" strokeWidth={1.5} />
+            </div>
           </div>
 
-          <div className="flex flex-col items-center gap-1.5 text-center">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20">Pustakam AI</span>
+          <div className="w-full space-y-6 text-center">
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/20">Pustakam AI</span>
+              <div className="h-[24px] flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={phase}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="text-sm font-semibold tracking-tight text-white/80"
+                  >
+                    {phases[phase].label}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={phase}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-[10px] text-white/30 font-medium uppercase tracking-[0.1em] h-[12px]"
+                >
+                  {phases[phase].sub}
+                </motion.p>
+              </AnimatePresence>
             </div>
-            <h3 className="text-sm font-semibold tracking-tight text-white/70">
-              Preparing your study workspace...
-            </h3>
-            <p className="text-[10px] text-white/30 font-medium uppercase tracking-[0.15em]">
-              Analyzing content & resources
-            </p>
+
+            {/* Simulated Progress Bar */}
+            <div className="relative h-1 w-full bg-white/5 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 12, ease: "easeInOut", repeat: Infinity }}
+                className="absolute inset-y-0 left-0 bg-[#FECD8C] shadow-[0_0_12px_#FECD8C]"
+              />
+            </div>
           </div>
         </div>
-
-        {/* Outer radial glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#FECD8C]/5 rounded-full blur-[80px]" />
       </motion.div>
     </div>
   );

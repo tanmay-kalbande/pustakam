@@ -1201,11 +1201,13 @@ export function StudyModePage({
           )}
 
           {/* Reader toolbar â€” height matches sidebar header ~44px */}
-          <div
+          <motion.div
+            layout
+            animate={{ maxWidth: readerShellMaxWidth }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="mx-auto shrink-0 sticky top-0 z-30 flex items-center justify-between gap-3 px-6"
             style={{
               height: 44,
-              maxWidth: readerShellMaxWidth,
               width: '100%',
               background: rt.bg === '#0c0c0c' ? 'rgba(12,12,12,0.95)' : `${rt.bg}f2`,
               borderBottom: `1px solid ${rt.border}`,
@@ -1339,7 +1341,12 @@ export function StudyModePage({
           </div>
 
           {/* Collapsible chapter overview â€” collapsed by default so the book is front and center */}
-          <div className="shrink-0 px-5 pt-3 pb-0" style={{ maxWidth: readerShellMaxWidth, margin: '0 auto', width: '100%' }}>
+          <motion.div 
+            layout
+            animate={{ maxWidth: readerShellMaxWidth }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="shrink-0 px-5 pt-3 pb-0 mx-auto w-full"
+          >
             <button
               onClick={() => setHeroOpen(o => !o)}
               className="flex w-full items-center justify-between gap-3 rounded-[16px] border px-4 py-2.5 text-left transition-all"
@@ -1374,7 +1381,12 @@ export function StudyModePage({
                 transition={{ duration: 0.22, ease: 'easeInOut' }}
                 className="overflow-hidden"
               >
-                <div className="mx-auto w-full px-5 pb-3 pt-2" style={{ maxWidth: readerShellMaxWidth }}>
+                <motion.div 
+                  layout
+                  animate={{ maxWidth: readerShellMaxWidth }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  className="mx-auto w-full px-5 pb-3 pt-2"
+                >
                   <div
                     className="overflow-hidden rounded-[24px] border"
                     style={{
@@ -1479,7 +1491,12 @@ export function StudyModePage({
           )}
 
           {/* Content */}
-          <div className="mx-auto flex-1 w-full px-8 py-8" style={{ maxWidth: readerShellMaxWidth, overflowX: 'hidden' }}>
+          <motion.div 
+            layout
+            animate={{ maxWidth: readerShellMaxWidth }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="mx-auto flex-1 w-full px-8 py-8 overflow-hidden"
+          >
             {surface === 'full_book' && isEditing ? (
               <textarea
                 value={editedContent}
@@ -1494,11 +1511,13 @@ export function StudyModePage({
                 }}
               />
             ) : (
-                <div
+                <motion.div
                   ref={contentRef}
+                  layout
+                  animate={{ maxWidth: readerContentMaxWidth }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
                   className="mx-auto overflow-hidden rounded-[30px] border px-5 py-6 shadow-[0_24px_70px_rgba(0,0,0,0.08)] md:px-7 md:py-8"
                   style={{
-                    maxWidth: readerContentMaxWidth,
                     width: '100%',
                     boxSizing: 'border-box',
                     borderColor: rt.border,
@@ -1531,9 +1550,11 @@ export function StudyModePage({
 
           {/* Chapter nav */}
           {surface === 'module' && (
-            <div
-              className="mx-auto shrink-0 flex items-center justify-between gap-4 px-8 py-3.5 mt-2"
-              style={{ maxWidth: readerShellMaxWidth, width: '100%' }}
+            <motion.div
+              layout
+              animate={{ maxWidth: readerShellMaxWidth }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="mx-auto shrink-0 flex items-center justify-between gap-4 px-8 py-3.5 mt-2 w-full"
             >
               <button
                 onClick={() => { if (selModIdx > 0) { setSelModIdx(s => s - 1); setSurface('module'); } }}
