@@ -1489,7 +1489,7 @@ export function StudyModePage({
             layout
             animate={{ maxWidth: readerShellMaxWidth }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="mx-auto flex-1 w-full px-8 py-8 overflow-hidden"
+            className="mx-auto flex-1 w-full px-8 pt-8 pb-3"
           >
             {surface === 'full_book' && isEditing ? (
               <textarea
@@ -1548,7 +1548,7 @@ export function StudyModePage({
               layout
               animate={{ maxWidth: readerShellMaxWidth }}
               transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="mx-auto shrink-0 flex items-center justify-between gap-4 px-8 mt-1 w-full"
+              className="mx-auto shrink-0 flex items-center justify-between gap-4 px-10 mt-[-32px] pb-10 w-full relative z-10"
             >
               <button
                 onClick={() => { if (selModIdx > 0) { setSelModIdx(s => s - 1); setSurface('module'); } }}
