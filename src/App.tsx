@@ -9,6 +9,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { useGenerationStats } from './components/GenerationProgressPanel';
 import { APISettings, ModelProvider } from './types';
 import type { QuotaStatus } from './types/providers';
+import { usePWA } from './hooks/usePWA';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff, Loader2 } from 'lucide-react';
 import { storageUtils } from './utils/storage';
