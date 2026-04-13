@@ -170,8 +170,8 @@ const SurfaceToggle = ({
   surfaceColor: string;
 }) => (
   <div
-    className="inline-flex items-center gap-1 overflow-hidden p-1"
-    style={{ borderRadius: 20, border: `1px solid ${borderColor}`, background: surfaceColor }}
+    className="inline-flex items-center gap-1 overflow-hidden p-0.5"
+    style={{ borderRadius: 16, border: `1px solid ${borderColor}`, background: surfaceColor }}
   >
     {([
       { v: 'module' as const, label: 'Chapters', icon: BookOpen },
@@ -180,7 +180,7 @@ const SurfaceToggle = ({
       <button
         key={v}
         onClick={() => onChange(v)}
-        className="flex h-8 min-w-[110px] items-center justify-center gap-1.5 rounded-full px-4 text-[11px] font-semibold transition-all"
+        className="flex h-7 min-w-[90px] items-center justify-center gap-1.5 rounded-full px-3 text-[11px] font-semibold transition-all"
         style={{
           background: value === v ? accentColor : 'transparent',
           color: value === v ? activeTextColor : mutedTextColor,
@@ -1213,14 +1213,14 @@ export function StudyModePage({
             <div className="flex items-center gap-2">
               {/* Theme switcher */}
               <div
-                className="flex items-center overflow-hidden rounded-[18px] border p-1"
+                className="flex items-center overflow-hidden rounded-[18px] border p-0.5"
                 style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.02)' }}
               >
                 {(['dark', 'sepia', 'light'] as const).map(t => (
                   <button
                     key={t}
                     onClick={() => setSettings(p => ({ ...p, theme: t }))}
-                    className="flex h-8 w-8 items-center justify-center rounded-full transition-all"
+                    className="flex h-7 w-7 items-center justify-center rounded-full transition-all"
                     style={{
                       background: settings.theme === t ? 'rgba(255,255,255,0.08)' : 'transparent',
                       color: settings.theme === t ? rt.text : rt.sub,
@@ -1233,7 +1233,7 @@ export function StudyModePage({
 
               {/* Font size */}
               <div
-                className="flex h-10 items-center gap-1.5 rounded-[18px] border px-2.5"
+                className="flex h-8 items-center gap-1.5 rounded-[18px] border px-2"
                 style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.02)' }}
               >
                 <button
@@ -1259,7 +1259,7 @@ export function StudyModePage({
               {/* Font family */}
               <div className="relative group hidden md:block">
                 <button
-                  className="flex h-10 items-center gap-1.5 rounded-[18px] border px-3.5 text-[11px]"
+                  className="flex h-8 items-center gap-1.5 rounded-[18px] border px-3 text-[11px]"
                   style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.02)', color: rt.sub }}
                 >
                   {FONT_LABELS[settings.fontFamily]} <ChevronDown size={10} />
