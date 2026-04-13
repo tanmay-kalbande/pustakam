@@ -67,6 +67,8 @@ const FONT_FAMILIES = {
 };
 const FONT_LABELS = { sans: 'Sans', serif: 'Serif', mono: 'Mono' };
 const MAX_WIDTHS = { narrow: '60ch', medium: '72ch', wide: '86ch' };
+const EXPANDED_MAX_WIDTHS = { narrow: '64ch', medium: '80ch', wide: '94ch' };
+const DESKTOP_PANEL_WIDTH = 296;
 
 const EXPLANATION_OPTIONS: ExplanationMode[] = [
   'simpler', 'deeper', 'step_by_step', 'analogy', 'exam_focused', 'practical',
@@ -170,8 +172,8 @@ const SurfaceToggle = ({
   surfaceColor: string;
 }) => (
   <div
-    className="inline-flex overflow-hidden"
-    style={{ borderRadius: 9999, border: `1px solid ${borderColor}`, background: surfaceColor }}
+    className="inline-flex items-center gap-1 overflow-hidden p-1"
+    style={{ borderRadius: 20, border: `1px solid ${borderColor}`, background: surfaceColor }}
   >
     {([
       { v: 'module' as const, label: 'Chapters', icon: BookOpen },
@@ -180,11 +182,12 @@ const SurfaceToggle = ({
       <button
         key={v}
         onClick={() => onChange(v)}
-        className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-semibold transition-all"
+        className="flex h-8 min-w-[110px] items-center justify-center gap-1.5 rounded-full px-4 text-[11px] font-semibold transition-all"
         style={{
           background: value === v ? accentColor : 'transparent',
           color: value === v ? activeTextColor : mutedTextColor,
           letterSpacing: '0.02em',
+          boxShadow: value === v ? '0 10px 24px rgba(0,0,0,0.12)' : 'none',
         }}
       >
         <Icon size={11} />
@@ -197,70 +200,86 @@ const SurfaceToggle = ({
 // ─── Interaction Card ─────────────────────────────────────────────────────────
 const InteractionCard = ({
   interaction, onFollowUp,
-}: { interaction: StudyInteraction; onFollowUp?: (p: string) => void }) => (
-  <div className="space-y-3 rounded-[24px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.015))] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.2)]">
-    {interaction.question?.question && (
-      <div className="flex justify-end">
-        <div
-          className="max-w-[82%] rounded-[18px] border border-[rgba(254,205,140,0.18)] bg-[rgba(254,205,140,0.08)] px-3.5 py-3 text-sm leading-relaxed text-white/85"
-          style={{
-            borderRadius: '10px 10px 2px 10px',
-          }}
+}: { interaction: StudyInteraction; onFollowUp?: (p: string) => void }) => {
+  const isTutor = interaction.type === 'doubt';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.985 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.26, ease: 'easeOut' }}
+      whileHover={{ y: -1.5 }}
+      className="space-y-2.5 rounded-[22px] border border-white/[0.07] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.012))] p-3.5 shadow-[0_14px_36px_rgba(0,0,0,0.18)]"
+    >
+      {interaction.question?.question && (
+        <motion.div
+          initial={{ opacity: 0, x: 8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.04, duration: 0.2 }}
+          className="flex justify-end"
         >
-          {interaction.question.question}
-        </div>
-      </div>
-    )}
-
-    <div className="flex gap-3 rounded-[20px] border border-white/[0.07] bg-black/20 p-4">
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border border-[rgba(254,205,140,0.18)] bg-[rgba(254,205,140,0.08)]">
-        <Sparkles size={10} style={{ color: '#FECD8C' }} />
-      </div>
-
-      <div className="flex-1 min-w-0">
-        {interaction.sourceText && (
           <div
-            className="mb-3 rounded-r-xl border-l-2 border-[rgba(254,205,140,0.25)] bg-white/[0.03] px-3 py-2 text-[11px] leading-relaxed italic text-white/38"
-            style={{
-              borderRadius: '0 4px 4px 0',
-            }}
+            className="max-w-[84%] rounded-[16px] border border-[rgba(254,205,140,0.16)] bg-[linear-gradient(180deg,rgba(254,205,140,0.12),rgba(254,205,140,0.06))] px-3 py-2.5 text-[12px] leading-6 text-white/88 shadow-[0_10px_24px_rgba(254,205,140,0.07)]"
+            style={{ borderRadius: '14px 14px 4px 14px' }}
           >
-            "{interaction.sourceText.slice(0, 200)}{interaction.sourceText.length > 200 ? '...' : ''}"
+            {interaction.question.question}
           </div>
-        )}
+        </motion.div>
+      )}
 
-        <div className="mb-2 flex items-center gap-2">
-          <span className="rounded-full border border-white/[0.08] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.24em] text-white/30">
-            {interaction.type === 'doubt' ? 'Tutor' : 'Reframe'}
-          </span>
-          {interaction.answer.confidence ? (
-            <span className="rounded-full border border-white/[0.06] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/22">
-              {interaction.answer.confidence}
-            </span>
-          ) : null}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08, duration: 0.24 }}
+        className="flex gap-3 rounded-[18px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(0,0,0,0.06))] p-3"
+      >
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[14px] border border-[rgba(254,205,140,0.18)] bg-[rgba(254,205,140,0.1)]">
+          <Sparkles size={10} style={{ color: '#FECD8C' }} />
         </div>
 
-        <p className="text-[13px] leading-relaxed text-white/70">
-          {interaction.answer.answer}
-        </p>
-
-        {(interaction.answer.followUpSuggestions?.length ?? 0) > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {interaction.answer.followUpSuggestions!.map(s => (
-              <button
-                key={s}
-                onClick={() => onFollowUp?.(s)}
-                className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/45 transition-all hover:border-[rgba(254,205,140,0.3)] hover:text-white/75"
-              >
-                {s}
-              </button>
-            ))}
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex flex-wrap items-center gap-1.5">
+            <span className="rounded-full border border-white/[0.08] bg-white/[0.025] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.22em] text-white/32">
+              {isTutor ? 'Tutor' : 'Reframe'}
+            </span>
+            <span className="rounded-full border border-[rgba(254,205,140,0.1)] bg-[rgba(254,205,140,0.05)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-[rgba(254,205,140,0.7)]">
+              {isTutor ? 'Friendly answer' : 'Fresh angle'}
+            </span>
+            {interaction.answer.confidence ? (
+              <span className="rounded-full border border-white/[0.06] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/22">
+                {interaction.answer.confidence}
+              </span>
+            ) : null}
           </div>
-        )}
-      </div>
-    </div>
-  </div>
-);
+
+          {interaction.sourceText && (
+            <div className="mb-3 rounded-[14px] border border-white/[0.05] bg-white/[0.03] px-3 py-2 text-[10px] leading-5 italic text-white/42">
+              "{interaction.sourceText.slice(0, 180)}{interaction.sourceText.length > 180 ? '...' : ''}"
+            </div>
+          )}
+
+          <p className="text-[12.5px] leading-6 text-white/74">
+            {interaction.answer.answer}
+          </p>
+
+          {(interaction.answer.followUpSuggestions?.length ?? 0) > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {interaction.answer.followUpSuggestions!.map(s => (
+                <button
+                  key={s}
+                  onClick={() => onFollowUp?.(s)}
+                  className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium text-white/48 transition-all hover:border-[rgba(254,205,140,0.28)] hover:bg-[rgba(254,205,140,0.06)] hover:text-white/78"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 // ─── Flashcard View ───────────────────────────────────────────────────────────
 const FlashcardView = ({
@@ -390,6 +409,7 @@ export function StudyModePage({
   onCancelEdit, onContentChange, showToast, isMobile = false, onBack,
 }: StudyModePageProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const questionInputRef = useRef<HTMLTextAreaElement>(null);
 
   const orderedModules = useMemo(() => {
     if (!book.roadmap?.modules?.length) return [...book.modules];
@@ -448,6 +468,10 @@ export function StudyModePage({
 
   const rt = READER_THEMES[settings.theme];
   const accentTextColor = settings.theme === 'dark' ? '#111111' : '#FFFFFF';
+  const readerShellMaxWidth = panelOpen
+    ? (sidebarOpen ? '76rem' : '82rem')
+    : (sidebarOpen ? '94rem' : '108rem');
+  const readerContentMaxWidth = panelOpen ? MAX_WIDTHS[settings.maxWidth] : EXPANDED_MAX_WIDTHS[settings.maxWidth];
 
   useEffect(() => {
     setSidebarOpen(!isMobile);
@@ -455,6 +479,18 @@ export function StudyModePage({
   }, [isMobile]);
 
   useEffect(() => { localStorage.setItem('pustakam-reading-settings', JSON.stringify(settings)); }, [settings]);
+
+  useEffect(() => {
+    if (!panelOpen || activeTool !== 'doubt' || !questionInputRef.current) return;
+    requestAnimationFrame(() => questionInputRef.current?.focus());
+  }, [panelOpen, activeTool, currentModule?.id]);
+
+  useEffect(() => {
+    if (!questionInputRef.current) return;
+    const input = questionInputRef.current;
+    input.style.height = '0px';
+    input.style.height = `${Math.min(input.scrollHeight, 148)}px`;
+  }, [questionInput]);
 
   useEffect(() => {
     const nextResume = readingProgressUtils.getResumeState(book.id);
@@ -672,46 +708,46 @@ export function StudyModePage({
   };
 
   const quickPrompts = [
-    `Explain the core concept in "${currentModule.title}"`,
-    'What are the most common mistakes to avoid?',
-    'Give me a real-world example of this.',
+    `Break "${currentModule.title}" into plain language`,
+    'Give me one example that makes this stick',
+    'What part of this chapter usually trips people up?',
   ];
 
   // ─── Study Panel ─────────────────────────────────────────────────────────
   const renderPanel = () => (
     <div className="flex h-full flex-col border-l border-white/[0.06] bg-[linear-gradient(180deg,#121212,#0b0b0b)] text-white/84">
-      <div className="shrink-0 border-b border-white/[0.06] px-5 pb-4 pt-5">
-        <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="shrink-0 border-b border-white/[0.06] px-4 pb-3 pt-4">
+        <div className="mb-3 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[rgba(254,205,140,0.72)]">
+            <p className="text-[9px] font-bold uppercase tracking-[0.26em] text-[rgba(254,205,140,0.72)]">
               Study companion
             </p>
-            <h3 className="mt-2 truncate text-sm font-semibold text-white/88">{currentModule.title}</h3>
-            <p className="mt-1 text-[11px] leading-5 text-white/38">
-              {selectedText ? 'Selection pinned for sharper answers.' : 'Highlight any passage to pin it as context.'}
+            <h3 className="mt-1.5 truncate text-[13px] font-semibold text-white/88">{currentModule.title}</h3>
+            <p className="mt-1 text-[10px] leading-5 text-white/42">
+              {selectedText ? 'Pinned context is ready.' : 'Highlight a line to anchor the next reply.'}
             </p>
           </div>
           <button
             onClick={() => setPanelOpen(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03] text-white/38 transition-all hover:bg-white/[0.08] hover:text-white/72"
+            className="flex h-8 w-8 items-center justify-center rounded-[14px] border border-white/[0.08] bg-white/[0.03] text-white/42 transition-all hover:bg-white/[0.08] hover:text-white/72"
           >
-            <X size={14} />
+            <X size={13} />
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-1.5">
           {companionStats.map(item => (
             <div
               key={item.label}
-              className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-3 py-2.5"
+              className="rounded-[16px] border border-white/[0.07] bg-white/[0.03] px-2.5 py-2"
             >
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/24">{item.label}</p>
-              <p className="mt-1 text-sm font-semibold text-white/82">{item.value}</p>
+              <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-white/24">{item.label}</p>
+              <p className="mt-1 text-[13px] font-semibold text-white/82">{item.value}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-4 flex gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] p-1">
+        <div className="mt-3 flex gap-1 rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-1">
           {([
             { t: 'doubt' as StudyTool, label: 'Ask', icon: MessageCircle },
             { t: 'explain' as StudyTool, label: 'Reframe', icon: Sparkles },
@@ -720,9 +756,10 @@ export function StudyModePage({
             <button
               key={t}
               onClick={() => setActiveTool(t)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-semibold transition-all ${
+              className={`flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[11px] font-semibold transition-all ${
                 activeTool === t ? 'bg-[#FECD8C] text-black' : 'text-white/38 hover:text-white/70'
               }`}
+              style={{ boxShadow: activeTool === t ? '0 12px 28px rgba(254,205,140,0.14)' : 'none' }}
             >
               <Icon size={11} />
               {label}
@@ -730,37 +767,45 @@ export function StudyModePage({
           ))}
         </div>
 
-        <div className="mt-4 rounded-[22px] border border-[rgba(254,205,140,0.12)] bg-[rgba(254,205,140,0.05)] p-3">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-[rgba(254,205,140,0.7)]">
+        <div className="mt-3 rounded-[18px] border border-[rgba(254,205,140,0.12)] bg-[rgba(254,205,140,0.05)] px-3 py-2.5">
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[rgba(254,205,140,0.7)]">
               {selectedText ? 'Pinned context' : 'Quick hint'}
             </span>
             {selectedText ? (
               <button
                 onClick={() => setSelectedText('')}
-                className="rounded-full border border-white/[0.08] px-2 py-0.5 text-[10px] font-semibold text-white/40 transition-all hover:text-white/72"
+                className="rounded-full border border-white/[0.08] px-2 py-0.5 text-[9px] font-semibold text-white/40 transition-all hover:text-white/72"
               >
                 Clear
               </button>
             ) : null}
           </div>
-          <p className="text-[11px] leading-6 text-white/52">
+          <p className="text-[10.5px] leading-5 text-white/54">
             {selectedText
               ? selectedTextPreview
-              : 'Tap and drag over any sentence in the reader, then ask for a doubt answer or a cleaner explanation.'}
+              : 'Drag across a sentence, then ask for a simpler take, an example, or an exam-style recap.'}
           </p>
         </div>
       </div>
 
       {/* Panel body */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5 custom-scrollbar">
+      <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-4 py-3">
 
         {/* ── DOUBT TAB ── */}
         {activeTool === 'doubt' && (
           <>
             {!threadLoading && doubtHistory.length === 0 && (
-              <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] mb-3" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <div className="space-y-3">
+                <div className="rounded-[18px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(0,0,0,0.08))] px-3.5 py-3">
+                  <p className="text-[11px] font-semibold text-white/82">
+                    Ask for a simpler explanation, a real-world example, or a quick memory trick.
+                  </p>
+                  <p className="mt-1 text-[10px] leading-5 text-white/44">
+                    I stay tied to this chapter, so answers stay focused instead of generic.
+                  </p>
+                </div>
+                <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.2)' }}>
                   Suggested Questions
                 </p>
                 <div className="space-y-1.5">
@@ -768,15 +813,14 @@ export function StudyModePage({
                     <button
                       key={p}
                       onClick={() => setQuestionInput(p)}
-                      className="w-full text-left px-3 py-2.5 text-[12px] transition-all"
+                      className="w-full rounded-[16px] border px-3 py-2.5 text-left text-[11px] leading-5 transition-all"
                       style={{
                         background: 'rgba(255,255,255,0.025)',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                        color: 'rgba(255,255,255,0.42)',
-                        borderRadius: 7,
+                        borderColor: 'rgba(255,255,255,0.06)',
+                        color: 'rgba(255,255,255,0.48)',
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.11)'; e.currentTarget.style.color = 'rgba(255,255,255,0.68)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.42)'; }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(254,205,140,0.2)'; e.currentTarget.style.color = 'rgba(255,255,255,0.78)'; e.currentTarget.style.background = 'rgba(254,205,140,0.06)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.48)'; e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; }}
                     >
                       {p}
                     </button>
@@ -788,7 +832,7 @@ export function StudyModePage({
             {threadLoading && (
               <div className="flex items-center gap-2 py-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
                 <Loader2 size={12} className="animate-spin" />
-                <span className="text-[11px]">Loading history…</span>
+                <span className="text-[11px]">Loading history...</span>
               </div>
             )}
 
@@ -815,13 +859,12 @@ export function StudyModePage({
                       key={mode}
                       onClick={() => void handleExplain(mode)}
                       disabled={!!explainLoading}
-                      className="flex items-center gap-2 px-3 py-2.5 text-left text-[11px] font-medium transition-all"
+                      className="flex items-center gap-2 rounded-[16px] px-3 py-2.5 text-left text-[11px] font-medium transition-all"
                       style={{
                         background: isActive ? `${meta.color}12` : 'rgba(255,255,255,0.025)',
                         border: `1px solid ${isActive ? `${meta.color}30` : 'rgba(255,255,255,0.07)'}`,
                         color: isActive ? meta.color : 'rgba(255,255,255,0.52)',
                         opacity: explainLoading && !isActive ? 0.35 : 1,
-                        borderRadius: 7,
                       }}
                     >
                       <span style={{ fontSize: 13, lineHeight: 1, fontFamily: 'monospace', color: meta.color }}>
@@ -874,11 +917,11 @@ export function StudyModePage({
                 <button
                   onClick={handleGenerateFlashcards}
                   disabled={flashLoading}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all"
-                  style={{ background: '#FECD8C', color: '#000', opacity: flashLoading ? 0.6 : 1, borderRadius: 7 }}
+                  className="flex h-10 w-full items-center justify-center gap-2 rounded-[16px] text-sm font-semibold transition-all"
+                  style={{ background: '#FECD8C', color: '#000', opacity: flashLoading ? 0.6 : 1 }}
                 >
                   {flashLoading ? <Loader2 size={14} className="animate-spin" /> : <Brain size={14} />}
-                  {flashLoading ? 'Generating…' : 'Generate Deck'}
+                  {flashLoading ? 'Generating...' : 'Generate Deck'}
                 </button>
 
                 {flashError && (
@@ -894,7 +937,7 @@ export function StudyModePage({
                 {deckLoading && (
                   <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.2)' }}>
                     <Loader2 size={12} className="animate-spin" />
-                    <span className="text-[11px]">Loading deck…</span>
+                    <span className="text-[11px]">Loading deck...</span>
                   </div>
                 )}
               </div>
@@ -930,16 +973,30 @@ export function StudyModePage({
 
       {/* Doubt input */}
       {activeTool === 'doubt' && (
-        <div className="shrink-0 p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="shrink-0 px-4 pb-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <div
             style={{
-              border: '1px solid rgba(255,255,255,0.09)',
-              background: 'rgba(255,255,255,0.025)',
-              borderRadius: 8,
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.018))',
+              borderRadius: 20,
               overflow: 'hidden',
             }}
           >
+            {selectedText && (
+              <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-3 py-2">
+                <span className="truncate text-[10px] font-medium text-[rgba(254,205,140,0.74)]">
+                  Pinned: {selectedTextPreview}
+                </span>
+                <button
+                  onClick={() => setSelectedText('')}
+                  className="shrink-0 rounded-full border border-white/[0.08] px-2 py-0.5 text-[9px] font-semibold text-white/44 transition-all hover:text-white/76"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
             <textarea
+              ref={questionInputRef}
               value={questionInput}
               onChange={e => setQuestionInput(e.target.value)}
               onKeyDown={e => {
@@ -948,18 +1005,18 @@ export function StudyModePage({
                   if (!doubtLoading) void handleAskDoubt();
                 }
               }}
-              placeholder="Ask anything about this chapter…"
-              className="w-full bg-transparent px-3.5 pt-3 pb-2 text-[13px] resize-none outline-none leading-relaxed"
-              style={{ minHeight: '68px', color: 'rgba(255,255,255,0.78)', caretColor: '#FECD8C' }}
-              rows={3}
+              placeholder={selectedText ? 'Ask about the highlighted passage...' : 'Ask for a clearer explanation, example, or shortcut...'}
+              className="w-full resize-none bg-transparent px-3.5 pt-3 text-[13px] leading-6 outline-none"
+              style={{ minHeight: '54px', maxHeight: '148px', color: 'rgba(255,255,255,0.8)', caretColor: '#FECD8C' }}
+              rows={2}
             />
-            <div className="flex items-center justify-between px-3 pb-2.5">
-              <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.18)' }}>↵ to send</span>
+            <div className="flex items-center justify-between gap-2 px-3 pb-3 pt-2">
+              <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.24)' }}>Enter to send</span>
               <div className="flex items-center gap-2">
                 {doubtError && lastDoubtPayload && (
                   <button
                     onClick={() => void handleAskDoubt(lastDoubtPayload)}
-                    className="flex items-center gap-1 text-[11px] px-2 py-1"
+                    className="flex items-center gap-1 rounded-full px-2 py-1 text-[10px]"
                     style={{ color: 'rgba(252,165,165,0.7)' }}
                   >
                     <RefreshCw size={10} /> Retry
@@ -968,16 +1025,16 @@ export function StudyModePage({
                 <button
                   onClick={() => void handleAskDoubt()}
                   disabled={doubtLoading || !questionInput.trim()}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold transition-all"
+                  className="flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[11px] font-semibold transition-all"
                   style={{
                     background: questionInput.trim() ? '#FECD8C' : 'rgba(255,255,255,0.05)',
                     color: questionInput.trim() ? '#000' : 'rgba(255,255,255,0.22)',
                     opacity: doubtLoading ? 0.6 : 1,
-                    borderRadius: 6,
+                    boxShadow: questionInput.trim() ? '0 14px 30px rgba(254,205,140,0.14)' : 'none',
                   }}
                 >
                   {doubtLoading ? <Loader2 size={11} className="animate-spin" /> : <MessageCircle size={11} />}
-                  Ask
+                  Send
                 </button>
               </div>
             </div>
@@ -1029,8 +1086,8 @@ export function StudyModePage({
         <div className="flex items-center gap-2">
           {/* Chapter / progress badge */}
           <div
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-[11px]"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 6 }}
+            className="hidden h-10 items-center gap-1.5 rounded-[16px] border px-3.5 text-[11px] sm:flex"
+            style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}
           >
             <span style={{ color: 'rgba(255,255,255,0.28)' }}>Ch.</span>
             <span className="font-semibold" style={{ color: 'rgba(255,255,255,0.68)' }}>
@@ -1047,32 +1104,31 @@ export function StudyModePage({
           {!isMobile && (
             <button
               onClick={() => setSidebarOpen(p => !p)}
-              className="w-8 h-8 flex items-center justify-center transition-all"
+              className="flex h-10 w-10 items-center justify-center rounded-[16px] border transition-all"
               style={{
                 background: sidebarOpen ? 'rgba(255,255,255,0.06)' : 'transparent',
                 color: sidebarOpen ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 6,
+                borderColor: 'rgba(255,255,255,0.06)',
               }}
               title="Toggle chapters"
             >
-              <List size={14} />
+              <List size={15} />
             </button>
           )}
 
           {!isMobile && (
             <button
               onClick={() => setPanelOpen(p => !p)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold transition-all"
+              className="flex h-10 items-center gap-1.5 rounded-[16px] border px-3.5 text-[11px] font-semibold transition-all"
               style={{
                 background: panelOpen ? 'rgba(254,205,140,0.09)' : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${panelOpen ? 'rgba(254,205,140,0.2)' : 'rgba(255,255,255,0.08)'}`,
+                borderColor: panelOpen ? 'rgba(254,205,140,0.2)' : 'rgba(255,255,255,0.08)',
                 color: panelOpen ? '#FECD8C' : 'rgba(255,255,255,0.38)',
-                borderRadius: 6,
+                boxShadow: panelOpen ? '0 12px 28px rgba(254,205,140,0.08)' : 'none',
               }}
             >
-              <Brain size={12} />
-              {panelOpen ? 'Hide' : 'Tutor'}
+              <MessageCircle size={12} />
+              {panelOpen ? 'Hide' : 'Companion'}
             </button>
           )}
         </div>
@@ -1191,14 +1247,14 @@ export function StudyModePage({
             <div className="flex items-center gap-2">
               {/* Theme switcher */}
               <div
-                className="flex items-center overflow-hidden"
-                style={{ border: `1px solid ${rt.border}`, borderRadius: 6, background: 'rgba(255,255,255,0.02)' }}
+                className="flex items-center overflow-hidden rounded-[18px] border p-1"
+                style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.02)' }}
               >
                 {(['dark', 'sepia', 'light'] as const).map(t => (
                   <button
                     key={t}
                     onClick={() => setSettings(p => ({ ...p, theme: t }))}
-                    className="w-8 h-7 flex items-center justify-center transition-all"
+                    className="flex h-8 w-8 items-center justify-center rounded-full transition-all"
                     style={{
                       background: settings.theme === t ? 'rgba(255,255,255,0.08)' : 'transparent',
                       color: settings.theme === t ? rt.text : rt.sub,
@@ -1211,8 +1267,8 @@ export function StudyModePage({
 
               {/* Font size */}
               <div
-                className="flex items-center gap-1.5 px-2 h-7"
-                style={{ border: `1px solid ${rt.border}`, borderRadius: 6, background: 'rgba(255,255,255,0.02)' }}
+                className="flex h-10 items-center gap-1.5 rounded-[18px] border px-2.5"
+                style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.02)' }}
               >
                 <button
                   onClick={() => setSettings(p => ({ ...p, fontSize: Math.max(13, p.fontSize - 1) }))}
@@ -1237,8 +1293,8 @@ export function StudyModePage({
               {/* Font family */}
               <div className="relative group hidden md:block">
                 <button
-                  className="flex items-center gap-1.5 px-3 h-7 text-[11px]"
-                  style={{ border: `1px solid ${rt.border}`, borderRadius: 6, background: 'rgba(255,255,255,0.02)', color: rt.sub }}
+                  className="flex h-10 items-center gap-1.5 rounded-[18px] border px-3.5 text-[11px]"
+                  style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.02)', color: rt.sub }}
                 >
                   {FONT_LABELS[settings.fontFamily]} <ChevronDown size={10} />
                 </button>
@@ -1270,14 +1326,14 @@ export function StudyModePage({
               </div>
 
               <div
-                className="hidden items-center gap-1 rounded-full border p-1 lg:flex"
+                className="hidden items-center gap-1 overflow-hidden rounded-[20px] border p-1 lg:flex"
                 style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.02)' }}
               >
                 {(['narrow', 'medium', 'wide'] as const).map(width => (
                   <button
                     key={width}
                     onClick={() => setSettings(p => ({ ...p, maxWidth: width }))}
-                    className="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] transition-all"
+                    className="flex h-8 min-w-[88px] items-center justify-center rounded-full px-3 text-[10px] font-semibold uppercase tracking-[0.18em] transition-all"
                     style={{
                       background: settings.maxWidth === width ? `${rt.accent}` : 'transparent',
                       color: settings.maxWidth === width ? accentTextColor : rt.sub,
@@ -1331,7 +1387,7 @@ export function StudyModePage({
             </div>
           </div>
 
-          <section className="mx-auto w-full max-w-[76rem] px-4 pb-4 pt-6 md:px-8 md:pt-8">
+          <section className="mx-auto w-full px-4 pb-4 pt-6 md:px-8 md:pt-8" style={{ maxWidth: readerShellMaxWidth }}>
             <div
               className="overflow-hidden rounded-[32px] border shadow-[0_28px_80px_rgba(0,0,0,0.16)]"
               style={{
@@ -1339,7 +1395,11 @@ export function StudyModePage({
                 background: `radial-gradient(circle_at_top_left, ${rt.accent}18, transparent 34%), linear-gradient(180deg, ${rt.surface}, ${rt.bg})`,
               }}
             >
-              <div className="grid gap-5 px-5 py-5 md:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.95fr)] md:px-6 md:py-6">
+              <div className={`grid gap-5 px-5 py-5 md:px-6 md:py-6 ${
+                panelOpen
+                  ? 'md:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.95fr)]'
+                  : 'md:grid-cols-[minmax(0,1.65fr)_minmax(320px,1fr)]'
+              }`}>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
@@ -1502,7 +1562,7 @@ export function StudyModePage({
           )}
 
           {/* Content */}
-          <div className="flex-1 px-8 py-8 mx-auto w-full" style={{ maxWidth: '76rem' }}>
+          <div className="mx-auto flex-1 w-full px-8 py-8" style={{ maxWidth: readerShellMaxWidth }}>
             {surface === 'full_book' && isEditing ? (
               <textarea
                 value={editedContent}
@@ -1521,7 +1581,7 @@ export function StudyModePage({
                 ref={contentRef}
                 className="overflow-hidden rounded-[30px] border px-5 py-6 shadow-[0_24px_70px_rgba(0,0,0,0.08)] md:px-7 md:py-8"
                 style={{
-                  maxWidth: MAX_WIDTHS[settings.maxWidth],
+                  maxWidth: readerContentMaxWidth,
                   borderColor: rt.border,
                   background: `linear-gradient(180deg, ${rt.surface}, ${rt.bg})`,
                 }}
@@ -1583,12 +1643,12 @@ export function StudyModePage({
           {panelOpen && !isMobile && (
             <motion.aside
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 332, opacity: 1 }}
+              animate={{ width: DESKTOP_PANEL_WIDTH, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: 'easeInOut' }}
               className="shrink-0 overflow-hidden"
             >
-              <div className="w-[332px] h-full flex flex-col">
+              <div className="flex h-full flex-col" style={{ width: DESKTOP_PANEL_WIDTH }}>
                 {renderPanel()}
               </div>
             </motion.aside>
@@ -1597,18 +1657,17 @@ export function StudyModePage({
       </div>
 
       {/* Mobile FAB */}
-      {(!panelOpen || isMobile) && (
+      {isMobile && !panelOpen && (
         <button
           onClick={() => setPanelOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 pl-4 pr-5 py-3 text-sm font-bold shadow-2xl transition-all"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full pl-4 pr-5 py-3 text-sm font-semibold shadow-2xl transition-all"
           style={{
             background: '#FECD8C',
             color: '#000',
-            borderRadius: 30,
             boxShadow: '0 8px 32px rgba(254,205,140,0.22)',
           }}
         >
-          <Brain size={15} /> Ask Tutor
+          <MessageCircle size={15} /> Ask Tutor
         </button>
       )}
 
