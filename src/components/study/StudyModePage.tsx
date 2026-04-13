@@ -85,11 +85,7 @@ const EXPLANATION_META: Record<ExplanationMode, { badge: string; icon: string; c
 };
 
 const normalizeSelection = (v: string) => v.replace(/\s+/g, ' ').trim().slice(0, 900);
-const WIDTH_LABELS: Record<ReadingSettings['maxWidth'], string> = {
-  narrow: 'Focus',
-  medium: 'Balance',
-  wide: 'Roomy',
-};
+
 const countWords = (value: string) => value.trim().split(/\s+/).filter(Boolean).length;
 const getReadMinutes = (wordCount: number) => Math.max(1, Math.ceil(wordCount / 220));
 const formatReadMinutes = (wordCount: number) => `${getReadMinutes(wordCount)} min read`;
@@ -1340,24 +1336,7 @@ export function StudyModePage({
                 </div>
               </div>
 
-              <div
-                className="hidden items-center gap-1 overflow-hidden rounded-[20px] border p-1 lg:flex"
-                style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.02)' }}
-              >
-                {(['narrow', 'medium', 'wide'] as const).map(width => (
-                  <button
-                    key={width}
-                    onClick={() => setSettings(p => ({ ...p, maxWidth: width }))}
-                    className="flex h-8 min-w-[88px] items-center justify-center rounded-full px-3 text-[10px] font-semibold uppercase tracking-[0.18em] transition-all"
-                    style={{
-                      background: settings.maxWidth === width ? `${rt.accent}` : 'transparent',
-                      color: settings.maxWidth === width ? accentTextColor : rt.sub,
-                    }}
-                  >
-                    {WIDTH_LABELS[width]}
-                  </button>
-                ))}
-              </div>
+
             </div>
 
             <div className="flex items-center gap-2">
