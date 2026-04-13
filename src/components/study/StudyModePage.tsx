@@ -69,7 +69,7 @@ const FONT_FAMILIES = {
 };
 const FONT_LABELS = { sans: 'Sans', serif: 'Serif', mono: 'Mono' };
 const MAX_WIDTHS = { narrow: '60ch', medium: '72ch', wide: '86ch' };
-const EXPANDED_MAX_WIDTHS = { narrow: '64ch', medium: '80ch', wide: '94ch' };
+const EXPANDED_MAX_WIDTHS = { narrow: '72ch', medium: '96ch', wide: '110ch' };
 const DESKTOP_PANEL_WIDTH = 296;
 
 const EXPLANATION_OPTIONS: ExplanationMode[] = [
@@ -1202,9 +1202,11 @@ export function StudyModePage({
 
           {/* Reader toolbar â€” height matches sidebar header ~44px */}
           <div
-            className="shrink-0 sticky top-0 z-30 flex items-center justify-between gap-3 px-6"
+            className="mx-auto shrink-0 sticky top-0 z-30 flex items-center justify-between gap-3 px-6"
             style={{
               height: 44,
+              maxWidth: readerShellMaxWidth,
+              width: '100%',
               background: rt.bg === '#0c0c0c' ? 'rgba(12,12,12,0.95)' : `${rt.bg}f2`,
               borderBottom: `1px solid ${rt.border}`,
               backdropFilter: 'blur(10px)',
@@ -1492,17 +1494,17 @@ export function StudyModePage({
                 }}
               />
             ) : (
-              <div
-                ref={contentRef}
-                className="overflow-hidden rounded-[30px] border px-5 py-6 shadow-[0_24px_70px_rgba(0,0,0,0.08)] md:px-7 md:py-8"
-                style={{
-                  maxWidth: readerContentMaxWidth,
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  borderColor: rt.border,
-                  background: `linear-gradient(180deg, ${rt.surface}, ${rt.bg})`,
-                }}
-              >
+                <div
+                  ref={contentRef}
+                  className="mx-auto overflow-hidden rounded-[30px] border px-5 py-6 shadow-[0_24px_70px_rgba(0,0,0,0.08)] md:px-7 md:py-8"
+                  style={{
+                    maxWidth: readerContentMaxWidth,
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    borderColor: rt.border,
+                    background: `linear-gradient(180deg, ${rt.surface}, ${rt.bg})`,
+                  }}
+                >
                 <article
                   className={`prose prose-lg max-w-none ${settings.theme !== 'light' ? 'prose-invert' : ''}`}
                   style={{
@@ -1530,8 +1532,8 @@ export function StudyModePage({
           {/* Chapter nav */}
           {surface === 'module' && (
             <div
-              className="shrink-0 flex items-center justify-between gap-4 px-8 py-5 mt-4"
-              style={{ borderTop: `1px solid ${rt.border}` }}
+              className="mx-auto shrink-0 flex items-center justify-between gap-4 px-8 py-5 mt-4"
+              style={{ borderTop: `1px solid ${rt.border}`, maxWidth: readerShellMaxWidth, width: '100%' }}
             >
               <button
                 onClick={() => { if (selModIdx > 0) { setSelModIdx(s => s - 1); setSurface('module'); } }}

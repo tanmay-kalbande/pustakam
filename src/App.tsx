@@ -9,8 +9,8 @@ import { SettingsModal } from './components/SettingsModal';
 import { useGenerationStats } from './components/GenerationProgressPanel';
 import { APISettings, ModelProvider } from './types';
 import type { QuotaStatus } from './types/providers';
-import { usePWA } from './hooks/usePWA';
-import { WifiOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { WifiOff, Loader2 } from 'lucide-react';
 import { storageUtils } from './utils/storage';
 import { bookService } from './services/bookService';
 import { learningService } from './services/learningService';
@@ -58,10 +58,46 @@ function formatBookTitle(session: Pick<BookSession, 'title' | 'goal'>): string {
 
 function WorkspaceFallback() {
   return (
-    <div className="w-full max-w-5xl mx-auto px-6 pt-24 pb-10">
-      <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 text-sm text-[var(--text-secondary)] animate-fade-in-up">
-        Loading your workspace...
-      </div>
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 pointer-events-none">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative group overflow-hidden"
+      >
+        <div 
+          className="relative z-10 flex flex-col items-center gap-6 rounded-[32px] border border-white/10 bg-black/40 px-12 py-10 backdrop-blur-2xl shadow-[0_32px_128px_-12px_rgba(0,0,0,0.8)]"
+          style={{ 
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)',
+          }}
+        >
+          {/* Animated Spinner with Glow */}
+          <div className="relative">
+            <div className="absolute inset-0 blur-xl opacity-20 bg-[#FECD8C] animate-pulse" />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="relative text-[#FECD8C]"
+            >
+              <Loader2 size={32} strokeWidth={1.5} />
+            </motion.div>
+          </div>
+
+          <div className="flex flex-col items-center gap-1.5 text-center">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20">Pustakam AI</span>
+            </div>
+            <h3 className="text-sm font-semibold tracking-tight text-white/70">
+              Preparing your study workspace...
+            </h3>
+            <p className="text-[10px] text-white/30 font-medium uppercase tracking-[0.15em]">
+              Analyzing content & resources
+            </p>
+          </div>
+        </div>
+
+        {/* Outer radial glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#FECD8C]/5 rounded-full blur-[80px]" />
+      </motion.div>
     </div>
   );
 }
