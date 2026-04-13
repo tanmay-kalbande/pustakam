@@ -30,6 +30,7 @@ import {
   ZoomIn,
   ZoomOut,
   List,
+  Smile,
 } from 'lucide-react';
 import { BookModule, BookProject } from '../../types/book';
 import { ExplanationMode, FlashcardDeck, StudyInteraction, StudyThread } from '../../types/study';
@@ -91,14 +92,14 @@ const getReadMinutes = (wordCount: number) => Math.max(1, Math.ceil(wordCount / 
 const formatReadMinutes = (wordCount: number) => `${getReadMinutes(wordCount)} min read`;
 const toTitleCase = (value: string) => value.replace(/_/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
 
-// ─── Reading theme tokens ────────────────────────────────────────────────────
+// â”€â”€â”€ Reading theme tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const READER_THEMES = {
   dark:  { bg: '#0c0c0c', surface: '#111111', text: '#e8e8e8', sub: '#888', border: 'rgba(255,255,255,0.07)', accent: '#FECD8C' },
   sepia: { bg: '#f5f0e8', surface: '#faf7f2', text: '#2c1f14', sub: '#8b7355', border: 'rgba(0,0,0,0.08)', accent: '#b45309' },
   light: { bg: '#ffffff', surface: '#f8f8f8', text: '#111111', sub: '#555', border: 'rgba(0,0,0,0.07)', accent: '#3b82f6' },
 };
 
-// ─── Code Block ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Code Block â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CodeBlock = React.memo(function CodeBlock({
   children, className, readingTheme,
 }: { children: ReactNode; className?: string; readingTheme?: string }) {
@@ -150,7 +151,7 @@ const CodeBlock = React.memo(function CodeBlock({
   );
 });
 
-// ─── Surface Toggle ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Surface Toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const SurfaceToggle = ({
   value,
   onChange,
@@ -194,86 +195,54 @@ const SurfaceToggle = ({
   </div>
 );
 
-// ─── Interaction Card ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Interaction Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const InteractionCard = ({
-  interaction, onFollowUp,
+  interaction,
 }: { interaction: StudyInteraction; onFollowUp?: (p: string) => void }) => {
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.985 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.26, ease: 'easeOut' }}
-      whileHover={{ y: -1.5 }}
-      className="space-y-2.5 rounded-[22px] border border-white/[0.07] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.012))] p-3.5 shadow-[0_14px_36px_rgba(0,0,0,0.18)]"
-    >
+    <div className="space-y-6 py-2">
       {interaction.question?.question && (
-        <motion.div
-          initial={{ opacity: 0, x: 8 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.04, duration: 0.2 }}
-          className="flex justify-end"
-        >
-          <div
-            className="max-w-[84%] rounded-[16px] border border-[rgba(254,205,140,0.16)] bg-[linear-gradient(180deg,rgba(254,205,140,0.12),rgba(254,205,140,0.06))] px-3 py-2.5 text-[12px] leading-6 text-white/88 shadow-[0_10px_24px_rgba(254,205,140,0.07)]"
-            style={{ borderRadius: '14px 14px 4px 14px' }}
-          >
-            {interaction.question.question}
+        <div className="flex justify-end">
+          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 shadow-sm">
+            <Smile size={12} className="text-white/40" />
+            <span className="text-[12px] font-medium text-white/80">{interaction.question.question}</span>
           </div>
-        </motion.div>
+        </div>
       )}
 
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.08, duration: 0.24 }}
-        className="flex gap-3 rounded-[18px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(0,0,0,0.06))] p-3"
-      >
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[14px] border border-[rgba(254,205,140,0.18)] bg-[rgba(254,205,140,0.1)]">
-          <Sparkles size={10} style={{ color: '#FECD8C' }} />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 px-1">
+          <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/20">Pustakam AI</span>
         </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 px-1">
           {interaction.sourceText && (
-            <div className="mb-3 rounded-[14px] border border-white/[0.05] bg-white/[0.03] px-3 py-2 text-[10px] leading-5 italic text-white/42">
-              "{interaction.sourceText.slice(0, 180)}{interaction.sourceText.length > 180 ? '...' : ''}"
+            <div className="mb-4 border-l-2 border-white/5 pl-4 text-[11px] leading-relaxed italic text-white/30">
+              "{interaction.sourceText.slice(0, 200)}{interaction.sourceText.length > 200 ? '...' : ''}"
             </div>
           )}
 
-          <div className="chat-md text-[12.5px] leading-6 text-white/74">
+          <div className="chat-md text-[13px] leading-relaxed text-white/70">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
-              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+              p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
               strong: ({ children }) => <strong className="font-semibold text-white/90">{children}</strong>,
-              em: ({ children }) => <em className="italic text-white/68">{children}</em>,
-              ul: ({ children }) => <ul className="my-1.5 ml-4 list-disc space-y-0.5 text-white/68">{children}</ul>,
-              ol: ({ children }) => <ol className="my-1.5 ml-4 list-decimal space-y-0.5 text-white/68">{children}</ol>,
-              li: ({ children }) => <li className="leading-5">{children}</li>,
-              code: ({ children }) => <code className="rounded px-1 py-0.5 font-mono text-[11px]" style={{ background: 'rgba(255,255,255,0.07)', color: '#FECD8C' }}>{children}</code>,
+              em: ({ children }) => <em className="italic text-white/60">{children}</em>,
+              ul: ({ children }) => <ul className="my-4 ml-4 list-disc space-y-2 text-white/60">{children}</ul>,
+              ol: ({ children }) => <ol className="my-4 ml-4 list-decimal space-y-2 text-white/60">{children}</ol>,
+              li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+              code: ({ children }) => <code className="rounded px-1.5 py-0.5 font-mono text-[11px]" style={{ background: 'rgba(255,255,255,0.05)', color: '#FECD8C' }}>{children}</code>,
+              blockquote: ({ children }) => <blockquote className="border-l-2 border-white/10 pl-4 italic text-white/40 my-4">{children}</blockquote>,
             }}>
               {interaction.answer.answer}
             </ReactMarkdown>
           </div>
-
-          {(interaction.answer.followUpSuggestions?.length ?? 0) > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {interaction.answer.followUpSuggestions!.map(s => (
-                <button
-                  key={s}
-                  onClick={() => onFollowUp?.(s)}
-                  className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium text-white/48 transition-all hover:border-[rgba(254,205,140,0.28)] hover:bg-[rgba(254,205,140,0.06)] hover:text-white/78"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
-// ─── Flashcard View ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Flashcard View â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const FlashcardView = ({
   deck, idx, revealed, onReveal, onNav, onRate,
 }: {
@@ -412,7 +381,7 @@ const FlashcardView = ({
   );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function StudyModePage({
   book, theme, isEditing, editedContent, onEditFullBook, onSaveFullBook,
   onCancelEdit, onContentChange, showToast, isMobile = false, onBack,
@@ -475,7 +444,7 @@ export function StudyModePage({
   const doubtHistory = interactions.filter(i => i.type === 'doubt').slice().reverse();
   const explainHistory = interactions.filter(i => i.type === 're_explain').slice().reverse();
   const moduleProgress = liveModuleProgress;
-  const selectedTextPreview = selectedText ? `${selectedText.slice(0, 150)}${selectedText.length > 150 ? '…' : ''}` : '';
+  const selectedTextPreview = selectedText ? `${selectedText.slice(0, 150)}${selectedText.length > 150 ? 'â€¦' : ''}` : '';
 
   const rt = READER_THEMES[settings.theme];
   const accentTextColor = settings.theme === 'dark' ? '#111111' : '#FFFFFF';
@@ -647,7 +616,7 @@ export function StudyModePage({
     {
       label: 'Tutor activity',
       value: `${interactions.length}`,
-      detail: `${doubtHistory.length} doubts · ${explainHistory.length} reframes`,
+      detail: `${doubtHistory.length} doubts Â· ${explainHistory.length} reframes`,
     },
   ];
 
@@ -733,7 +702,7 @@ export function StudyModePage({
     'What part of this chapter usually trips people up?',
   ];
 
-  // ─── Study Panel ─────────────────────────────────────────────────────────
+  // â”€â”€â”€ Study Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const renderPanel = () => (
     <div className="flex h-full flex-col border-l border-white/[0.06] bg-[linear-gradient(180deg,#121212,#0b0b0b)] text-white/84">
       {/* Panel header */}
@@ -793,16 +762,16 @@ export function StudyModePage({
         {selectedText && (
           <div className="mt-2 flex items-center gap-2 rounded-[10px] border border-[rgba(254,205,140,0.14)] bg-[rgba(254,205,140,0.05)] px-2.5 py-1.5">
             <span className="flex-1 truncate text-[10px] text-[rgba(254,205,140,0.72)]">"{selectedTextPreview}"</span>
-            <button onClick={() => setSelectedText('')} className="shrink-0 text-[9px] text-white/36 hover:text-white/68 transition-all">✕</button>
+            <button onClick={() => setSelectedText('')} className="shrink-0 text-[9px] text-white/36 hover:text-white/68 transition-all">âœ•</button>
           </div>
         )}
       </div>
 
-      {/* Panel body — gets all remaining height */}
+      {/* Panel body â€” gets all remaining height */}
       <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto overflow-x-hidden px-4 py-4">
 
         {/* ── DOUBT TAB ── */}
-        {activeTool === 'doubt' && (
+        {activeTool === "doubt" && (
           <>
             {!threadLoading && doubtHistory.length === 0 && (
               <div className="space-y-3">
@@ -813,27 +782,6 @@ export function StudyModePage({
                   <p className="mt-1 text-[10px] leading-5 text-white/44">
                     I stay tied to this chapter, so answers stay focused instead of generic.
                   </p>
-                </div>
-                <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                  Suggested Questions
-                </p>
-                <div className="space-y-1.5">
-                  {quickPrompts.map(p => (
-                    <button
-                      key={p}
-                      onClick={() => setQuestionInput(p)}
-                      className="w-full rounded-[16px] border px-3 py-2.5 text-left text-[11px] leading-5 transition-all"
-                      style={{
-                        background: 'rgba(255,255,255,0.025)',
-                        borderColor: 'rgba(255,255,255,0.06)',
-                        color: 'rgba(255,255,255,0.48)',
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(254,205,140,0.2)'; e.currentTarget.style.color = 'rgba(255,255,255,0.78)'; e.currentTarget.style.background = 'rgba(254,205,140,0.06)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.48)'; e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; }}
-                    >
-                      {p}
-                    </button>
-                  ))}
                 </div>
               </div>
             )}
@@ -846,12 +794,12 @@ export function StudyModePage({
             )}
 
             {doubtHistory.map(i => (
-              <InteractionCard key={i.id} interaction={i} onFollowUp={p => handleFollowUp(p, i.sourceText)} />
+              <InteractionCard key={i.id} interaction={i} />
             ))}
           </>
         )}
 
-        {/* ── EXPLAIN TAB ── */}
+        {/* â”€â”€ EXPLAIN TAB â”€â”€ */}
         {activeTool === 'explain' && (
           <>
             <div>
@@ -888,7 +836,7 @@ export function StudyModePage({
 
               {contextText && (
                 <p className="mt-2 text-[10px] leading-relaxed truncate" style={{ color: 'rgba(255,255,255,0.22)' }}>
-                  Context: "{contextText.slice(0, 70)}{contextText.length > 70 ? '…' : ''}"
+                  Context: "{contextText.slice(0, 70)}{contextText.length > 70 ? 'â€¦' : ''}"
                 </p>
               )}
 
@@ -909,13 +857,13 @@ export function StudyModePage({
 
             {explainHistory.length > 0 && (
               <div className="space-y-4">
-                {explainHistory.map(i => <InteractionCard key={i.id} interaction={i} onFollowUp={p => handleFollowUp(p, i.sourceText)} />)}
+                {explainHistory.map(i => <InteractionCard key={i.id} interaction={i} />)}
               </div>
             )}
           </>
         )}
 
-        {/* ── FLASHCARDS TAB ── */}
+        {/* â”€â”€ FLASHCARDS TAB â”€â”€ */}
         {activeTool === 'flashcards' && (
           <>
             {!deck ? (
@@ -1053,7 +1001,7 @@ export function StudyModePage({
     </div>
   );
 
-  // ─── Layout ───────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div
       className="flex min-h-screen flex-col"
@@ -1063,7 +1011,7 @@ export function StudyModePage({
       }}
     >
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <header
         className="sticky top-0 z-50 flex h-[64px] shrink-0 items-center justify-between gap-4 px-5"
         style={{
@@ -1104,7 +1052,7 @@ export function StudyModePage({
             </span>
             {moduleProgress > 0 && (
               <>
-                <span style={{ color: 'rgba(255,255,255,0.14)' }}>·</span>
+                <span style={{ color: 'rgba(255,255,255,0.14)' }}>Â·</span>
                 <span style={{ color: 'rgba(254,205,140,0.65)' }}>{moduleProgress}%</span>
               </>
             )}
@@ -1143,10 +1091,10 @@ export function StudyModePage({
         </div>
       </header>
 
-      {/* ── Body ─────────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex flex-1 min-h-0 overflow-hidden" style={{ overflowX: 'hidden' }}>
 
-        {/* ── Sidebar ── */}
+        {/* â”€â”€ Sidebar â”€â”€ */}
         <AnimatePresence initial={false}>
           {sidebarOpen && !isMobile && (
             <motion.aside
@@ -1157,7 +1105,7 @@ export function StudyModePage({
               className="shrink-0 flex flex-col overflow-hidden"
               style={{ borderRight: '1px solid rgba(255,255,255,0.06)', background: '#0a0a0a' }}
             >
-              {/* Sidebar header — height matches reader toolbar ~44px */}
+              {/* Sidebar header â€” height matches reader toolbar ~44px */}
               <div className="flex items-center px-4" style={{ height: 44, borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
                 <p className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.2)' }}>
                   Chapters
@@ -1215,7 +1163,7 @@ export function StudyModePage({
           )}
         </AnimatePresence>
 
-        {/* ── Reader ─────────────────────────────────────────────────────── */}
+        {/* â”€â”€ Reader â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <main
           className="flex-1 min-w-0 flex flex-col overflow-y-auto"
           id="main-scroll-area"
@@ -1245,7 +1193,7 @@ export function StudyModePage({
             </div>
           )}
 
-          {/* Reader toolbar — height matches sidebar header ~44px */}
+          {/* Reader toolbar â€” height matches sidebar header ~44px */}
           <div
             className="shrink-0 sticky top-0 z-30 flex items-center justify-between gap-3 px-6"
             style={{
@@ -1381,7 +1329,7 @@ export function StudyModePage({
             </div>
           </div>
 
-          {/* Collapsible chapter overview — collapsed by default so the book is front and center */}
+          {/* Collapsible chapter overview â€” collapsed by default so the book is front and center */}
           <div className="shrink-0 px-5 pt-3 pb-0" style={{ maxWidth: readerShellMaxWidth, margin: '0 auto', width: '100%' }}>
             <button
               onClick={() => setHeroOpen(o => !o)}
@@ -1470,7 +1418,7 @@ export function StudyModePage({
                 </span>
                 {roadmapModule?.estimatedTime && (
                   <>
-                    <span style={{ color: `${rt.sub}60` }}>·</span>
+                    <span style={{ color: `${rt.sub}60` }}>Â·</span>
                     <span className="text-[9px]" style={{ color: rt.sub }}>{roadmapModule.estimatedTime}</span>
                   </>
                 )}
@@ -1600,7 +1548,7 @@ export function StudyModePage({
           )}
         </main>
 
-        {/* ── Study panel (desktop) ──────────────────────────────────────── */}
+        {/* â”€â”€ Study panel (desktop) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <AnimatePresence initial={false}>
           {panelOpen && !isMobile && (
             <motion.aside
