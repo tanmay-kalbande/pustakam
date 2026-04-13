@@ -451,7 +451,7 @@ export function StudyModePage({
   const readerShellMaxWidth = panelOpen
     ? (sidebarOpen ? '76rem' : '82rem')
     : (sidebarOpen ? '94rem' : '108rem');
-  const readerContentMaxWidth = panelOpen ? MAX_WIDTHS[settings.maxWidth] : EXPANDED_MAX_WIDTHS[settings.maxWidth];
+  const readerContentMaxWidth = (panelOpen && sidebarOpen) ? MAX_WIDTHS[settings.maxWidth] : EXPANDED_MAX_WIDTHS[settings.maxWidth];
 
   useEffect(() => {
     setSidebarOpen(!isMobile);
@@ -1538,20 +1538,22 @@ export function StudyModePage({
               <button
                 onClick={() => { if (selModIdx > 0) { setSelModIdx(s => s - 1); setSurface('module'); } }}
                 disabled={selModIdx === 0}
-                className="flex items-center gap-2 px-4 py-2 text-[12px] font-medium transition-all disabled:opacity-30"
-                style={{ border: `1px solid ${rt.border}`, color: rt.sub, borderRadius: 7 }}
-                onMouseEnter={e => { if (selModIdx > 0) { e.currentTarget.style.color = rt.text; } }}
+                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-medium transition-all disabled:opacity-20 translate-x-[-8px]"
+                style={{ color: rt.sub }}
+                onMouseEnter={e => { if (selModIdx > 0) { e.currentTarget.style.color = rt.accent; } }}
                 onMouseLeave={e => { e.currentTarget.style.color = rt.sub; }}
               >
-                <ArrowLeft size={13} /> Previous
+                <ArrowLeft size={12} /> Previous
               </button>
               <button
                 onClick={() => { if (selModIdx < orderedModules.length - 1) { setSelModIdx(s => s + 1); setSurface('module'); } }}
                 disabled={selModIdx === orderedModules.length - 1}
-                className="flex items-center gap-2 px-4 py-2 text-[12px] font-semibold transition-all disabled:opacity-30"
-                style={{ background: '#FECD8C', color: '#000', borderRadius: 7 }}
+                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-semibold transition-all disabled:opacity-20 translate-x-[8px]"
+                style={{ color: rt.sub }}
+                onMouseEnter={e => { if (selModIdx < orderedModules.length - 1) { e.currentTarget.style.color = rt.accent; } }}
+                onMouseLeave={e => { e.currentTarget.style.color = rt.sub; }}
               >
-                Next <ArrowRight size={13} />
+                Next <ArrowRight size={12} />
               </button>
             </div>
           )}
