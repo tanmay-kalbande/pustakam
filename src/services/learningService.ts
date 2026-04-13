@@ -98,6 +98,10 @@ class LearningService {
     await studyStorage.deleteStudyState(bookId);
   }
 
+  async clearModuleThread(bookId: string, moduleId: string): Promise<void> {
+    await studyStorage.clearModuleThread(bookId, moduleId);
+  }
+
   async recordFlashcardFeedback(
     bookId: string,
     moduleId: string,

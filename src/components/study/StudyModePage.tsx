@@ -13,6 +13,7 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
+  ChevronUp,
   Copy,
   Edit,
   Loader2,
@@ -25,6 +26,7 @@ import {
   Sparkles,
   Sun,
   Target,
+  Trash2,
   X,
   ZoomIn,
   ZoomOut,
@@ -68,7 +70,7 @@ const FONT_FAMILIES = {
 const FONT_LABELS = { sans: 'Sans', serif: 'Serif', mono: 'Mono' };
 const MAX_WIDTHS = { narrow: '60ch', medium: '72ch', wide: '86ch' };
 const EXPANDED_MAX_WIDTHS = { narrow: '64ch', medium: '80ch', wide: '94ch' };
-const DESKTOP_PANEL_WIDTH = 380;
+const DESKTOP_PANEL_WIDTH = 296;
 
 const EXPLANATION_OPTIONS: ExplanationMode[] = [
   'simpler', 'deeper', 'step_by_step', 'analogy', 'exam_focused', 'practical',
@@ -197,6 +199,40 @@ const SurfaceToggle = ({
   </div>
 );
 
+// ─── Streaming Text ──────────────────────────────────────────────────────────
+const StreamingText = React.memo(function StreamingText({ text, speed = 6 }: { text: string; speed?: number }) {
+  const [displayed, setDisplayed] = useState('');
+  const [done, setDone] = useState(false);
+  const textRef = useRef(text);
+  const rafRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    textRef.current = text;
+    setDisplayed('');
+    setDone(false);
+    let i = 0;
+    const step = () => {
+      // Reveal in chunks for speed
+      i = Math.min(i + speed, textRef.current.length);
+      setDisplayed(textRef.current.slice(0, i));
+      if (i < textRef.current.length) {
+        rafRef.current = setTimeout(step, 16);
+      } else {
+        setDone(true);
+      }
+    };
+    rafRef.current = setTimeout(step, 40);
+    return () => { if (rafRef.current) clearTimeout(rafRef.current); };
+  }, [text, speed]);
+
+  return (
+    <span>
+      {displayed}
+      {!done && <span className="inline-block w-0.5 h-3.5 bg-[#FECD8C] opacity-70 ml-0.5 align-middle animate-pulse" />}
+    </span>
+  );
+});
+
 // ─── Interaction Card ─────────────────────────────────────────────────────────
 const InteractionCard = ({
   interaction, onFollowUp,
@@ -259,7 +295,7 @@ const InteractionCard = ({
           )}
 
           <p className="text-[12.5px] leading-6 text-white/74">
-            {interaction.answer.answer}
+            <StreamingText text={interaction.answer.answer} speed={8} />
           </p>
 
           {(interaction.answer.followUpSuggestions?.length ?? 0) > 0 && (
@@ -429,6 +465,8 @@ export function StudyModePage({
   const [activeTool, setActiveTool] = useState<StudyTool>('doubt');
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [panelOpen, setPanelOpen] = useState(!isMobile);
+  const [heroOpen, setHeroOpen] = useState(false);
+  const [clearingChat, setClearingChat] = useState(false);
   const [selectedText, setSelectedText] = useState('');
   const [questionInput, setQuestionInput] = useState('');
   const [thread, setThread] = useState<StudyThread | null>(null);
@@ -653,6 +691,19 @@ export function StudyModePage({
     }));
   };
 
+  const handleClearChat = async () => {
+    if (!currentModule) return;
+    setClearingChat(true);
+    try {
+      await learningService.clearModuleThread(book.id, currentModule.id);
+      setThread(null);
+    } catch {
+      showToast('Could not clear chat.', 'error');
+    } finally {
+      setClearingChat(false);
+    }
+  };
+
   const overviewSnippet = [roadmapModule?.description || '', ...(roadmapModule?.objectives || [])].filter(Boolean).join(' ');
   const contextText = selectedText || overviewSnippet;
 
@@ -716,33 +767,41 @@ export function StudyModePage({
   // ─── Study Panel ─────────────────────────────────────────────────────────
   const renderPanel = () => (
     <div className="flex h-full flex-col border-l border-white/[0.06] bg-[linear-gradient(180deg,#121212,#0b0b0b)] text-white/84">
-      {/* Panel header — compact so chat gets most space */}
+      {/* Panel header */}
       <div className="shrink-0 border-b border-white/[0.06] px-4 pb-2.5 pt-3">
+        {/* Top row: label + clear + close */}
         <div className="mb-2 flex items-center justify-between gap-2">
-          <div className="min-w-0 flex items-center gap-2">
-            <span className="text-[9px] font-bold uppercase tracking-[0.26em] text-[rgba(254,205,140,0.72)]">
-              Study Companion
-            </span>
-            <span className="text-[10px] text-white/30">·</span>
-            <span className="truncate text-[11px] font-medium text-white/52 max-w-[140px]">{currentModule.title}</span>
+          <div className="min-w-0">
+            <p className="text-[9px] font-bold uppercase tracking-[0.26em] text-[rgba(254,205,140,0.72)]">Study Companion</p>
+            <p className="mt-0.5 truncate text-[11px] font-medium text-white/40 max-w-[140px]">{currentModule.title}</p>
           </div>
-          <button
-            onClick={() => setPanelOpen(false)}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-white/42 transition-all hover:bg-white/[0.08] hover:text-white/72"
-          >
-            <X size={12} />
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Clear chat */}
+            {interactions.length > 0 && (
+              <button
+                onClick={handleClearChat}
+                disabled={clearingChat}
+                title="Clear chat history"
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-white/36 transition-all hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+              >
+                {clearingChat ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />}
+              </button>
+            )}
+            <button
+              onClick={() => setPanelOpen(false)}
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-white/42 transition-all hover:bg-white/[0.08] hover:text-white/72"
+            >
+              <X size={12} />
+            </button>
+          </div>
         </div>
 
-        {/* Compact stats row */}
-        <div className="flex items-center gap-2 mb-2">
+        {/* Compact stats */}
+        <div className="flex items-center gap-1.5 mb-2">
           {companionStats.map(item => (
-            <div
-              key={item.label}
-              className="flex items-center gap-1.5 rounded-[10px] border border-white/[0.06] bg-white/[0.025] px-2.5 py-1"
-            >
-              <span className="text-[9px] font-semibold text-white/82">{item.value}</span>
-              <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-white/22">{item.label}</span>
+            <div key={item.label} className="flex items-center gap-1 rounded-[8px] border border-white/[0.06] bg-white/[0.025] px-2 py-0.5">
+              <span className="text-[10px] font-semibold text-white/78">{item.value}</span>
+              <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-white/22">{item.label}</span>
             </div>
           ))}
         </div>
@@ -769,18 +828,11 @@ export function StudyModePage({
         </div>
 
         {/* Context pin */}
-        {selectedText ? (
-          <div className="mt-2 flex items-center gap-2 rounded-[12px] border border-[rgba(254,205,140,0.14)] bg-[rgba(254,205,140,0.05)] px-3 py-1.5">
-            <span className="flex-1 truncate text-[10px] text-[rgba(254,205,140,0.75)]">{selectedTextPreview}</span>
-            <button
-              onClick={() => setSelectedText('')}
-              className="shrink-0 text-[9px] font-semibold text-white/36 hover:text-white/68 transition-all"
-            >Clear</button>
+        {selectedText && (
+          <div className="mt-2 flex items-center gap-2 rounded-[10px] border border-[rgba(254,205,140,0.14)] bg-[rgba(254,205,140,0.05)] px-2.5 py-1.5">
+            <span className="flex-1 truncate text-[10px] text-[rgba(254,205,140,0.72)]">"{selectedTextPreview}"</span>
+            <button onClick={() => setSelectedText('')} className="shrink-0 text-[9px] text-white/36 hover:text-white/68 transition-all">✕</button>
           </div>
-        ) : (
-          <p className="mt-2 text-[10px] leading-5 text-white/30 px-0.5">
-            💡 Highlight any sentence to anchor my reply to it.
-          </p>
         )}
       </div>
 
@@ -1384,116 +1436,82 @@ export function StudyModePage({
             </div>
           </div>
 
-          <section className="mx-auto w-full px-4 pb-4 pt-6 md:px-8 md:pt-8" style={{ maxWidth: readerShellMaxWidth }}>
-            <div
-              className="overflow-hidden rounded-[32px] border shadow-[0_28px_80px_rgba(0,0,0,0.16)]"
+          {/* Collapsible chapter overview — collapsed by default so the book is front and center */}
+          <div className="shrink-0 px-5 pt-3 pb-0" style={{ maxWidth: readerShellMaxWidth, margin: '0 auto', width: '100%' }}>
+            <button
+              onClick={() => setHeroOpen(o => !o)}
+              className="flex w-full items-center justify-between gap-3 rounded-[16px] border px-4 py-2.5 text-left transition-all"
               style={{
                 borderColor: rt.border,
-                background: `radial-gradient(circle_at_top_left, ${rt.accent}18, transparent 34%), linear-gradient(180deg, ${rt.surface}, ${rt.bg})`,
+                background: heroOpen ? 'rgba(255,255,255,0.03)' : 'transparent',
               }}
             >
-              <div className={`grid gap-5 px-5 py-5 md:px-6 md:py-6 ${
-                panelOpen
-                  ? 'md:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.95fr)]'
-                  : 'md:grid-cols-[minmax(0,1.65fr)_minmax(320px,1fr)]'
-              }`}>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className="rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em]"
-                      style={{ borderColor: `${rt.accent}36`, background: `${rt.accent}14`, color: rt.accent }}
-                    >
-                      {surfaceLabel}
-                    </span>
-                    {book.roadmap?.difficultyLevel ? (
-                      <span
-                        className="rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
-                        style={{ borderColor: rt.border, color: rt.sub }}
-                      >
-                        {toTitleCase(book.roadmap.difficultyLevel)}
-                      </span>
-                    ) : null}
-                    <span
-                      className="rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
-                      style={{ borderColor: rt.border, color: rt.sub }}
-                    >
-                      {currentReadLabel}
-                    </span>
-                  </div>
-
-                  <h2
-                    className="mt-4 text-3xl font-semibold tracking-tight md:text-[2.6rem]"
-                    style={{ color: rt.text, fontFamily: FONT_FAMILIES[settings.fontFamily], lineHeight: 1.08 }}
-                  >
-                    {surfaceTitle}
-                  </h2>
-
-                  <p
-                    className="mt-3 max-w-3xl text-sm leading-7 md:text-[15px]"
-                    style={{ color: rt.sub, fontFamily: FONT_FAMILIES[settings.fontFamily] }}
-                  >
-                    {surfaceDescription}
-                  </p>
-
-                  {book.goal ? (
-                    <div className="mt-5 rounded-[24px] border px-4 py-4" style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.03)' }}>
-                      <div className="mb-2 flex items-center gap-2">
-                        <Target size={14} style={{ color: rt.accent }} />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: rt.accent }}>
-                          Why this workspace exists
-                        </span>
-                      </div>
-                      <p className="text-sm leading-7" style={{ color: rt.sub }}>
-                        {book.goal}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {heroStats.map(item => (
-                    <div
-                      key={item.label}
-                      className="rounded-[24px] border px-4 py-4"
-                      style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.035)' }}
-                    >
-                      <p className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: rt.sub }}>
-                        {item.label}
-                      </p>
-                      <p className="mt-3 text-2xl font-semibold" style={{ color: rt.text }}>
-                        {item.value}
-                      </p>
-                      <p className="mt-2 text-[12px] leading-6" style={{ color: rt.sub }}>
-                        {item.detail}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <div className="flex items-center gap-3 min-w-0">
+                <span
+                  className="shrink-0 rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.22em]"
+                  style={{ borderColor: `${rt.accent}36`, background: `${rt.accent}14`, color: rt.accent }}
+                >
+                  {surfaceLabel}
+                </span>
+                <h2 className="truncate text-[13px] font-semibold" style={{ color: rt.text }}>{surfaceTitle}</h2>
+                {readerProgress > 0 && (
+                  <span className="shrink-0 text-[10px] font-mono" style={{ color: rt.sub }}>{Math.round(readerProgress)}%</span>
+                )}
               </div>
+              {heroOpen ? <ChevronUp size={13} style={{ color: rt.sub, flexShrink: 0 }} /> : <ChevronDown size={13} style={{ color: rt.sub, flexShrink: 0 }} />}
+            </button>
+          </div>
 
-              {moduleObjectiveList.length > 0 ? (
-                <div className="border-t px-5 py-5 md:px-6" style={{ borderColor: rt.border }}>
-                  <div className="mb-3 flex items-center gap-2">
-                    <CheckCircle2 size={14} style={{ color: rt.accent }} />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: rt.sub }}>
-                      Focus checkpoints
-                    </span>
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {moduleObjectiveList.map(objective => (
-                      <div
-                        key={objective}
-                        className="rounded-[20px] border px-4 py-3 text-sm leading-6"
-                        style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.03)', color: rt.sub }}
-                      >
-                        {objective}
-                      </div>
-                    ))}
+          {/* Expanded hero details */}
+          <AnimatePresence initial={false}>
+            {heroOpen && (
+              <motion.section
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="mx-auto w-full px-5 pb-3 pt-2" style={{ maxWidth: readerShellMaxWidth }}>
+                  <div
+                    className="overflow-hidden rounded-[24px] border"
+                    style={{
+                      borderColor: rt.border,
+                      background: `radial-gradient(circle at top left, ${rt.accent}10, transparent 40%), linear-gradient(180deg, ${rt.surface}, ${rt.bg})`,
+                    }}
+                  >
+                    {/* Stats row */}
+                    <div className="flex flex-wrap gap-3 px-4 py-3 border-b" style={{ borderColor: rt.border }}>
+                      {heroStats.map(item => (
+                        <div key={item.label} className="min-w-[100px]">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: rt.sub }}>{item.label}</p>
+                          <p className="mt-0.5 text-[15px] font-semibold" style={{ color: rt.text }}>{item.value}</p>
+                          <p className="text-[10px]" style={{ color: rt.sub }}>{item.detail}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Description + goal */}
+                    <div className="px-4 py-3">
+                      {book.goal && (
+                        <div className="mb-2 flex items-start gap-2">
+                          <Target size={12} className="mt-0.5 shrink-0" style={{ color: rt.accent }} />
+                          <p className="text-[11px] leading-5" style={{ color: rt.sub }}>{book.goal}</p>
+                        </div>
+                      )}
+                      {moduleObjectiveList.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {moduleObjectiveList.map(o => (
+                            <span key={o} className="rounded-full border px-2.5 py-1 text-[10px] leading-snug" style={{ borderColor: rt.border, color: rt.sub, background: 'rgba(255,255,255,0.025)' }}>{o}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              ) : null}
-            </div>
-          </section>
+              </motion.section>
+            )}
+          </AnimatePresence>
 
           {/* Module header */}
           {false && surface === 'module' && (

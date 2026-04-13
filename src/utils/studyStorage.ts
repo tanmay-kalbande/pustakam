@@ -333,6 +333,20 @@ export const studyStorage = {
     }));
   },
 
+  async clearModuleThread(bookId: string, moduleId: string): Promise<void> {
+    await mutateState(bookId, current => {
+      const { [moduleId]: _, ...remainingThreads } = current.threads;
+      return {
+        state: {
+          ...current,
+          threads: remainingThreads,
+          updatedAt: new Date(),
+        },
+        result: undefined,
+      };
+    });
+  },
+
   async deleteStudyState(bookId: string): Promise<void> {
     const storageKey = getStorageKey(bookId);
     localStorage.removeItem(storageKey);
