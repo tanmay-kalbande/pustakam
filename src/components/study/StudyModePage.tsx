@@ -757,7 +757,7 @@ export function StudyModePage({
               className={`flex h-8 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[11px] font-semibold transition-all ${
                 activeTool === t ? 'bg-[#FECD8C] text-black' : 'text-white/38 hover:text-white/70'
               }`}
-              style={{ boxShadow: activeTool === t ? '0 12px 28px rgba(254,205,140,0.14)' : 'none' }}
+              style={{ boxShadow: 'none' }}
             >
               <Icon size={11} />
               {label}
@@ -1057,12 +1057,6 @@ export function StudyModePage({
             <span className="font-semibold" style={{ color: 'rgba(255,255,255,0.68)' }}>
               {selModIdx + 1}/{orderedModules.length}
             </span>
-            {moduleProgress > 0 && (
-              <>
-                <span style={{ color: 'rgba(255,255,255,0.14)' }}>Â·</span>
-                <span style={{ color: 'rgba(254,205,140,0.65)' }}>{moduleProgress}%</span>
-              </>
-            )}
           </div>
 
           {!isMobile && (
