@@ -1532,28 +1532,26 @@ export function StudyModePage({
           {/* Chapter nav */}
           {surface === 'module' && (
             <div
-              className="mx-auto shrink-0 flex items-center justify-between gap-4 px-8 py-5 mt-4"
-              style={{ borderTop: `1px solid ${rt.border}`, maxWidth: readerShellMaxWidth, width: '100%' }}
+              className="mx-auto shrink-0 flex items-center justify-between gap-4 px-8 py-3.5 mt-2"
+              style={{ maxWidth: readerShellMaxWidth, width: '100%' }}
             >
               <button
                 onClick={() => { if (selModIdx > 0) { setSelModIdx(s => s - 1); setSurface('module'); } }}
                 disabled={selModIdx === 0}
-                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-medium transition-all disabled:opacity-20 translate-x-[-8px]"
-                style={{ color: rt.sub }}
-                onMouseEnter={e => { if (selModIdx > 0) { e.currentTarget.style.color = rt.accent; } }}
-                onMouseLeave={e => { e.currentTarget.style.color = rt.sub; }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-all disabled:opacity-20"
+                style={{ border: `1px solid ${rt.border}`, color: rt.sub, borderRadius: 6 }}
+                onMouseEnter={e => { if (selModIdx > 0) { e.currentTarget.style.color = rt.text; e.currentTarget.style.borderColor = rt.text; } }}
+                onMouseLeave={e => { e.currentTarget.style.color = rt.sub; e.currentTarget.style.borderColor = rt.border; } }}
               >
-                <ArrowLeft size={12} /> Previous
+                <ArrowLeft size={11} /> Previous
               </button>
               <button
                 onClick={() => { if (selModIdx < orderedModules.length - 1) { setSelModIdx(s => s + 1); setSurface('module'); } }}
                 disabled={selModIdx === orderedModules.length - 1}
-                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-semibold transition-all disabled:opacity-20 translate-x-[8px]"
-                style={{ color: rt.sub }}
-                onMouseEnter={e => { if (selModIdx < orderedModules.length - 1) { e.currentTarget.style.color = rt.accent; } }}
-                onMouseLeave={e => { e.currentTarget.style.color = rt.sub; }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold transition-all disabled:opacity-20"
+                style={{ background: '#FECD8C', color: '#000', borderRadius: 6 }}
               >
-                Next <ArrowRight size={12} />
+                Next <ArrowRight size={11} />
               </button>
             </div>
           )}
