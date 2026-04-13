@@ -1332,7 +1332,7 @@ export function StudyModePage({
                 )
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Collapsible chapter overview â€” collapsed by default so the book is front and center */}
           <motion.div 
@@ -1363,7 +1363,7 @@ export function StudyModePage({
               </div>
               {heroOpen ? <ChevronUp size={13} style={{ color: rt.sub, flexShrink: 0 }} /> : <ChevronDown size={13} style={{ color: rt.sub, flexShrink: 0 }} />}
             </button>
-          </div>
+          </motion.div>
 
           {/* Expanded hero details */}
           <AnimatePresence initial={false}>
@@ -1416,7 +1416,7 @@ export function StudyModePage({
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </motion.section>
             )}
           </AnimatePresence>
@@ -1538,9 +1538,9 @@ export function StudyModePage({
                     {content}
                   </ReactMarkdown>
                 </article>
-              </div>
+                </motion.div>
             )}
-          </div>
+          </motion.div>
 
           {/* Chapter nav */}
           {surface === 'module' && (
@@ -1548,7 +1548,7 @@ export function StudyModePage({
               layout
               animate={{ maxWidth: readerShellMaxWidth }}
               transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="mx-auto shrink-0 flex items-center justify-between gap-4 px-8 py-3.5 mt-2 w-full"
+              className="mx-auto shrink-0 flex items-center justify-between gap-4 px-8 mt-1 w-full"
             >
               <button
                 onClick={() => { if (selModIdx > 0) { setSelModIdx(s => s - 1); setSurface('module'); } }}
@@ -1556,7 +1556,7 @@ export function StudyModePage({
                 className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-all disabled:opacity-20"
                 style={{ border: `1px solid ${rt.border}`, color: rt.sub, borderRadius: 6 }}
                 onMouseEnter={e => { if (selModIdx > 0) { e.currentTarget.style.color = rt.text; e.currentTarget.style.borderColor = rt.text; } }}
-                onMouseLeave={e => { e.currentTarget.style.color = rt.sub; e.currentTarget.style.borderColor = rt.border; } }}
+                onMouseLeave={e => { e.currentTarget.style.color = rt.sub; e.currentTarget.style.borderColor = rt.border; }}
               >
                 <ArrowLeft size={11} /> Previous
               </button>
@@ -1568,7 +1568,7 @@ export function StudyModePage({
               >
                 Next <ArrowRight size={11} />
               </button>
-            </div>
+            </motion.div>
           )}
         </main>
 
