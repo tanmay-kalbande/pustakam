@@ -68,7 +68,7 @@ const FONT_FAMILIES = {
 const FONT_LABELS = { sans: 'Sans', serif: 'Serif', mono: 'Mono' };
 const MAX_WIDTHS = { narrow: '60ch', medium: '72ch', wide: '86ch' };
 const EXPANDED_MAX_WIDTHS = { narrow: '64ch', medium: '80ch', wide: '94ch' };
-const DESKTOP_PANEL_WIDTH = 296;
+const DESKTOP_PANEL_WIDTH = 380;
 
 const EXPLANATION_OPTIONS: ExplanationMode[] = [
   'simpler', 'deeper', 'step_by_step', 'analogy', 'exam_focused', 'practical',
@@ -716,38 +716,39 @@ export function StudyModePage({
   // ─── Study Panel ─────────────────────────────────────────────────────────
   const renderPanel = () => (
     <div className="flex h-full flex-col border-l border-white/[0.06] bg-[linear-gradient(180deg,#121212,#0b0b0b)] text-white/84">
-      <div className="shrink-0 border-b border-white/[0.06] px-4 pb-3 pt-4">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[9px] font-bold uppercase tracking-[0.26em] text-[rgba(254,205,140,0.72)]">
-              Study companion
-            </p>
-            <h3 className="mt-1.5 truncate text-[13px] font-semibold text-white/88">{currentModule.title}</h3>
-            <p className="mt-1 text-[10px] leading-5 text-white/42">
-              {selectedText ? 'Pinned context is ready.' : 'Highlight a line to anchor the next reply.'}
-            </p>
+      {/* Panel header — compact so chat gets most space */}
+      <div className="shrink-0 border-b border-white/[0.06] px-4 pb-2.5 pt-3">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div className="min-w-0 flex items-center gap-2">
+            <span className="text-[9px] font-bold uppercase tracking-[0.26em] text-[rgba(254,205,140,0.72)]">
+              Study Companion
+            </span>
+            <span className="text-[10px] text-white/30">·</span>
+            <span className="truncate text-[11px] font-medium text-white/52 max-w-[140px]">{currentModule.title}</span>
           </div>
           <button
             onClick={() => setPanelOpen(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-[14px] border border-white/[0.08] bg-white/[0.03] text-white/42 transition-all hover:bg-white/[0.08] hover:text-white/72"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-white/42 transition-all hover:bg-white/[0.08] hover:text-white/72"
           >
-            <X size={13} />
+            <X size={12} />
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-1.5">
+        {/* Compact stats row */}
+        <div className="flex items-center gap-2 mb-2">
           {companionStats.map(item => (
             <div
               key={item.label}
-              className="rounded-[16px] border border-white/[0.07] bg-white/[0.03] px-2.5 py-2"
+              className="flex items-center gap-1.5 rounded-[10px] border border-white/[0.06] bg-white/[0.025] px-2.5 py-1"
             >
-              <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-white/24">{item.label}</p>
-              <p className="mt-1 text-[13px] font-semibold text-white/82">{item.value}</p>
+              <span className="text-[9px] font-semibold text-white/82">{item.value}</span>
+              <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-white/22">{item.label}</span>
             </div>
           ))}
         </div>
 
-        <div className="mt-3 flex gap-1 rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-1">
+        {/* Tab switcher */}
+        <div className="flex gap-1 rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-1">
           {([
             { t: 'doubt' as StudyTool, label: 'Ask', icon: MessageCircle },
             { t: 'explain' as StudyTool, label: 'Reframe', icon: Sparkles },
@@ -756,7 +757,7 @@ export function StudyModePage({
             <button
               key={t}
               onClick={() => setActiveTool(t)}
-              className={`flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[11px] font-semibold transition-all ${
+              className={`flex h-8 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[11px] font-semibold transition-all ${
                 activeTool === t ? 'bg-[#FECD8C] text-black' : 'text-white/38 hover:text-white/70'
               }`}
               style={{ boxShadow: activeTool === t ? '0 12px 28px rgba(254,205,140,0.14)' : 'none' }}
@@ -767,30 +768,24 @@ export function StudyModePage({
           ))}
         </div>
 
-        <div className="mt-3 rounded-[18px] border border-[rgba(254,205,140,0.12)] bg-[rgba(254,205,140,0.05)] px-3 py-2.5">
-          <div className="mb-1.5 flex items-center justify-between gap-2">
-            <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[rgba(254,205,140,0.7)]">
-              {selectedText ? 'Pinned context' : 'Quick hint'}
-            </span>
-            {selectedText ? (
-              <button
-                onClick={() => setSelectedText('')}
-                className="rounded-full border border-white/[0.08] px-2 py-0.5 text-[9px] font-semibold text-white/40 transition-all hover:text-white/72"
-              >
-                Clear
-              </button>
-            ) : null}
+        {/* Context pin */}
+        {selectedText ? (
+          <div className="mt-2 flex items-center gap-2 rounded-[12px] border border-[rgba(254,205,140,0.14)] bg-[rgba(254,205,140,0.05)] px-3 py-1.5">
+            <span className="flex-1 truncate text-[10px] text-[rgba(254,205,140,0.75)]">{selectedTextPreview}</span>
+            <button
+              onClick={() => setSelectedText('')}
+              className="shrink-0 text-[9px] font-semibold text-white/36 hover:text-white/68 transition-all"
+            >Clear</button>
           </div>
-          <p className="text-[10.5px] leading-5 text-white/54">
-            {selectedText
-              ? selectedTextPreview
-              : 'Drag across a sentence, then ask for a simpler take, an example, or an exam-style recap.'}
+        ) : (
+          <p className="mt-2 text-[10px] leading-5 text-white/30 px-0.5">
+            💡 Highlight any sentence to anchor my reply to it.
           </p>
-        </div>
+        )}
       </div>
 
-      {/* Panel body */}
-      <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-4 py-3">
+      {/* Panel body — gets all remaining height */}
+      <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto overflow-x-hidden px-4 py-4">
 
         {/* ── DOUBT TAB ── */}
         {activeTool === 'doubt' && (
@@ -1135,7 +1130,7 @@ export function StudyModePage({
       </header>
 
       {/* ── Body ─────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden" style={{ overflowX: 'hidden' }}>
 
         {/* ── Sidebar ── */}
         <AnimatePresence initial={false}>
@@ -1148,7 +1143,8 @@ export function StudyModePage({
               className="shrink-0 flex flex-col overflow-hidden"
               style={{ borderRight: '1px solid rgba(255,255,255,0.06)', background: '#0a0a0a' }}
             >
-              <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              {/* Sidebar header — height matches reader toolbar ~44px */}
+              <div className="flex items-center px-4" style={{ height: 44, borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
                 <p className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.2)' }}>
                   Chapters
                 </p>
@@ -1235,10 +1231,11 @@ export function StudyModePage({
             </div>
           )}
 
-          {/* Reader toolbar */}
+          {/* Reader toolbar — height matches sidebar header ~44px */}
           <div
-            className="shrink-0 sticky top-0 z-30 flex items-center justify-between gap-3 px-6 py-2.5"
+            className="shrink-0 sticky top-0 z-30 flex items-center justify-between gap-3 px-6"
             style={{
+              height: 44,
               background: rt.bg === '#0c0c0c' ? 'rgba(12,12,12,0.95)' : `${rt.bg}f2`,
               borderBottom: `1px solid ${rt.border}`,
               backdropFilter: 'blur(10px)',
@@ -1562,7 +1559,7 @@ export function StudyModePage({
           )}
 
           {/* Content */}
-          <div className="mx-auto flex-1 w-full px-8 py-8" style={{ maxWidth: readerShellMaxWidth }}>
+          <div className="mx-auto flex-1 w-full px-8 py-8" style={{ maxWidth: readerShellMaxWidth, overflowX: 'hidden' }}>
             {surface === 'full_book' && isEditing ? (
               <textarea
                 value={editedContent}
@@ -1582,6 +1579,8 @@ export function StudyModePage({
                 className="overflow-hidden rounded-[30px] border px-5 py-6 shadow-[0_24px_70px_rgba(0,0,0,0.08)] md:px-7 md:py-8"
                 style={{
                   maxWidth: readerContentMaxWidth,
+                  width: '100%',
+                  boxSizing: 'border-box',
                   borderColor: rt.border,
                   background: `linear-gradient(180deg, ${rt.surface}, ${rt.bg})`,
                 }}
