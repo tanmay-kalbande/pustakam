@@ -11,7 +11,6 @@ import {
   BookText,
   Brain,
   Check,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Copy,
@@ -199,45 +198,10 @@ const SurfaceToggle = ({
   </div>
 );
 
-// ─── Streaming Text ──────────────────────────────────────────────────────────
-const StreamingText = React.memo(function StreamingText({ text, speed = 6 }: { text: string; speed?: number }) {
-  const [displayed, setDisplayed] = useState('');
-  const [done, setDone] = useState(false);
-  const textRef = useRef(text);
-  const rafRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    textRef.current = text;
-    setDisplayed('');
-    setDone(false);
-    let i = 0;
-    const step = () => {
-      // Reveal in chunks for speed
-      i = Math.min(i + speed, textRef.current.length);
-      setDisplayed(textRef.current.slice(0, i));
-      if (i < textRef.current.length) {
-        rafRef.current = setTimeout(step, 16);
-      } else {
-        setDone(true);
-      }
-    };
-    rafRef.current = setTimeout(step, 40);
-    return () => { if (rafRef.current) clearTimeout(rafRef.current); };
-  }, [text, speed]);
-
-  return (
-    <span>
-      {displayed}
-      {!done && <span className="inline-block w-0.5 h-3.5 bg-[#FECD8C] opacity-70 ml-0.5 align-middle animate-pulse" />}
-    </span>
-  );
-});
-
 // ─── Interaction Card ─────────────────────────────────────────────────────────
 const InteractionCard = ({
   interaction, onFollowUp,
 }: { interaction: StudyInteraction; onFollowUp?: (p: string) => void }) => {
-  const isTutor = interaction.type === 'doubt';
 
   return (
     <motion.div
@@ -274,29 +238,25 @@ const InteractionCard = ({
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="mb-2 flex flex-wrap items-center gap-1.5">
-            <span className="rounded-full border border-white/[0.08] bg-white/[0.025] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.22em] text-white/32">
-              {isTutor ? 'Tutor' : 'Reframe'}
-            </span>
-            <span className="rounded-full border border-[rgba(254,205,140,0.1)] bg-[rgba(254,205,140,0.05)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-[rgba(254,205,140,0.7)]">
-              {isTutor ? 'Friendly answer' : 'Fresh angle'}
-            </span>
-            {interaction.answer.confidence ? (
-              <span className="rounded-full border border-white/[0.06] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/22">
-                {interaction.answer.confidence}
-              </span>
-            ) : null}
-          </div>
-
           {interaction.sourceText && (
             <div className="mb-3 rounded-[14px] border border-white/[0.05] bg-white/[0.03] px-3 py-2 text-[10px] leading-5 italic text-white/42">
               "{interaction.sourceText.slice(0, 180)}{interaction.sourceText.length > 180 ? '...' : ''}"
             </div>
           )}
 
-          <p className="text-[12.5px] leading-6 text-white/74">
-            <StreamingText text={interaction.answer.answer} speed={8} />
-          </p>
+          <div className="chat-md text-[12.5px] leading-6 text-white/74">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+              strong: ({ children }) => <strong className="font-semibold text-white/90">{children}</strong>,
+              em: ({ children }) => <em className="italic text-white/68">{children}</em>,
+              ul: ({ children }) => <ul className="my-1.5 ml-4 list-disc space-y-0.5 text-white/68">{children}</ul>,
+              ol: ({ children }) => <ol className="my-1.5 ml-4 list-decimal space-y-0.5 text-white/68">{children}</ol>,
+              li: ({ children }) => <li className="leading-5">{children}</li>,
+              code: ({ children }) => <code className="rounded px-1 py-0.5 font-mono text-[11px]" style={{ background: 'rgba(255,255,255,0.07)', color: '#FECD8C' }}>{children}</code>,
+            }}>
+              {interaction.answer.answer}
+            </ReactMarkdown>
+          </div>
 
           {(interaction.answer.followUpSuggestions?.length ?? 0) > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
@@ -357,9 +317,16 @@ const FlashcardView = ({
           <div className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.22em] text-white/28">
             Question
           </div>
-          <p className="text-[15px] font-semibold leading-7 text-white/88">
-            {card.front}
-          </p>
+          <div className="text-[15px] font-semibold leading-7 text-white/88 flashcard-md">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+              p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+              strong: ({ children }) => <strong className="font-bold text-white/96">{children}</strong>,
+              em: ({ children }) => <em className="italic text-white/72">{children}</em>,
+              code: ({ children }) => <code className="rounded px-1 font-mono text-[13px]" style={{ background: 'rgba(255,255,255,0.08)', color: '#FECD8C' }}>{children}</code>,
+            }}>
+              {card.front}
+            </ReactMarkdown>
+          </div>
           {(card.tags?.length ?? 0) > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {card.tags!.map(t => (
@@ -386,9 +353,19 @@ const FlashcardView = ({
                 <div className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.22em] text-[rgba(254,205,140,0.6)]">
                   Answer
                 </div>
-                <p className="text-[13px] leading-7 text-white/68">
-                  {card.back}
-                </p>
+                <div className="text-[13px] leading-7 text-white/68 flashcard-md">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+                    p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                    strong: ({ children }) => <strong className="font-bold text-white/90">{children}</strong>,
+                    em: ({ children }) => <em className="italic text-white/60">{children}</em>,
+                    ul: ({ children }) => <ul className="my-1 ml-4 list-disc space-y-0.5">{children}</ul>,
+                    ol: ({ children }) => <ol className="my-1 ml-4 list-decimal space-y-0.5">{children}</ol>,
+                    li: ({ children }) => <li className="leading-5">{children}</li>,
+                    code: ({ children }) => <code className="rounded px-1 font-mono text-[12px]" style={{ background: 'rgba(255,255,255,0.07)', color: '#FECD8C' }}>{children}</code>,
+                  }}>
+                    {card.back}
+                  </ReactMarkdown>
+                </div>
                 <div className="mt-5 grid grid-cols-3 gap-2">
                   {[
                     { label: 'Hard', v: 'hard' as const, bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.22)', text: 'rgba(252,165,165,0.9)' },
@@ -677,11 +654,7 @@ export function StudyModePage({
       detail: `${doubtHistory.length} doubts · ${explainHistory.length} reframes`,
     },
   ];
-  const companionStats = [
-    { label: 'Doubts', value: doubtHistory.length },
-    { label: 'Reframes', value: explainHistory.length },
-    { label: 'Cards', value: deck?.cards.length || 0 },
-  ];
+
 
   const appendInteraction = (interaction: StudyInteraction) => {
     setThread(prev => ({
@@ -797,14 +770,7 @@ export function StudyModePage({
         </div>
 
         {/* Compact stats */}
-        <div className="flex items-center gap-1.5 mb-2">
-          {companionStats.map(item => (
-            <div key={item.label} className="flex items-center gap-1 rounded-[8px] border border-white/[0.06] bg-white/[0.025] px-2 py-0.5">
-              <span className="text-[10px] font-semibold text-white/78">{item.value}</span>
-              <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-white/22">{item.label}</span>
-            </div>
-          ))}
-        </div>
+
 
         {/* Tab switcher */}
         <div className="flex gap-1 rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-1">
