@@ -13,7 +13,6 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
   Copy,
   Edit,
   Loader2,
@@ -25,10 +24,10 @@ import {
   Save,
   Sparkles,
   Sun,
+  Target,
   X,
   ZoomIn,
   ZoomOut,
-  PanelLeft,
   List,
 } from 'lucide-react';
 import { BookModule, BookProject } from '../../types/book';
@@ -73,16 +72,25 @@ const EXPLANATION_OPTIONS: ExplanationMode[] = [
   'simpler', 'deeper', 'step_by_step', 'analogy', 'exam_focused', 'practical',
 ];
 
-const EXPLANATION_META: Record<ExplanationMode, { icon: string; color: string }> = {
-  simpler:      { icon: '↓', color: '#60a5fa' },
-  deeper:       { icon: '↑', color: '#a78bfa' },
-  step_by_step: { icon: '→', color: '#34d399' },
-  analogy:      { icon: '≈', color: '#fbbf24' },
-  exam_focused: { icon: '★', color: '#f87171' },
-  practical:    { icon: '⚡', color: '#fb923c' },
+const EXPLANATION_META: Record<ExplanationMode, { badge: string; icon: string; color: string; hint: string }> = {
+  simpler: { badge: 'S', icon: 'S', color: '#60a5fa', hint: 'Strip away the jargon and make it easy to grasp.' },
+  deeper: { badge: 'D', icon: 'D', color: '#a78bfa', hint: 'Go under the hood and connect the bigger ideas.' },
+  step_by_step: { badge: '123', icon: '123', color: '#34d399', hint: 'Break the concept into a clean sequence.' },
+  analogy: { badge: 'IRL', icon: 'IRL', color: '#fbbf24', hint: 'Use a comparison so it clicks faster.' },
+  exam_focused: { badge: 'EX', icon: 'EX', color: '#f87171', hint: 'Condense the parts most likely to matter in tests.' },
+  practical: { badge: 'DO', icon: 'DO', color: '#fb923c', hint: 'Turn the idea into action, examples, and usage.' },
 };
 
 const normalizeSelection = (v: string) => v.replace(/\s+/g, ' ').trim().slice(0, 900);
+const WIDTH_LABELS: Record<ReadingSettings['maxWidth'], string> = {
+  narrow: 'Focus',
+  medium: 'Balance',
+  wide: 'Roomy',
+};
+const countWords = (value: string) => value.trim().split(/\s+/).filter(Boolean).length;
+const getReadMinutes = (wordCount: number) => Math.max(1, Math.ceil(wordCount / 220));
+const formatReadMinutes = (wordCount: number) => `${getReadMinutes(wordCount)} min read`;
+const toTitleCase = (value: string) => value.replace(/_/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
 
 // ─── Reading theme tokens ────────────────────────────────────────────────────
 const READER_THEMES = {
@@ -144,10 +152,26 @@ const CodeBlock = React.memo(function CodeBlock({
 });
 
 // ─── Surface Toggle ───────────────────────────────────────────────────────────
-const SurfaceToggle = ({ value, onChange }: { value: ReaderSurface; onChange: (v: ReaderSurface) => void }) => (
+const SurfaceToggle = ({
+  value,
+  onChange,
+  accentColor,
+  activeTextColor,
+  borderColor,
+  mutedTextColor,
+  surfaceColor,
+}: {
+  value: ReaderSurface;
+  onChange: (v: ReaderSurface) => void;
+  accentColor: string;
+  activeTextColor: string;
+  borderColor: string;
+  mutedTextColor: string;
+  surfaceColor: string;
+}) => (
   <div
     className="inline-flex overflow-hidden"
-    style={{ borderRadius: 6, border: '1px solid rgba(255,255,255,0.09)', background: 'rgba(255,255,255,0.03)' }}
+    style={{ borderRadius: 9999, border: `1px solid ${borderColor}`, background: surfaceColor }}
   >
     {([
       { v: 'module' as const, label: 'Chapters', icon: BookOpen },
@@ -156,10 +180,10 @@ const SurfaceToggle = ({ value, onChange }: { value: ReaderSurface; onChange: (v
       <button
         key={v}
         onClick={() => onChange(v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold transition-all"
+        className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-semibold transition-all"
         style={{
-          background: value === v ? '#FECD8C' : 'transparent',
-          color: value === v ? '#000' : 'rgba(255,255,255,0.45)',
+          background: value === v ? accentColor : 'transparent',
+          color: value === v ? activeTextColor : mutedTextColor,
           letterSpacing: '0.02em',
         }}
       >
@@ -174,15 +198,12 @@ const SurfaceToggle = ({ value, onChange }: { value: ReaderSurface; onChange: (v
 const InteractionCard = ({
   interaction, onFollowUp,
 }: { interaction: StudyInteraction; onFollowUp?: (p: string) => void }) => (
-  <div className="space-y-3">
+  <div className="space-y-3 rounded-[24px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.015))] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.2)]">
     {interaction.question?.question && (
       <div className="flex justify-end">
         <div
-          className="max-w-[82%] px-3.5 py-2.5 text-sm leading-relaxed"
+          className="max-w-[82%] rounded-[18px] border border-[rgba(254,205,140,0.18)] bg-[rgba(254,205,140,0.08)] px-3.5 py-3 text-sm leading-relaxed text-white/85"
           style={{
-            background: 'rgba(254,205,140,0.09)',
-            border: '1px solid rgba(254,205,140,0.14)',
-            color: 'rgba(255,255,255,0.82)',
             borderRadius: '10px 10px 2px 10px',
           }}
         >
@@ -191,30 +212,35 @@ const InteractionCard = ({
       </div>
     )}
 
-    <div className="flex gap-3">
-      <div
-        className="shrink-0 w-6 h-6 flex items-center justify-center mt-0.5"
-        style={{ background: 'rgba(254,205,140,0.08)', border: '1px solid rgba(254,205,140,0.18)', borderRadius: 6 }}
-      >
+    <div className="flex gap-3 rounded-[20px] border border-white/[0.07] bg-black/20 p-4">
+      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border border-[rgba(254,205,140,0.18)] bg-[rgba(254,205,140,0.08)]">
         <Sparkles size={10} style={{ color: '#FECD8C' }} />
       </div>
 
       <div className="flex-1 min-w-0">
         {interaction.sourceText && (
           <div
-            className="mb-2.5 px-3 py-2 text-[11px] leading-relaxed italic"
+            className="mb-3 rounded-r-xl border-l-2 border-[rgba(254,205,140,0.25)] bg-white/[0.03] px-3 py-2 text-[11px] leading-relaxed italic text-white/38"
             style={{
-              background: 'rgba(255,255,255,0.02)',
-              borderLeft: '2px solid rgba(254,205,140,0.25)',
               borderRadius: '0 4px 4px 0',
-              color: 'rgba(255,255,255,0.38)',
             }}
           >
-            "{interaction.sourceText.slice(0, 200)}{interaction.sourceText.length > 200 ? '…' : ''}"
+            "{interaction.sourceText.slice(0, 200)}{interaction.sourceText.length > 200 ? '...' : ''}"
           </div>
         )}
 
-        <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
+        <div className="mb-2 flex items-center gap-2">
+          <span className="rounded-full border border-white/[0.08] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.24em] text-white/30">
+            {interaction.type === 'doubt' ? 'Tutor' : 'Reframe'}
+          </span>
+          {interaction.answer.confidence ? (
+            <span className="rounded-full border border-white/[0.06] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/22">
+              {interaction.answer.confidence}
+            </span>
+          ) : null}
+        </div>
+
+        <p className="text-[13px] leading-relaxed text-white/70">
           {interaction.answer.answer}
         </p>
 
@@ -224,21 +250,7 @@ const InteractionCard = ({
               <button
                 key={s}
                 onClick={() => onFollowUp?.(s)}
-                className="px-2.5 py-1 text-[11px] transition-all"
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  color: 'rgba(255,255,255,0.42)',
-                  borderRadius: 20,
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = 'rgba(254,205,140,0.3)';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.72)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.42)';
-                }}
+                className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/45 transition-all hover:border-[rgba(254,205,140,0.3)] hover:text-white/75"
               >
                 {s}
               </button>
@@ -262,51 +274,43 @@ const FlashcardView = ({
   const progress = ((idx + 1) / deck.cards.length) * 100;
 
   return (
-    <div className="space-y-3">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.28)' }}>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
           {deck.deckTitle}
         </span>
-        <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.28)' }}>
+        <span className="rounded-full border border-white/[0.08] px-2.5 py-1 text-[10px] font-mono text-white/30">
           {idx + 1} / {deck.cards.length}
         </span>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-px w-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
         <div
           className="h-full transition-all duration-500"
           style={{ width: `${progress}%`, background: '#FECD8C' }}
         />
       </div>
 
-      {/* Card */}
       <motion.div
         key={card.id}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
-        style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, overflow: 'hidden' }}
+        className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-[radial-gradient(circle_at_top,rgba(254,205,140,0.12),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] shadow-[0_24px_54px_rgba(0,0,0,0.24)]"
       >
-        {/* Front */}
-        <div className="p-4" style={{ background: 'rgba(255,255,255,0.015)' }}>
-          <div
-            className="text-[9px] font-bold uppercase tracking-[0.2em] mb-2.5"
-            style={{ color: 'rgba(255,255,255,0.22)' }}
-          >
+        <div className="p-5">
+          <div className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.22em] text-white/28">
             Question
           </div>
-          <p className="text-[13px] font-medium leading-relaxed" style={{ color: 'rgba(255,255,255,0.84)' }}>
+          <p className="text-[15px] font-semibold leading-7 text-white/88">
             {card.front}
           </p>
           {(card.tags?.length ?? 0) > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
+            <div className="mt-4 flex flex-wrap gap-2">
               {card.tags!.map(t => (
                 <span
                   key={t}
-                  className="px-2 py-0.5 text-[10px]"
-                  style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.28)', borderRadius: 3 }}
+                  className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/28"
                 >
                   {t}
                 </span>
@@ -323,17 +327,14 @@ const FlashcardView = ({
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.22 }}
             >
-              <div className="px-4 pb-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <div
-                  className="text-[9px] font-bold uppercase tracking-[0.2em] mb-2.5"
-                  style={{ color: 'rgba(254,205,140,0.45)' }}
-                >
+              <div className="border-t border-white/[0.06] px-5 pb-5 pt-4">
+                <div className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.22em] text-[rgba(254,205,140,0.6)]">
                   Answer
                 </div>
-                <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.62)' }}>
+                <p className="text-[13px] leading-7 text-white/68">
                   {card.back}
                 </p>
-                <div className="grid grid-cols-3 gap-2 mt-4">
+                <div className="mt-5 grid grid-cols-3 gap-2">
                   {[
                     { label: 'Hard', v: 'hard' as const, bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.22)', text: 'rgba(252,165,165,0.9)' },
                     { label: 'Fair', v: 'medium' as const, bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.22)', text: 'rgba(254,215,170,0.9)' },
@@ -342,7 +343,7 @@ const FlashcardView = ({
                     <button
                       key={opt.v}
                       onClick={() => onRate(opt.v)}
-                      className="py-2 text-xs font-semibold transition-all"
+                      className="rounded-2xl py-2.5 text-xs font-semibold transition-all"
                       style={{ background: opt.bg, border: `1px solid ${opt.border}`, color: opt.text, borderRadius: 6 }}
                     >
                       {opt.label}
@@ -352,10 +353,10 @@ const FlashcardView = ({
               </div>
             </motion.div>
           ) : (
-            <div className="px-4 pb-4">
+            <div className="px-5 pb-5">
               <button
                 onClick={onReveal}
-                className="w-full py-2.5 text-sm font-semibold mt-3 transition-all"
+                className="mt-3 w-full rounded-2xl py-3 text-sm font-semibold transition-all hover:translate-y-[-1px]"
                 style={{ background: '#FECD8C', color: '#000', borderRadius: 6 }}
               >
                 Reveal Answer
@@ -365,23 +366,16 @@ const FlashcardView = ({
         </AnimatePresence>
       </motion.div>
 
-      {/* Navigation */}
       <div className="grid grid-cols-2 gap-2">
         <button
           onClick={() => onNav('prev')}
-          className="flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all"
-          style={{ border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.42)', borderRadius: 6 }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.42)'; }}
+          className="flex items-center justify-center gap-1.5 rounded-2xl border border-white/[0.08] py-2.5 text-xs font-medium text-white/48 transition-all hover:border-white/[0.14] hover:text-white/72"
         >
           <ArrowLeft size={12} /> Prev
         </button>
         <button
           onClick={() => onNav('next')}
-          className="flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all"
-          style={{ border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.42)', borderRadius: 6 }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.42)'; }}
+          className="flex items-center justify-center gap-1.5 rounded-2xl border border-white/[0.08] py-2.5 text-xs font-medium text-white/48 transition-all hover:border-white/[0.14] hover:text-white/72"
         >
           Next <ArrowRight size={12} />
         </button>
@@ -431,6 +425,12 @@ export function StudyModePage({
   const [cardRevealed, setCardRevealed] = useState(false);
   const [lastDoubtPayload, setLastDoubtPayload] = useState<{ question: string; selectedText?: string } | null>(null);
   const [lastExplainPayload, setLastExplainPayload] = useState<{ mode: ExplanationMode; selectedText?: string } | null>(null);
+  const [liveModuleProgress, setLiveModuleProgress] = useState(
+    () => readingProgressUtils.getModuleProgress(book.id, resumeState?.moduleIndex || 0)?.percentComplete || 0
+  );
+  const [liveFullBookProgress, setLiveFullBookProgress] = useState(
+    () => readingProgressUtils.getFullBookProgress(book.id)?.percentComplete || 0
+  );
 
   const [settings, setSettings] = useState<ReadingSettings>(() => {
     const saved = localStorage.getItem('pustakam-reading-settings');
@@ -443,12 +443,33 @@ export function StudyModePage({
   const interactions = thread?.interactions || [];
   const doubtHistory = interactions.filter(i => i.type === 'doubt').slice().reverse();
   const explainHistory = interactions.filter(i => i.type === 're_explain').slice().reverse();
-  const moduleProgress = readingProgressUtils.getModuleProgress(book.id, selModIdx)?.percentComplete || 0;
+  const moduleProgress = liveModuleProgress;
   const selectedTextPreview = selectedText ? `${selectedText.slice(0, 150)}${selectedText.length > 150 ? '…' : ''}` : '';
 
   const rt = READER_THEMES[settings.theme];
+  const accentTextColor = settings.theme === 'dark' ? '#111111' : '#FFFFFF';
+
+  useEffect(() => {
+    setSidebarOpen(!isMobile);
+    setPanelOpen(!isMobile);
+  }, [isMobile]);
 
   useEffect(() => { localStorage.setItem('pustakam-reading-settings', JSON.stringify(settings)); }, [settings]);
+
+  useEffect(() => {
+    const nextResume = readingProgressUtils.getResumeState(book.id);
+    if (!nextResume) return;
+    setSelModIdx(Math.max(0, Math.min(nextResume.moduleIndex, Math.max(orderedModules.length - 1, 0))));
+    setSurface(nextResume.mode);
+  }, [book.id, orderedModules.length]);
+
+  useEffect(() => {
+    setLiveModuleProgress(readingProgressUtils.getModuleProgress(book.id, selModIdx)?.percentComplete || 0);
+  }, [book.id, selModIdx]);
+
+  useEffect(() => {
+    setLiveFullBookProgress(readingProgressUtils.getFullBookProgress(book.id)?.percentComplete || 0);
+  }, [book.id]);
 
   useEffect(() => {
     if (!currentModule) return;
@@ -480,11 +501,113 @@ export function StudyModePage({
     return () => { document.removeEventListener('mouseup', handle); document.removeEventListener('touchend', handle); };
   }, []);
 
+  useEffect(() => {
+    if (!content) return;
+    if (surface === 'full_book' && isEditing) return;
+
+    const scrollEl = (document.getElementById('main-scroll-area') as HTMLElement | null) || document.documentElement;
+    const savedProgress = surface === 'full_book'
+      ? readingProgressUtils.getFullBookProgress(book.id)
+      : readingProgressUtils.getModuleProgress(book.id, selModIdx);
+
+    requestAnimationFrame(() => {
+      scrollEl.scrollTo({
+        top: savedProgress?.scrollPosition || 0,
+        behavior: 'auto',
+      });
+    });
+  }, [book.id, content, surface, selModIdx, isEditing]);
+
+  useEffect(() => {
+    if (!content) return;
+    if (surface === 'full_book' && isEditing) return;
+
+    const scrollEl = (document.getElementById('main-scroll-area') as HTMLElement | null) || document.documentElement;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
+    const saveReadingProgress = () => {
+      const maxScroll = Math.max(1, scrollEl.scrollHeight - scrollEl.clientHeight);
+      const scrollPosition = scrollEl.scrollTop;
+      const percent = Math.min(100, Math.max(0, (scrollPosition / maxScroll) * 100));
+
+      readingProgressUtils.saveBookmark(book.id, selModIdx, scrollPosition, percent, surface);
+      if (surface === 'full_book') setLiveFullBookProgress(percent);
+      else setLiveModuleProgress(percent);
+    };
+
+    const onScroll = () => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(saveReadingProgress, 120);
+    };
+
+    scrollEl.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      scrollEl.removeEventListener('scroll', onScroll);
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [book.id, content, surface, selModIdx, isEditing]);
+
   if (!currentModule) return (
     <div className="flex items-center justify-center h-64 text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
       No module content available.
     </div>
   );
+
+  const chapterProgressList = orderedModules.map((module, index) => ({
+    module,
+    progress: index === selModIdx
+      ? liveModuleProgress
+      : readingProgressUtils.getModuleProgress(book.id, index)?.percentComplete || 0,
+  }));
+  const completedModules = chapterProgressList.filter(item => item.progress >= 95).length;
+  const totalWords = book.totalWords || orderedModules.reduce((sum, module) => sum + (module.wordCount || countWords(module.content || '')), 0);
+  const currentWordCount = surface === 'full_book'
+    ? totalWords
+    : currentModule.wordCount || countWords(currentModule.content || '');
+  const fullBookProgress = liveFullBookProgress > 0
+    ? liveFullBookProgress
+    : Math.round((completedModules / Math.max(orderedModules.length, 1)) * 100);
+  const readerProgress = surface === 'full_book' ? fullBookProgress : moduleProgress;
+  const currentReadLabel = surface === 'full_book'
+    ? book.roadmap?.estimatedReadingTime || formatReadMinutes(totalWords)
+    : roadmapModule?.estimatedTime || formatReadMinutes(currentWordCount);
+  const surfaceLabel = surface === 'full_book' ? 'Full book studio' : `Chapter ${selModIdx + 1} focus`;
+  const surfaceTitle = surface === 'full_book' ? book.title : currentModule.title;
+  const surfaceDescription = surface === 'full_book'
+    ? 'Review the full manuscript in one place while the tutor stays anchored to your active chapter for precise help.'
+    : roadmapModule?.description || 'Stay in this chapter to keep questions, reframes, and flashcards aligned with the right context.';
+  const moduleObjectiveList = roadmapModule?.objectives?.slice(0, 4) || [];
+  const bookmarkStats = readingProgressUtils.getBookmarkStats(book.id);
+  const lastReadLabel = bookmarkStats.hasBookmark && bookmarkStats.lastReadDate
+    ? readingProgressUtils.formatLastRead(bookmarkStats.lastReadDate)
+    : 'Start here';
+  const heroStats = [
+    {
+      label: 'Reading progress',
+      value: `${Math.round(readerProgress)}%`,
+      detail: surface === 'full_book' ? 'Across the full study book' : 'Inside this chapter',
+    },
+    {
+      label: surface === 'full_book' ? 'Chapter coverage' : 'Chapter length',
+      value: surface === 'full_book' ? `${completedModules}/${orderedModules.length}` : `${currentWordCount.toLocaleString()}`,
+      detail: surface === 'full_book' ? 'Chapters essentially completed' : 'Words ready for review',
+    },
+    {
+      label: 'Study time',
+      value: currentReadLabel,
+      detail: `Last read ${lastReadLabel}`,
+    },
+    {
+      label: 'Tutor activity',
+      value: `${interactions.length}`,
+      detail: `${doubtHistory.length} doubts · ${explainHistory.length} reframes`,
+    },
+  ];
+  const companionStats = [
+    { label: 'Doubts', value: doubtHistory.length },
+    { label: 'Reframes', value: explainHistory.length },
+    { label: 'Cards', value: deck?.cards.length || 0 },
+  ];
 
   const appendInteraction = (interaction: StudyInteraction) => {
     setThread(prev => ({
@@ -556,37 +679,39 @@ export function StudyModePage({
 
   // ─── Study Panel ─────────────────────────────────────────────────────────
   const renderPanel = () => (
-    <div
-      className="flex flex-col h-full"
-      style={{ background: '#0d0d0d', borderLeft: '1px solid rgba(255,255,255,0.06)' }}
-    >
-      {/* Panel Top */}
-      <div className="shrink-0 px-5 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="flex items-start justify-between gap-2 mb-4">
+    <div className="flex h-full flex-col border-l border-white/[0.06] bg-[linear-gradient(180deg,#121212,#0b0b0b)] text-white/84">
+      <div className="shrink-0 border-b border-white/[0.06] px-5 pb-4 pt-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[9px] font-bold uppercase tracking-[0.22em] mb-1" style={{ color: 'rgba(254,205,140,0.5)' }}>
-              Study Companion
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[rgba(254,205,140,0.72)]">
+              Study companion
             </p>
-            <h3 className="text-sm font-semibold leading-snug truncate" style={{ color: 'rgba(255,255,255,0.88)' }}>
-              {currentModule.title}
-            </h3>
+            <h3 className="mt-2 truncate text-sm font-semibold text-white/88">{currentModule.title}</h3>
+            <p className="mt-1 text-[11px] leading-5 text-white/38">
+              {selectedText ? 'Selection pinned for sharper answers.' : 'Highlight any passage to pin it as context.'}
+            </p>
           </div>
           <button
             onClick={() => setPanelOpen(false)}
-            className="shrink-0 w-7 h-7 flex items-center justify-center transition-all"
-            style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 6, color: 'rgba(255,255,255,0.3)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; }}
+            className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03] text-white/38 transition-all hover:bg-white/[0.08] hover:text-white/72"
           >
-            <X size={13} />
+            <X size={14} />
           </button>
         </div>
 
-        {/* Tool tabs */}
-        <div
-          className="flex gap-0.5 p-1"
-          style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }}
-        >
+        <div className="grid grid-cols-3 gap-2">
+          {companionStats.map(item => (
+            <div
+              key={item.label}
+              className="rounded-[18px] border border-white/[0.07] bg-white/[0.03] px-3 py-2.5"
+            >
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/24">{item.label}</p>
+              <p className="mt-1 text-sm font-semibold text-white/82">{item.value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] p-1">
           {([
             { t: 'doubt' as StudyTool, label: 'Ask', icon: MessageCircle },
             { t: 'explain' as StudyTool, label: 'Reframe', icon: Sparkles },
@@ -595,12 +720,9 @@ export function StudyModePage({
             <button
               key={t}
               onClick={() => setActiveTool(t)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-semibold transition-all"
-              style={{
-                background: activeTool === t ? '#FECD8C' : 'transparent',
-                color: activeTool === t ? '#000' : 'rgba(255,255,255,0.38)',
-                borderRadius: 6,
-              }}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-semibold transition-all ${
+                activeTool === t ? 'bg-[#FECD8C] text-black' : 'text-white/38 hover:text-white/70'
+              }`}
             >
               <Icon size={11} />
               {label}
@@ -608,30 +730,26 @@ export function StudyModePage({
           ))}
         </div>
 
-        {/* Selected text chip */}
-        {selectedText && (
-          <div
-            className="mt-3 flex items-start gap-2 p-2.5"
-            style={{
-              background: 'rgba(254,205,140,0.05)',
-              border: '1px solid rgba(254,205,140,0.13)',
-              borderRadius: 7,
-            }}
-          >
-            <span className="text-[9px] font-bold uppercase tracking-[0.18em] mt-0.5" style={{ color: 'rgba(254,205,140,0.55)' }}>
-              Sel.
+        <div className="mt-4 rounded-[22px] border border-[rgba(254,205,140,0.12)] bg-[rgba(254,205,140,0.05)] p-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-[rgba(254,205,140,0.7)]">
+              {selectedText ? 'Pinned context' : 'Quick hint'}
             </span>
-            <p className="flex-1 text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.48)' }}>
-              {selectedTextPreview}
-            </p>
-            <button
-              onClick={() => setSelectedText('')}
-              style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}
-            >
-              <X size={12} />
-            </button>
+            {selectedText ? (
+              <button
+                onClick={() => setSelectedText('')}
+                className="rounded-full border border-white/[0.08] px-2 py-0.5 text-[10px] font-semibold text-white/40 transition-all hover:text-white/72"
+              >
+                Clear
+              </button>
+            ) : null}
           </div>
-        )}
+          <p className="text-[11px] leading-6 text-white/52">
+            {selectedText
+              ? selectedTextPreview
+              : 'Tap and drag over any sentence in the reader, then ask for a doubt answer or a cleaner explanation.'}
+          </p>
+        </div>
       </div>
 
       {/* Panel body */}
@@ -871,34 +989,37 @@ export function StudyModePage({
 
   // ─── Layout ───────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: '#080808', color: 'rgba(255,255,255,0.84)' }}>
+    <div
+      className="flex min-h-screen flex-col"
+      style={{
+        background: 'radial-gradient(circle at top left, rgba(254,205,140,0.09), transparent 24%), radial-gradient(circle at 85% 12%, rgba(96,165,250,0.08), transparent 22%), #080808',
+        color: 'rgba(255,255,255,0.84)',
+      }}
+    >
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header
-        className="sticky top-0 z-50 shrink-0 flex items-center justify-between gap-4 px-5 h-[52px]"
+        className="sticky top-0 z-50 flex h-[64px] shrink-0 items-center justify-between gap-4 px-5"
         style={{
-          background: 'rgba(8,8,8,0.96)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          backdropFilter: 'blur(16px)',
+          background: 'rgba(8,8,8,0.82)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(20px)',
         }}
       >
         {/* Left */}
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onBack}
-            className="shrink-0 flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 transition-all"
-            style={{ border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.46)', borderRadius: 6 }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.78)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.46)'; }}
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[11px] font-medium text-white/52 transition-all hover:border-white/[0.14] hover:text-white/82"
           >
             <ArrowLeft size={12} /> Back
           </button>
 
           <div className="hidden sm:block min-w-0">
-            <p className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+            <p className="text-[9px] font-bold uppercase tracking-[0.24em]" style={{ color: 'rgba(254,205,140,0.6)' }}>
               Study Workspace
             </p>
-            <h1 className="text-[13px] font-semibold truncate" style={{ color: 'rgba(255,255,255,0.72)' }}>
+            <h1 className="text-[14px] font-semibold truncate" style={{ color: 'rgba(255,255,255,0.84)' }}>
               {book.title}
             </h1>
           </div>
@@ -1147,10 +1268,37 @@ export function StudyModePage({
                   ))}
                 </div>
               </div>
+
+              <div
+                className="hidden items-center gap-1 rounded-full border p-1 lg:flex"
+                style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.02)' }}
+              >
+                {(['narrow', 'medium', 'wide'] as const).map(width => (
+                  <button
+                    key={width}
+                    onClick={() => setSettings(p => ({ ...p, maxWidth: width }))}
+                    className="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] transition-all"
+                    style={{
+                      background: settings.maxWidth === width ? `${rt.accent}` : 'transparent',
+                      color: settings.maxWidth === width ? accentTextColor : rt.sub,
+                    }}
+                  >
+                    {WIDTH_LABELS[width]}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <SurfaceToggle value={surface} onChange={setSurface} />
+              <SurfaceToggle
+                value={surface}
+                onChange={setSurface}
+                accentColor={rt.accent}
+                activeTextColor={accentTextColor}
+                borderColor={rt.border}
+                mutedTextColor={rt.sub}
+                surfaceColor="rgba(255,255,255,0.03)"
+              />
 
               {surface === 'full_book' && (
                 isEditing ? (
@@ -1183,8 +1331,115 @@ export function StudyModePage({
             </div>
           </div>
 
+          <section className="mx-auto w-full max-w-[76rem] px-4 pb-4 pt-6 md:px-8 md:pt-8">
+            <div
+              className="overflow-hidden rounded-[32px] border shadow-[0_28px_80px_rgba(0,0,0,0.16)]"
+              style={{
+                borderColor: rt.border,
+                background: `radial-gradient(circle_at_top_left, ${rt.accent}18, transparent 34%), linear-gradient(180deg, ${rt.surface}, ${rt.bg})`,
+              }}
+            >
+              <div className="grid gap-5 px-5 py-5 md:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.95fr)] md:px-6 md:py-6">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className="rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em]"
+                      style={{ borderColor: `${rt.accent}36`, background: `${rt.accent}14`, color: rt.accent }}
+                    >
+                      {surfaceLabel}
+                    </span>
+                    {book.roadmap?.difficultyLevel ? (
+                      <span
+                        className="rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
+                        style={{ borderColor: rt.border, color: rt.sub }}
+                      >
+                        {toTitleCase(book.roadmap.difficultyLevel)}
+                      </span>
+                    ) : null}
+                    <span
+                      className="rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
+                      style={{ borderColor: rt.border, color: rt.sub }}
+                    >
+                      {currentReadLabel}
+                    </span>
+                  </div>
+
+                  <h2
+                    className="mt-4 text-3xl font-semibold tracking-tight md:text-[2.6rem]"
+                    style={{ color: rt.text, fontFamily: FONT_FAMILIES[settings.fontFamily], lineHeight: 1.08 }}
+                  >
+                    {surfaceTitle}
+                  </h2>
+
+                  <p
+                    className="mt-3 max-w-3xl text-sm leading-7 md:text-[15px]"
+                    style={{ color: rt.sub, fontFamily: FONT_FAMILIES[settings.fontFamily] }}
+                  >
+                    {surfaceDescription}
+                  </p>
+
+                  {book.goal ? (
+                    <div className="mt-5 rounded-[24px] border px-4 py-4" style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.03)' }}>
+                      <div className="mb-2 flex items-center gap-2">
+                        <Target size={14} style={{ color: rt.accent }} />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: rt.accent }}>
+                          Why this workspace exists
+                        </span>
+                      </div>
+                      <p className="text-sm leading-7" style={{ color: rt.sub }}>
+                        {book.goal}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {heroStats.map(item => (
+                    <div
+                      key={item.label}
+                      className="rounded-[24px] border px-4 py-4"
+                      style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.035)' }}
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: rt.sub }}>
+                        {item.label}
+                      </p>
+                      <p className="mt-3 text-2xl font-semibold" style={{ color: rt.text }}>
+                        {item.value}
+                      </p>
+                      <p className="mt-2 text-[12px] leading-6" style={{ color: rt.sub }}>
+                        {item.detail}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {moduleObjectiveList.length > 0 ? (
+                <div className="border-t px-5 py-5 md:px-6" style={{ borderColor: rt.border }}>
+                  <div className="mb-3 flex items-center gap-2">
+                    <CheckCircle2 size={14} style={{ color: rt.accent }} />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: rt.sub }}>
+                      Focus checkpoints
+                    </span>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {moduleObjectiveList.map(objective => (
+                      <div
+                        key={objective}
+                        className="rounded-[20px] border px-4 py-3 text-sm leading-6"
+                        style={{ borderColor: rt.border, background: 'rgba(255,255,255,0.03)', color: rt.sub }}
+                      >
+                        {objective}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </section>
+
           {/* Module header */}
-          {surface === 'module' && (
+          {false && surface === 'module' && (
             <div className="shrink-0 px-8 pt-10 pb-6 mx-auto w-full" style={{ maxWidth: MAX_WIDTHS[settings.maxWidth] }}>
               <div className="flex items-center gap-2 mb-4">
                 <span
@@ -1242,7 +1497,7 @@ export function StudyModePage({
           )}
 
           {/* Divider */}
-          {surface === 'module' && (
+          {false && surface === 'module' && (
             <div className="mx-8" style={{ height: 1, background: rt.border, maxWidth: MAX_WIDTHS[settings.maxWidth] }} />
           )}
 
@@ -1252,17 +1507,25 @@ export function StudyModePage({
               <textarea
                 value={editedContent}
                 onChange={e => onContentChange(e.target.value)}
-                className="w-full rounded-lg font-mono text-sm leading-relaxed outline-none p-6 resize-none"
+                className="w-full resize-none rounded-[28px] p-6 font-mono text-sm leading-relaxed outline-none"
                 style={{
                   minHeight: '70vh',
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  color: 'rgba(255,255,255,0.72)',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${rt.border}`,
+                  color: rt.text,
                   fontSize: `${settings.fontSize - 2}px`,
                 }}
               />
             ) : (
-              <div ref={contentRef} style={{ maxWidth: MAX_WIDTHS[settings.maxWidth] }}>
+              <div
+                ref={contentRef}
+                className="overflow-hidden rounded-[30px] border px-5 py-6 shadow-[0_24px_70px_rgba(0,0,0,0.08)] md:px-7 md:py-8"
+                style={{
+                  maxWidth: MAX_WIDTHS[settings.maxWidth],
+                  borderColor: rt.border,
+                  background: `linear-gradient(180deg, ${rt.surface}, ${rt.bg})`,
+                }}
+              >
                 <article
                   className={`prose prose-lg max-w-none ${settings.theme !== 'light' ? 'prose-invert' : ''}`}
                   style={{
