@@ -788,7 +788,7 @@ export function SettingsModal({
                   {/* Stats grid */}
                   <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                     {[
-                      { label: 'AI Framework', val: 'Smart Orchestration' },
+                      { label: 'AI Model',     val: localSettings.selectedModel },
                       { label: 'Providers',    val: `${PROVIDERS.length} providers supported` },
                       { label: 'Architecture', val: 'Hybrid PWA' },
                       { label: 'Security',    val: 'Client-side Key Storage' },

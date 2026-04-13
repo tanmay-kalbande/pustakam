@@ -21,7 +21,7 @@ import { AI_SUITE_NAME, DEFAULT_ZHIPU_MODEL, ZHIPU_PROVIDER } from '../constants
 import { generateViaProxy, TaskType as ProxyTaskType } from './proxyService';
 import { generateText } from './providerService';
 import { byokStorage } from '../utils/byokStorage';
-import { getProviderConfig } from './providerRegistry';
+import { getModelsForProvider, getProviderConfig } from './providerRegistry';
 import { persistence } from '../utils/persistence';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -1356,7 +1356,7 @@ ${session.preferences?.includePracticalExercises ? '### Practice Exercises' : ''
         `# ${book.title}\n`,
         `**Generated:** ${new Date().toLocaleDateString()}\n`,
         `**Words:** ${totalWords.toLocaleString()}\n`,
-        `**Provider:** ${providerName} (Smart Orchestration)\n\n`,
+        `**Provider:** ${providerName} (${getModelsForProvider(this.settings.selectedProvider).find(m => m.id === this.settings.selectedModel)?.name || this.settings.selectedModel})\n\n`,
         `---\n\n## Table of Contents\n`,
         this.generateTableOfContents(book.modules),
         `\n\n---\n\n## Introduction\n\n${introduction}\n\n---\n\n`,
