@@ -36,6 +36,7 @@ interface StudyRequestBase {
 interface AskDoubtRequest extends StudyRequestBase {
   question: string;
   selectedText?: string;
+  history?: StudyInteraction[];
 }
 
 interface ReExplainRequest extends StudyRequestBase {
@@ -118,9 +119,10 @@ class LearningService {
     question,
     selectedText,
     signal,
+    history,
   }: AskDoubtRequest): Promise<StudyInteraction> {
     const prompt = buildDoubtPrompt(
-      this.buildPromptContext(book, module, moduleIndex),
+      this.buildPromptContext(book, module, moduleIndex, history),
       question,
       selectedText
     );
@@ -281,7 +283,8 @@ class LearningService {
   private buildPromptContext(
     book: BookProject,
     module: BookModule,
-    moduleIndex: number
+    moduleIndex: number,
+    history?: StudyInteraction[]
   ): StudyPromptContext {
     const orderedModules = this.getOrderedModules(book);
     const roadmapModule =
@@ -310,6 +313,13 @@ class LearningService {
       moduleObjectives: roadmapModule?.objectives || [],
       moduleContent: module.content,
       previousModulesSummary,
+      history: history
+        ?.filter(i => i.type === 'doubt')
+        .slice(-4)
+        .map(i => ({
+          q: i.question?.question || i.title || '',
+          a: i.answer?.answer || '',
+        })),
     };
   }
 

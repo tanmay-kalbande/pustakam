@@ -17,6 +17,7 @@ export interface StudyPromptContext {
   moduleObjectives?: string[];
   moduleContent: string;
   previousModulesSummary: string;
+  history?: Array<{ q: string; a: string }>;
 }
 
 const baseRules = [
@@ -63,6 +64,13 @@ export function buildDoubtPrompt(context: StudyPromptContext, question: string, 
     renderContext(context),
     '',
     selectedText ? `SELECTED TEXT:\n${trimBlock(selectedText, 1200)}` : 'SELECTED TEXT: None',
+    '',
+    context.history?.length
+      ? `CONVERSATION HISTORY:\n${context.history
+          .map(h => `Learner: ${h.q}\nTutor: ${h.a}`)
+          .join('\n\n')}`
+      : 'CONVERSATION HISTORY: None',
+    '',
     `LEARNER QUESTION: ${question.trim()}`,
     '',
     'Return this JSON shape:',

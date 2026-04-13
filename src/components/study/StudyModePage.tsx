@@ -652,7 +652,14 @@ export function StudyModePage({
     setDoubtLoading(true); setDoubtError(null);
     setLastDoubtPayload({ question: q, selectedText: st });
     try {
-      const i = await learningService.askModuleDoubt({ book, module: currentModule, moduleIndex: selModIdx, question: q, selectedText: st });
+      const i = await learningService.askModuleDoubt({
+        book,
+        module: currentModule,
+        moduleIndex: selModIdx,
+        question: q,
+        selectedText: st,
+        history: interactions,
+      });
       appendInteraction(i); setQuestionInput(''); setSelectedText(''); setPanelOpen(true);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to answer.';
