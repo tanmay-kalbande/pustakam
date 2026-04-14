@@ -1,4 +1,4 @@
-﻿// src/components/SettingsModal.tsx
+// src/components/SettingsModal.tsx
 import React from 'react';
 import { X, Database, Download, Upload, Trash2, Settings, Sparkles, Globe, Cpu, BookOpen, ChevronRight, Crown, Sun, Moon, Info, Shield, Key, Eye, EyeOff, CheckCircle, XCircle, Loader2, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -303,7 +303,7 @@ export function SettingsModal({
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-3 md:items-center md:p-4 backdrop-blur-md"
+        className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/70 p-3 md:items-center md:p-4 backdrop-blur-md"
         onClick={onClose}
       >
         <div
@@ -407,7 +407,7 @@ export function SettingsModal({
             </div>
 
             {/* Content area */}
-            <div className="flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] p-5 text-[var(--color-text-primary)] scroll-smooth md:p-6">
+            <div className="flex-1 overflow-y-auto p-5 text-[var(--color-text-primary)] scroll-smooth md:p-6">
 
               {/* â”€â”€ PERSONALITY TAB â”€â”€ */}
               {activeTab === 'personality' && (

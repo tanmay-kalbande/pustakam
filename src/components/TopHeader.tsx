@@ -42,6 +42,7 @@ interface TopHeaderProps {
 export const TopHeader: React.FC<TopHeaderProps> = ({
   settings,
   currentBookId,
+  books,
   onModelChange,
   onOpenSettings,
   theme,
