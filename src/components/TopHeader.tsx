@@ -60,6 +60,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProviderMenu, setShowProviderMenu] = useState(false);
+  const currentBook = currentBookId ? books?.find(book => book.id === currentBookId) ?? null : null;
 
   const displayName =
     userProfile?.full_name ||
@@ -116,15 +117,11 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         <div className="hidden min-w-0 flex-1 items-center justify-center px-4 lg:flex">
           {centerContent ?? (
-            <div className="flex min-w-0 items-center gap-3 text-xs text-[var(--text-muted)]">
-              <span>Roadmap</span>
-              <span className="h-1 w-1 rounded-full bg-[var(--workspace-line)]" />
-              <span>Chapters</span>
-              <span className="h-1 w-1 rounded-full bg-[var(--workspace-line)]" />
-              <span>Assembly</span>
-              <span className="h-1 w-1 rounded-full bg-[var(--workspace-line)]" />
-              <span>Study</span>
-            </div>
+            currentBook ? (
+              <div className="max-w-[320px] truncate text-sm font-medium text-[var(--text-secondary)]">
+                {currentBook.title}
+              </div>
+            ) : null
           )}
         </div>
 
@@ -134,7 +131,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               <div className="relative">
                 <button
                   onClick={() => setShowProviderMenu(open => !open)}
-                  className="workspace-topbar__pill min-w-[170px] justify-between text-left"
+                  className="workspace-topbar__pill h-[54px] w-[210px] justify-between text-left"
                 >
                   <span className="min-w-0">
                     <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
@@ -156,10 +153,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                     <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-[var(--workspace-line)] bg-[rgba(10,10,10,0.96)] p-2 shadow-[0_24px_48px_rgba(0,0,0,0.35)] backdrop-blur-xl">
                       <div className="border-b border-[var(--workspace-line)] px-3 py-3">
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-                          Active provider
+                          Choose provider
                         </p>
                         <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
-                          Use the shared path or switch to your own key when you need it.
+                          Select the provider for this workspace.
                         </p>
                       </div>
 
@@ -214,8 +211,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 )}
               </div>
 
-              <div className="workspace-topbar__section">
-                <div className="min-w-[120px] px-2">
+              <div className="workspace-topbar__section h-[54px] w-[250px] justify-between">
+                <div className="min-w-0 flex-1 px-2">
                   <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                     Model
                   </span>
@@ -227,7 +224,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   <button
                     onClick={() => cycleModel('up')}
                     disabled={providerModels.length <= 1}
-                    className="flex h-[17px] w-7 items-center justify-center text-[var(--text-secondary)] transition-colors hover:bg-white/[0.04] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-25"
+                    className="flex h-[20px] w-8 items-center justify-center text-[var(--text-secondary)] transition-colors hover:bg-white/[0.04] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-25"
                     title="Previous model"
                   >
                     <ChevronUp size={12} />
@@ -236,7 +233,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   <button
                     onClick={() => cycleModel('down')}
                     disabled={providerModels.length <= 1}
-                    className="flex h-[17px] w-7 items-center justify-center text-[var(--text-secondary)] transition-colors hover:bg-white/[0.04] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-25"
+                    className="flex h-[20px] w-8 items-center justify-center text-[var(--text-secondary)] transition-colors hover:bg-white/[0.04] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-25"
                     title="Next model"
                   >
                     <ChevronDown size={12} />

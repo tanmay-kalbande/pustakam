@@ -5,12 +5,14 @@ interface LoadingScreenProps {
   theme?: 'light' | 'dark';
   message?: string;
   isExiting?: boolean;
+  ownerName?: string;
 }
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   theme = 'dark',
   message = 'Firing up the engine...',
   isExiting = false,
+  ownerName = 'Tanmay Kalbande',
 }) => {
   return (
     <div
@@ -33,7 +35,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
             Pustakam
           </h1>
           <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.26em] text-[var(--color-text-secondary)] opacity-60 md:text-xs">
-            Internal Workspace
+            {ownerName}
           </p>
         </div>
 

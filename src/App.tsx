@@ -769,6 +769,7 @@ function App() {
           theme={theme}
           isExiting={isLoadingScreenExiting}
           message={isAuthTransitioning ? 'Getting your books ready...' : 'Firing up the engine...'}
+          ownerName={profile?.full_name || user?.user_metadata?.full_name || 'Tanmay Kalbande'}
         />
       )}
 

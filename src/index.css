@@ -2689,6 +2689,7 @@ html.light .header-with-fade::after {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
     border: 1px solid var(--workspace-line);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.02);
@@ -2700,12 +2701,13 @@ html.light .header-with-fade::after {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
     min-height: 36px;
     padding: 0 12px;
     border-radius: 10px;
     border: 1px solid transparent;
     color: var(--text-secondary);
-    transition: all 0.18s ease;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .workspace-topbar__ghost:hover,

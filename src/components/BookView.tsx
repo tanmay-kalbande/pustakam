@@ -13,9 +13,9 @@ import { APISettings, ModelProvider } from '../types';
 import type { QuotaStatus } from '../types/providers';
 import { BookProject, BookSession } from '../types/book';
 import { bookService } from '../services/bookService';
+import { getModelsForProvider, getProviderConfig } from '../services/providerRegistry';
 import { CustomSelect } from './CustomSelect';
 import { readingProgressUtils } from '../utils/readingProgress';
-import { ZHIPU_PROVIDER, DEFAULT_ZHIPU_MODEL } from '../constants/ai';
 
 const BookAnalytics = lazy(() => import('./BookAnalytics').then(module => ({ default: module.BookAnalytics })));
 const ReadingMode = lazy(() => import('./ReadingMode').then(module => ({ default: module.ReadingMode })));
@@ -283,7 +283,7 @@ const EmbeddedProgressPanel = ({
             )}
             <div>
               <h3 className="text-lg font-semibold text-[var(--color-text-primary)] md:text-xl">
-                {isPaused ? 'Generation Paused' : 'Generating Chapters…'}
+                {isPaused ? 'Generation paused' : 'Writing book'}
               </h3>
               <p className="text-sm text-[var(--color-text-secondary)]">{stats.completedModules} of {stats.totalModules} complete</p>
             </div>
@@ -320,7 +320,7 @@ const EmbeddedProgressPanel = ({
             {generationStatus.currentModule.generatedText && (
               <div
                 ref={streamBoxRef}
-                className="mt-3 max-h-[80px] overflow-hidden font-mono text-xs leading-relaxed text-[var(--text-secondary)] opacity-60"
+                className="streaming-text-box mt-3 max-h-[140px] overflow-y-auto pr-1 font-mono text-xs leading-relaxed text-[var(--text-secondary)] opacity-70"
               >
                 {generationStatus.currentModule.generatedText}
               </div>
@@ -382,11 +382,10 @@ const DetailPaneFallback = ({ label }: { label: string }) => (
 // HOME VIEW  (original design, robustness-hardened)
 // ============================================================================
 const HomeView = ({
-  onNewBook,
   onShowList,
-  hasApiKey,
+  onOpenBook,
+  books,
   bookCount,
-  theme,
   formData,
   setFormData,
   showAdvanced,
@@ -394,18 +393,17 @@ const HomeView = ({
   handleCreateRoadmap,
   handleEnhanceWithAI,
   isEnhancing,
+  setIsEnhancing,
   enhanceError,
   localIsGenerating,
   onOpenSettings,
   settings,
-  onModelChange,
   quotaStatus,
 }: {
-  onNewBook: () => void;
   onShowList: () => void;
-  hasApiKey: boolean;
+  onOpenBook: (id: string) => void;
+  books: BookProject[];
   bookCount: number;
-  theme: 'light' | 'dark';
   formData: BookSession;
   setFormData: React.Dispatch<React.SetStateAction<BookSession>>;
   showAdvanced: boolean;
@@ -413,53 +411,107 @@ const HomeView = ({
   handleCreateRoadmap: (data: BookSession) => void;
   handleEnhanceWithAI: () => void;
   isEnhancing: boolean;
-  enhanceError: string | null;
   setIsEnhancing: (val: boolean) => void;
+  enhanceError: string | null;
   localIsGenerating: boolean;
   onOpenSettings: () => void;
   settings: APISettings;
-  onModelChange: (model: string, provider: ModelProvider) => void;
   quotaStatus?: QuotaStatus | null;
 }) => {
   const canGenerate = !!(formData.goal.trim() && !localIsGenerating);
+  const recentBooks = [...books]
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 3);
+  const activeProvider = getProviderConfig(settings.selectedProvider);
+  const activeModel =
+    getModelsForProvider(settings.selectedProvider).find(model => model.id === settings.selectedModel)?.name
+    ?? settings.selectedModel;
+  const statusLabelMap: Record<BookProject['status'], string> = {
+    planning: 'Planning',
+    generating_roadmap: 'Creating roadmap',
+    roadmap_completed: 'Ready to write',
+    generating_content: 'Writing',
+    assembling: 'Assembling',
+    completed: 'Completed',
+    error: 'Needs attention',
+  };
 
   return (
     <div
-      className="relative flex-1 flex flex-col items-center px-6 w-full min-h-[90vh] overflow-y-auto"
+      className="relative flex-1 w-full bg-[var(--bg-base)] px-6 pb-24 pt-24"
       style={{ background: 'var(--bg-base)' }}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,rgba(255,255,255,0.02),transparent_70%)] -z-10" />
-      
-      <div className="w-full h-24 shrink-0 md:h-28" />
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl shrink-0 pb-24">
-        <div className="mb-10">
-          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">
-            Internal Builder
-          </p>
-          <h1 className="max-w-4xl text-4xl font-bold tracking-[-0.05em] text-[var(--text-primary)] md:text-6xl md:leading-[0.98]">
-            Start with one topic.
-            <span className="mt-2 block text-[var(--text-secondary)]">We map the book, then write it.</span>
-          </h1>
-          <p className="mt-5 max-w-3xl text-sm leading-7 text-[var(--text-secondary)] md:text-[15px]">
-            Type the topic, tighten the brief, and generate the roadmap first. Ten chapters. Around 30,000 words. One controlled run.
-          </p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            {[
-              { label: 'Default path', value: 'GLM-5', hint: 'Shared long-form engine' },
-              { label: 'Typical scope', value: '10 chapters', hint: 'Roadmap before writing' },
-              { label: 'Target output', value: '30,000 words', hint: 'Full learning book' },
-            ].map((item) => (
-              <div key={item.label} className="workspace-card px-4 py-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</p>
-                <p className="mt-2 text-lg font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{item.value}</p>
-                <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">{item.hint}</p>
+      <div className="relative z-10 mx-auto w-full max-w-6xl">
+        <div className="mb-10 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
+          <div>
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">
+              Create a Book
+            </p>
+            <h1 className="max-w-4xl text-4xl font-bold tracking-[-0.05em] text-[var(--text-primary)] md:text-6xl md:leading-[0.98]">
+              Start with a topic.
+              <span className="mt-2 block text-[var(--text-secondary)]">Build the roadmap first, then generate the full book.</span>
+            </h1>
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-[var(--text-secondary)] md:text-[15px]">
+              Write the learning goal clearly, tune the brief if needed, and start the roadmap. Existing drafts and completed books stay available in your library.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {[
+                { label: 'Provider', value: activeProvider.name, hint: activeProvider.tagline },
+                { label: 'Model', value: activeModel, hint: 'You can change this from the top bar anytime' },
+                { label: 'Library', value: `${bookCount} ${bookCount === 1 ? 'book' : 'books'}`, hint: bookCount > 0 ? 'Open your drafts and completed exports' : 'Your created books will appear here' },
+              ].map((item) => (
+                <div key={item.label} className="workspace-card px-4 py-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</p>
+                  <p className="mt-2 truncate text-lg font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{item.value}</p>
+                  <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">{item.hint}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="workspace-panel p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Recent Books</p>
+                <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
+                  {bookCount > 0 ? 'Pick up where you left off' : 'Library is empty'}
+                </h2>
               </div>
-            ))}
+              {bookCount > 0 ? (
+                <button onClick={onShowList} className="btn btn-secondary px-3 py-2 text-[11px]">
+                  <BookOpen size={14} />
+                  View Library
+                </button>
+              ) : null}
+            </div>
+
+            {recentBooks.length > 0 ? (
+              <div className="mt-5 space-y-3">
+                {recentBooks.map((book) => (
+                  <button
+                    key={book.id}
+                    onClick={() => onOpenBook(book.id)}
+                    className="workspace-card flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.04]"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-[var(--text-primary)]">{book.title}</div>
+                      <div className="mt-1 text-xs text-[var(--text-secondary)]">
+                        {statusLabelMap[book.status]} • {new Date(book.updatedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <ArrowLeft className="h-4 w-4 shrink-0 rotate-180 text-[var(--text-muted)]" />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-5 rounded-2xl border border-dashed border-[var(--workspace-line)] px-4 py-6 text-sm leading-6 text-[var(--text-secondary)]">
+                Your created books will show here once the first roadmap is generated.
+              </div>
+            )}
           </div>
         </div>
-
-
 
         {/* Input bar */}
         <div className="relative w-full overflow-hidden rounded-[26px] border border-[var(--workspace-line)] bg-white/[0.02] shadow-[0_24px_48px_rgba(0,0,0,0.2)]">
@@ -497,16 +549,16 @@ const HomeView = ({
                 }
               }
             }}
-            placeholder="What should this book teach?"
+            placeholder="Describe the book you want to create"
             className="w-full resize-none border-none bg-transparent px-5 py-5 text-[15px] leading-7 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
             rows={1}
             style={{ minHeight: '148px', maxHeight: '260px' }}
           />
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--workspace-line)] px-4 py-3">
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
-              <span>Shift + Enter for line breaks</span>
+              <span>Press Enter to start</span>
               <span className="h-1 w-1 rounded-full bg-[var(--workspace-line)]" />
-              <span>Roadmap comes before the chapter run</span>
+              <span>Shift + Enter adds a new line</span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -516,7 +568,7 @@ const HomeView = ({
                 title="Refine prompt with AI"
               >
                 {isEnhancing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                <span>{isEnhancing ? 'Refining brief' : 'Refine prompt'}</span>
+                <span>{isEnhancing ? 'Refining brief' : 'Refine brief'}</span>
               </button>
               <button
                 onClick={() => canGenerate ? handleCreateRoadmap(formData) : onOpenSettings()}
@@ -526,7 +578,7 @@ const HomeView = ({
                 {localIsGenerating ? (
                   <><Loader2 className="h-4 w-4 animate-spin" /> Building roadmap</>
                 ) : (
-                  <><Sparkles className="h-4 w-4" /> Generate roadmap</>
+                  <><Sparkles className="h-4 w-4" /> Create roadmap</>
                 )}
               </button>
             </div>
@@ -546,7 +598,7 @@ const HomeView = ({
           </button>
           {bookCount > 0 && (
             <button onClick={onShowList} className="btn btn-secondary px-4 py-2 text-xs">
-              <BookOpen size={14} /> Open Library <span className="opacity-40">({bookCount})</span>
+              <BookOpen size={14} /> View Created Books <span className="opacity-40">({bookCount})</span>
             </button>
           )}
         </div>
@@ -612,11 +664,11 @@ const HomeView = ({
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Extra Context</label>
+                <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Extra Context</label>
               <textarea
                 value={formData.reasoning}
                 onChange={e => setFormData(p => ({ ...p, reasoning: e.target.value }))}
-                placeholder="What should the reader be able to do when they finish?"
+                placeholder="What outcome should the reader reach by the end of the book?"
                 className="w-full glass-input rounded-md p-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none resize-none transition-all"
                 rows={3}
               />
@@ -682,7 +734,7 @@ const HomeView = ({
                 {localIsGenerating ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> Building roadmap</>
                 ) : (
-                  <><Sparkles className="w-5 h-5" /> Generate roadmap</>
+                  <><Sparkles className="w-5 h-5" /> Create roadmap</>
                 )}
               </button>
             </div>
@@ -1039,28 +1091,26 @@ export function BookView({
         />
       );
     }
-    return (
+      return (
         <HomeView
-        onNewBook={() => { setView('create'); }}
-        onShowList={() => { setShowListInMain(true); setView('list'); }}
-        hasApiKey={hasApiKey}
-        bookCount={books.length}
-        theme={theme}
-        formData={formData}
-        setFormData={setFormData}
-        showAdvanced={showAdvanced}
-        setShowAdvanced={setShowAdvanced}
-        handleCreateRoadmap={handleCreateRoadmap}
-        handleEnhanceWithAI={handleEnhanceWithAI}
-        isEnhancing={isEnhancing}
-        enhanceError={enhanceError}
-        setIsEnhancing={setIsEnhancing}
-        localIsGenerating={localIsGenerating}
-        onOpenSettings={onOpenSettings}
-        settings={settings}
-        onModelChange={onModelChange}
-        quotaStatus={quotaStatus}
-      />
+          onShowList={() => { setShowListInMain(true); setView('list'); }}
+          onOpenBook={(id) => { onSelectBook(id); setView('detail'); }}
+          books={books}
+          bookCount={books.length}
+          formData={formData}
+          setFormData={setFormData}
+          showAdvanced={showAdvanced}
+          setShowAdvanced={setShowAdvanced}
+          handleCreateRoadmap={handleCreateRoadmap}
+          handleEnhanceWithAI={handleEnhanceWithAI}
+          isEnhancing={isEnhancing}
+          setIsEnhancing={setIsEnhancing}
+          enhanceError={enhanceError}
+          localIsGenerating={localIsGenerating}
+          onOpenSettings={onOpenSettings}
+          settings={settings}
+          quotaStatus={quotaStatus}
+        />
     );
   }
 
@@ -1068,11 +1118,10 @@ export function BookView({
   if (view === 'create') {
     return (
       <HomeView
-        onNewBook={() => { setView('create'); }}
         onShowList={() => { setShowListInMain(true); setView('list'); }}
-        hasApiKey={hasApiKey}
+        onOpenBook={(id) => { onSelectBook(id); setView('detail'); }}
+        books={books}
         bookCount={books.length}
-        theme={theme}
         formData={formData}
         setFormData={setFormData}
         showAdvanced={true}
@@ -1085,7 +1134,6 @@ export function BookView({
         localIsGenerating={localIsGenerating}
         onOpenSettings={onOpenSettings}
         settings={settings}
-        onModelChange={onModelChange}
         quotaStatus={quotaStatus}
       />
     );
@@ -1205,9 +1253,9 @@ export function BookView({
 
               <div className="grid gap-10 xl:grid-cols-[minmax(0,1.15fr)_360px]">
                 {currentBook.roadmap && (
-                  <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm">
+                  <div className="workspace-panel p-6">
                     <div className="mb-6 flex items-center justify-between gap-4">
-                      <h3 className="text-xl font-bold text-[var(--text-primary)]">Learning Flow</h3>
+                      <h3 className="text-xl font-bold text-[var(--text-primary)]">Roadmap</h3>
                       <div className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-base)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                         {completedModules.length}/{totalModuleCount} complete
                       </div>
@@ -1274,8 +1322,8 @@ export function BookView({
                   )}
 
                   {(currentBook.status === 'roadmap_completed' || (currentBook.status === 'error' && completedModules.length > 0)) && !areAllModulesDone && !isGenerating && !isPaused && generationStatus?.status !== 'waiting_retry' && (
-                    <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm">
-                      <h3 className="text-xl font-bold text-[var(--text-primary)]">Generate Chapters</h3>
+                    <div className="workspace-panel p-6">
+                      <h3 className="text-xl font-bold text-[var(--text-primary)]">Generate chapters</h3>
                       <p className="mt-2 text-sm text-[var(--text-secondary)]">
                         {completedModules.length > 0 ? `Resume writing from ${completedModules.length} completed modules.` : 'Start the AI writing pass for all chapters.'}
                       </p>
@@ -1286,9 +1334,9 @@ export function BookView({
                   )}
 
                   {areAllModulesDone && currentBook.status !== 'completed' && !localIsGenerating && !isGenerating && !isPaused && (
-                    <div className="rounded-lg border border-[var(--brand)]/20 bg-[var(--brand)]/5 p-6 space-y-4 animate-fade-in-up">
+                    <div className="workspace-panel p-6 space-y-4 animate-fade-in-up">
                       <div>
-                        <h3 className="text-xl font-bold text-[var(--text-primary)]">Assemble Book</h3>
+                        <h3 className="text-xl font-bold text-[var(--text-primary)]">Assemble book</h3>
                         <p className="mt-1.5 text-sm text-[var(--text-secondary)]">All chapters complete. Build the final professional book export.</p>
                       </div>
                       <button onClick={handleStartAssembly} className="btn btn-primary w-full py-2.5">
@@ -1298,7 +1346,7 @@ export function BookView({
                   )}
 
                   {currentBook.status === 'assembling' && (
-                    <div className="rounded-lg border border-[var(--brand)]/30 bg-[var(--bg-surface)] p-6 space-y-6 animate-pulse">
+                    <div className="workspace-panel p-6 space-y-6 animate-pulse">
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--brand)] opacity-80">Assembly In Progress</p>
                         <h3 className="mt-2 text-xl font-bold text-[var(--text-primary)]">Finalizing Your Book</h3>
@@ -1311,8 +1359,8 @@ export function BookView({
                   )}
 
                   {currentBook.status === 'completed' && detailTab === 'overview' && (
-                    <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6">
-                      <h3 className="text-xl font-bold text-[var(--text-primary)]">Export Book</h3>
+                    <div className="workspace-panel p-6">
+                      <h3 className="text-xl font-bold text-[var(--text-primary)]">Export book</h3>
                       <p className="mt-2 text-sm text-[var(--text-secondary)]">Download your book in professional formats.</p>
                       <div className="mt-6 space-y-3">
                         <button onClick={handleDownloadPdf} disabled={pdfProgress > 0 && pdfProgress < 100}
@@ -1359,7 +1407,7 @@ export function BookView({
                     </div>
                   )}
 
-                  <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6">
+                  <div className="workspace-panel p-6">
                     <div className="space-y-4">
                       {[
                         { label: 'Completed modules', value: `${completedModules.length}/${totalModuleCount}` },
