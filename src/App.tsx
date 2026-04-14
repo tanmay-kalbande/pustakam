@@ -64,16 +64,16 @@ function formatBookTitle(session: Pick<BookSession, 'title' | 'goal'>): string {
 
 function WorkspaceFallback() {
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 pointer-events-none">
+    <div className="fixed right-4 top-20 z-[150] pointer-events-none">
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center gap-4 rounded-3xl border border-white/10 bg-black/20 px-8 py-6 backdrop-blur-xl"
+        className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/50 px-4 py-3 backdrop-blur-xl"
       >
-        <Loader2 size={24} className="text-[#FECD8C] animate-spin" strokeWidth={1.5} />
-        <div className="flex flex-col items-center gap-1 text-center">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20">Pustakam AI</span>
-          <p className="text-xs font-medium text-white/50">Preparing workspace...</p>
+        <Loader2 size={18} className="text-[#FECD8C] animate-spin" strokeWidth={1.5} />
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/20">Workspace</span>
+          <p className="text-xs font-medium text-white/60">Loading view...</p>
         </div>
       </motion.div>
     </div>
@@ -769,7 +769,7 @@ function App() {
           theme={theme}
           isExiting={isLoadingScreenExiting}
           message={isAuthTransitioning ? 'Getting your books ready...' : 'Firing up the engine...'}
-          ownerName={profile?.full_name || user?.user_metadata?.full_name || 'Tanmay Kalbande'}
+          ownerName="Tanmay Kalbande"
         />
       )}
 

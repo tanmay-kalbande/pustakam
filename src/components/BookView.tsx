@@ -444,28 +444,27 @@ const HomeView = ({
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,rgba(255,255,255,0.02),transparent_70%)] -z-10" />
 
       <div className="relative z-10 mx-auto w-full max-w-6xl">
-        <div className="mb-10 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
+        <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
           <div>
             <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">
               Create a Book
             </p>
-            <h1 className="max-w-4xl text-4xl font-bold tracking-[-0.05em] text-[var(--text-primary)] md:text-6xl md:leading-[0.98]">
+            <h1 className="max-w-3xl text-3xl font-bold tracking-[-0.05em] text-[var(--text-primary)] md:text-5xl md:leading-[1.02]">
               Start with a topic.
               <span className="mt-2 block text-[var(--text-secondary)]">Build the roadmap first, then generate the full book.</span>
             </h1>
-            <p className="mt-5 max-w-3xl text-sm leading-7 text-[var(--text-secondary)] md:text-[15px]">
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--text-secondary)] md:text-[15px]">
               Write the learning goal clearly, tune the brief if needed, and start the roadmap. Existing drafts and completed books stay available in your library.
             </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="mt-5 flex flex-wrap gap-2">
               {[
                 { label: 'Provider', value: activeProvider.name, hint: activeProvider.tagline },
                 { label: 'Model', value: activeModel, hint: 'You can change this from the top bar anytime' },
                 { label: 'Library', value: `${bookCount} ${bookCount === 1 ? 'book' : 'books'}`, hint: bookCount > 0 ? 'Open your drafts and completed exports' : 'Your created books will appear here' },
               ].map((item) => (
-                <div key={item.label} className="workspace-card px-4 py-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</p>
-                  <p className="mt-2 truncate text-lg font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{item.value}</p>
-                  <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">{item.hint}</p>
+                <div key={item.label} className="inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--workspace-line)] bg-[var(--workspace-soft)] px-3 py-2">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</span>
+                  <span className="truncate text-sm font-semibold text-[var(--text-primary)]">{item.value}</span>
                 </div>
               ))}
             </div>
@@ -493,7 +492,7 @@ const HomeView = ({
                   <button
                     key={book.id}
                     onClick={() => onOpenBook(book.id)}
-                    className="workspace-card flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.04]"
+                    className="workspace-card flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--workspace-soft)]"
                   >
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-[var(--text-primary)]">{book.title}</div>
@@ -514,7 +513,7 @@ const HomeView = ({
         </div>
 
         {/* Input bar */}
-        <div className="relative w-full overflow-hidden rounded-[26px] border border-[var(--workspace-line)] bg-white/[0.02] shadow-[0_24px_48px_rgba(0,0,0,0.2)]">
+        <div className="relative w-full overflow-hidden rounded-[26px] border border-[var(--workspace-line)] bg-[var(--workspace-panel)] shadow-[0_24px_48px_rgba(0,0,0,0.16)]">
           <textarea
             value={formData.goal}
             onChange={e => {

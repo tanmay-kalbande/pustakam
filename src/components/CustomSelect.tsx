@@ -41,12 +41,12 @@ export function CustomSelect({ options, value, onChange, placeholder = "Select..
         onClick={() => setIsOpen(!isOpen)}
         className="glass-input flex items-center justify-between w-full min-h-12 rounded-2xl px-4 py-3 text-left"
       >
-        <span className={selectedOption ? 'text-white' : 'text-gray-400'}>
+        <span className={selectedOption ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}>
           {selectedOption?.label || placeholder}
         </span>
         <ChevronDown
           size={16}
-          className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`}
+          className={`text-[var(--text-muted)] transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`}
         />
       </button>
 
@@ -59,12 +59,12 @@ export function CustomSelect({ options, value, onChange, placeholder = "Select..
                 onClick={() => handleSelect(option.value)}
                 className={`flex items-center justify-between p-3 text-sm rounded-xl cursor-pointer transition-all ${
                   value === option.value
-                    ? 'bg-amber-500/20 text-amber-400'
-                    : 'text-gray-300 hover:bg-white/5'
+                    ? 'bg-[var(--brand)]/15 text-[var(--brand)]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--workspace-soft)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 <span>{option.label}</span>
-                {value === option.value && <Check size={16} className="text-amber-400" />}
+                {value === option.value && <Check size={16} className="text-[var(--brand)]" />}
               </li>
             ))}
           </ul>

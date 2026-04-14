@@ -14,7 +14,17 @@ inject();
 
 // Service Worker update checker
 if ('serviceWorker' in navigator) {
+  let refreshing = false;
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
   navigator.serviceWorker.ready.then(registration => {
+    void registration.update();
+
     const checkForUpdates = () => {
       if (document.visibilityState === 'visible' && navigator.onLine) {
         void registration.update();
@@ -32,6 +42,7 @@ if ('serviceWorker' in navigator) {
       if (newWorker) {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
           }
         });
       }

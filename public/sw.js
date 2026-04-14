@@ -1,4 +1,4 @@
-const SW_VERSION = 'pustakam-v0.1.4';
+const SW_VERSION = 'pustakam-v0.1.5';
 const APP_SHELL_CACHE = `${SW_VERSION}-app-shell`;
 const STATIC_CACHE = `${SW_VERSION}-static`;
 const IMAGE_CACHE = `${SW_VERSION}-images`;
@@ -96,7 +96,12 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  if (/\.(js|css|woff2?|ttf)$/i.test(url.pathname)) {
+  if (/\.(js|css)$/i.test(url.pathname)) {
+    event.respondWith(networkFirst(event.request, event.request.url));
+    return;
+  }
+
+  if (/\.(woff2?|ttf)$/i.test(url.pathname)) {
     event.respondWith(staleWhileRevalidate(event.request));
     return;
   }

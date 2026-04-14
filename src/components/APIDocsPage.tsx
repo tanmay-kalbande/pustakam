@@ -1,188 +1,167 @@
 import React from 'react';
-import { ArrowLeft, Shield, AlertTriangle, Lock, BookOpen } from 'lucide-react';
+import { ArrowLeft, ExternalLink, KeyRound, Lock, Network, Shield, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface APIDocsPageProps {
-    onClose: () => void;
+  onClose: () => void;
 }
 
+const safetyCards = [
+  {
+    icon: Lock,
+    title: 'Your API keys stay local',
+    body: 'Bring-your-own keys are stored in this browser only. They are used directly from your device when a provider supports BYOK.',
+  },
+  {
+    icon: Network,
+    title: 'Shared quota uses the proxy path',
+    body: 'If you use the shared free path, requests go through the app-managed provider route instead of using your own key.',
+  },
+  {
+    icon: Trash2,
+    title: 'You stay in control',
+    body: 'You can remove saved keys anytime from Workspace Settings. Clearing browser storage also removes locally stored keys.',
+  },
+];
+
+const flowSteps = [
+  {
+    title: 'Choose a provider',
+    body: 'Pick the provider and model from the top bar or inside settings before starting a roadmap or chapter run.',
+  },
+  {
+    title: 'Start with a roadmap',
+    body: 'The workspace generates the roadmap first, then uses that structure to write chapters and assemble the final book.',
+  },
+  {
+    title: 'Review outputs locally',
+    body: 'Roadmaps, chapters, final books, and reader state stay in your local workspace so you can reopen drafts quickly.',
+  },
+];
+
+const providerNotes = [
+  'Use proxy/free quota when you want the fastest setup.',
+  'Use your own API key when you want direct billing and full provider control.',
+  'Switch models between runs if you want a different tone, speed, or reasoning style.',
+];
+
 const APIDocsPage: React.FC<APIDocsPageProps> = ({ onClose }) => {
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-[var(--bg-base)] overflow-auto font-sans"
-        >
-            {/* Header */}
-            <header className="sticky top-0 z-[60] bg-[var(--bg-base)]/80 backdrop-blur-2xl border-b border-[var(--border-subtle)] px-6 py-4">
-                <div className="max-w-5xl mx-auto flex items-center justify-between">
-                    <button
-                        onClick={onClose}
-                        className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-300 group"
-                    >
-                        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-sm font-medium">Exit Docs</span>
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">v2.7.0</span>
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[120] bg-black/70 p-3 backdrop-blur-md md:p-6"
+    >
+      <div className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-[28px] border border-[var(--border-default)] bg-[var(--bg-elevated)] shadow-[0_28px_80px_rgba(0,0,0,0.45)]">
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/80 px-5 py-4 backdrop-blur-xl md:px-7">
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-base)]/40 px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+          >
+            <ArrowLeft size={16} />
+            Back to workspace
+          </button>
+          <div className="text-right">
+            <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Internal Docs</div>
+            <div className="mt-1 text-sm font-semibold text-[var(--text-primary)]">API, keys, and request flow</div>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto px-5 py-6 md:px-7 md:py-8">
+          <div className="mx-auto max-w-5xl">
+            <section className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_320px]">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">API Docs</p>
+                <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-[-0.05em] text-[var(--text-primary)] md:text-6xl md:leading-[1.02]">
+                  Clear provider controls. Safer key handling. Less guesswork.
+                </h1>
+                <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--text-secondary)] md:text-[15px]">
+                  This workspace supports both shared proxy usage and bring-your-own-key providers. The important part is simple:
+                  your saved BYOK keys stay on this device, and you can remove them anytime from settings.
+                </p>
+              </div>
+
+              <div className="rounded-[24px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-5 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/40">
+                    <Shield className="h-5 w-5 text-[var(--brand)]" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">Key Safety</div>
+                    <div className="mt-1 text-base font-semibold text-[var(--text-primary)]">What to tell users</div>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">
+                  Pustakam does not need to expose the user's BYOK key in the UI beyond local settings. For supported providers, the browser sends the request directly with the locally stored key.
+                </p>
+              </div>
+            </section>
+
+            <section className="mt-8 grid gap-4 md:grid-cols-3">
+              {safetyCards.map(({ icon: Icon, title, body }) => (
+                <div key={title} className="rounded-[22px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-5 py-5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/40">
+                    <Icon className="h-4 w-4 text-[var(--brand)]" />
+                  </div>
+                  <h2 className="mt-4 text-lg font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{title}</h2>
+                  <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{body}</p>
+                </div>
+              ))}
+            </section>
+
+            <section className="mt-10 rounded-[28px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-5 py-6 md:px-7">
+              <div className="flex items-center gap-3">
+                <KeyRound className="h-5 w-5 text-[var(--brand)]" />
+                <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">How requests move through the app</h2>
+              </div>
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {flowSteps.map((step, index) => (
+                  <div key={step.title} className="rounded-[22px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/30 px-4 py-4">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Step {index + 1}</div>
+                    <h3 className="mt-2 text-base font-semibold text-[var(--text-primary)]">{step.title}</h3>
+                    <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{step.body}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+              <div className="rounded-[28px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-5 py-6 md:px-7">
+                <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">Provider guidance</h2>
+                <div className="mt-5 space-y-3">
+                  {providerNotes.map((note) => (
+                    <div key={note} className="rounded-[18px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/25 px-4 py-3 text-sm leading-7 text-[var(--text-secondary)]">
+                      {note}
                     </div>
+                  ))}
                 </div>
-            </header>
+              </div>
 
-            {/* Content */}
-            <main className="max-w-5xl mx-auto px-6 py-16 md:py-24">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="mb-20 text-center md:text-left"
+              <div className="rounded-[28px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-5 py-6">
+                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--text-muted)]">Quick Check</div>
+                <h2 className="mt-3 text-xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">Best practice for users</h2>
+                <ul className="mt-4 space-y-3 text-sm leading-7 text-[var(--text-secondary)]">
+                  <li>Tell users to keep sensitive keys in Workspace Settings only.</li>
+                  <li>Explain clearly whether a run is using shared quota or BYOK.</li>
+                  <li>Encourage users to delete unused keys from the same device when finished.</li>
+                </ul>
+                <a
+                  href="https://supabase.com/docs/guides/auth"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--brand)] transition-colors hover:text-[var(--brand-hover)]"
                 >
-                    <span className="text-[11px] font-mono tracking-[0.4em] uppercase text-emerald-500 mb-6 block font-bold">The Intelligence Protocol</span>
-                    <h1 className="text-5xl md:text-7xl font-bold text-[var(--text-primary)] mb-8 tracking-tighter leading-none">
-                        API <span className="text-[var(--brand)]">Documentation</span>
-                    </h1>
-                    <p className="text-[var(--text-secondary)] text-xl leading-relaxed max-w-2xl mx-auto md:mx-0">
-                        A developer's guide to AI providers, token utilization, and the Zero-Middleman security architecture.
-                    </p>
-                </motion.div>
-
-                <div className="space-y-24">
-                    {/* Section 1: API Security & Assurance (MOVED TO TOP) */}
-                    <motion.section
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="space-y-8"
-                    >
-                        <div className="flex items-center gap-4 text-[var(--text-primary)]">
-                            <div>
-                                <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] uppercase">Zero-Middleman Protocol</h2>
-                                <p className="text-[var(--text-muted)] text-sm">Pure client-side autonomy</p>
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="p-10 rounded-[2.5rem] bg-[var(--brand)]/[0.03] border border-[var(--brand)]/20 relative overflow-hidden group">
-                                <Lock className="absolute -bottom-6 -right-6 text-[var(--brand)]/10 group-hover:text-[var(--brand)]/20 transition-all duration-500" size={140} />
-                                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-6 relative z-10">Client-Side Vault</h3>
-                                <p className="text-[var(--text-secondary)] text-base leading-relaxed mb-8 relative z-10">
-                                    Pustakam operates as a <strong>standalone entity</strong>. Your cryptographic keys never touch external servers because we function entirely within your browser environment.
-                                </p>
-                                <ul className="space-y-5 relative z-10">
-                                    <li className="flex items-start gap-3 text-sm text-[var(--text-secondary)]">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] mt-2 shrink-0 shadow-[0_0_8px_var(--brand-glow)]" />
-                                        <span><strong>Direct Tunneling:</strong> Peer-to-peer browser-to-API communication.</span>
-                                    </li>
-                                    <li className="flex items-start gap-3 text-sm text-[var(--text-secondary)]">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] mt-2 shrink-0 shadow-[0_0_8px_var(--brand-glow)]" />
-                                        <span><strong>Local Persistence:</strong> Keys stored in local encrypted memory only.</span>
-                                    </li>
-                                    <li className="flex items-start gap-3 text-sm text-[var(--text-secondary)]">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] mt-2 shrink-0 shadow-[0_0_8px_var(--brand-glow)]" />
-                                        <span><strong>Full Purge:</strong> Instant wipe capability for all stored intelligence.</span>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div className="flex flex-col gap-6">
-                                <div className="p-8 rounded-[2rem] bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)] hover:border-[var(--brand)]/20 transition-all duration-500 group">
-                                    <h4 className="text-xs font-bold text-[var(--brand)] uppercase tracking-[0.2em] mb-4">Traffic Transparency</h4>
-                                    <p className="text-[var(--text-muted)] text-sm leading-relaxed">
-                                        Monitor the <strong>Network Stack (F12)</strong> during generation. You'll observe outbound traffic reaching only official endpoints like <code>api.z.ai</code> (Zhipu GLM).
-                                    </p>
-                                </div>
-                                <div className="p-8 rounded-[2rem] bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)] hover:border-[var(--brand)]/20 transition-all duration-500 group">
-                                    <h4 className="text-xs font-bold text-[var(--brand)] uppercase tracking-[0.2em] mb-4">Privacy Immutable</h4>
-                                    <p className="text-[var(--text-muted)] text-sm leading-relaxed">
-                                        <strong>End-to-End Privacy:</strong> Your creative output remains 100% local. We use anonymized analytics for performance, and encrypted account records for profile persistence - never at the cost of your intellectual privacy.
-                                    </p>
-                                </div>
-                                <div className="mt-auto p-4 rounded-2xl bg-[var(--brand)]/5 border border-[var(--brand)]/10">
-                                    <p className="text-[11px] text-[var(--brand)]/60 font-mono text-center italic tracking-wider">
-                                        "Architecture is the strongest form of security."
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.section>
-
-                    {/* Token Estimation Note */}
-                    <motion.section
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        className="p-10 rounded-[2.5rem] bg-blue-500/[0.03] border border-blue-500/20"
-                    >
-                        <h3 className="text-blue-400 text-xl font-bold mb-6">
-                            Token Economics
-                        </h3>
-                        <p className="text-[var(--text-secondary)] text-base leading-relaxed mb-8">
-                            For a <strong className="text-[var(--text-primary)]">30,000-word volume</strong>, context builds progressively.
-                            Each module incorporates preceding knowledge, resulting in <strong className="text-blue-400 italic">progressive context stacking</strong>:
-                        </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                            <div className="p-6 rounded-2xl bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)]">
-                                <p className="text-[var(--text-muted)] font-mono uppercase tracking-widest text-[10px] mb-2">Output Ceiling</p>
-                                <p className="text-[var(--text-primary)] font-bold text-3xl mb-1">~40,000</p>
-                                <p className="text-[var(--text-muted)] text-xs">Generated tokens for core content</p>
-                            </div>
-                            <div className="p-6 rounded-2xl bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)]">
-                                <p className="text-blue-400/40 font-mono uppercase tracking-widest text-[10px] mb-2">Input Cumulative</p>
-                                <p className="text-blue-400 font-bold text-3xl mb-1">~200,000</p>
-                                <p className="text-[var(--text-muted)] text-xs">Full stack context across 10 modules</p>
-                            </div>
-                        </div>
-                    </motion.section>
-
-                    {/* Providers & Use Cases sections follow with same styling... */}
-
-                    <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
-                        Pustakam runs on Zhipu GLM models via a secure server-side proxy. No API key setup is required  -  just sign in and start generating.
-                    </p>
-
-                    {/* Section 4: Model Strategy */}
-                    <section className="space-y-10">
-                        <div className="flex items-center gap-4 text-[var(--text-primary)]">
-                            <h2 className="text-3xl font-bold tracking-tight uppercase">Intelligence Strategy</h2>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="p-8 rounded-xl bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)] hover:border-blue-500/20 transition-all">
-                                <h4 className="text-xs font-bold text-blue-400 uppercase mb-4 tracking-widest">Fiction & Narrative</h4>
-                                <p className="text-[14px] text-[var(--text-muted)] leading-relaxed">
-                                    Prioritize <strong>GLM-4.7</strong> or <strong>Mistral Large</strong> for deep world-building and characteristic dialogue flow.
-                                </p>
-                            </div>
-                            <div className="p-8 rounded-xl bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)] hover:border-emerald-500/20 transition-all">
-                                <h4 className="text-xs font-bold text-emerald-400 uppercase mb-4 tracking-widest">Technical & Deep Logic</h4>
-                                <p className="text-[14px] text-[var(--text-muted)] leading-relaxed">
-                                    Deploy <strong>Gemma 3 27B</strong> or <strong>GPT-120B</strong> for rigorous structural accuracy and system architecture.
-                                </p>
-                            </div>
-                            <div className="p-8 rounded-xl bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)] hover:border-cyan-500/20 transition-all">
-                                <h4 className="text-xs font-bold text-cyan-400 uppercase mb-4 tracking-widest">Multilingual King</h4>
-                                <p className="text-[14px] text-[var(--text-muted)] leading-relaxed">
-                                    Use <strong>Qwen-3-235B</strong> for the absolute peak of Marathi, Hindi, and regional dialect reasoning.
-                                </p>
-                            </div>
-                            <div className="p-8 rounded-xl bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)] hover:border-purple-500/20 transition-all">
-                                <h4 className="text-xs font-bold text-purple-400 uppercase mb-4 tracking-widest">Structured Pedagogy</h4>
-                                <p className="text-[14px] text-[var(--text-muted)] leading-relaxed">
-                                    Select <strong>Gemini 2.0</strong> or <strong>Llama 3.3</strong> for high-fidelity educational frameworks and logic.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section className="pt-12 border-t border-[var(--border-subtle)] text-center">
-                        <p className="text-[var(--text-muted)] text-xs font-mono tracking-widest uppercase">
-                            Built by Tanmay Kalbande · hello@tanmaysk.in
-                        </p>
-                    </section>
-                </div>
-            </main>
-        </motion.div>
-    );
+                  External auth reference
+                  <ExternalLink size={14} />
+                </a>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </motion.div>
+  );
 };
 
 export default APIDocsPage;

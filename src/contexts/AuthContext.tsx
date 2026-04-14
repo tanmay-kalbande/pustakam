@@ -71,7 +71,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 setLoadingTimedOut(true);
                 setIsLoading(false);
             }
-        }, 5000);
+        }, 10000);
 
         const initAuth = async () => {
             try {
@@ -103,7 +103,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
                 if (!mounted) return;
-                if (event === 'INITIAL_SESSION') return;
 
                 setSession(session);
                 setUser(session?.user ?? null);

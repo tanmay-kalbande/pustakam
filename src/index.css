@@ -2559,6 +2559,26 @@ html.light .header-with-fade::after {
     --workspace-soft: rgba(255, 255, 255, 0.03);
     --workspace-line: rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
+    min-height: 100%;
+}
+
+.light .workspace-shell {
+    --bg-base: #f5f2eb;
+    --bg-surface: rgba(255, 255, 255, 0.86);
+    --bg-elevated: rgba(255, 255, 255, 0.96);
+    --border-subtle: rgba(17, 24, 39, 0.08);
+    --border-default: rgba(17, 24, 39, 0.14);
+    --text-primary: #151515;
+    --text-secondary: #4f4a42;
+    --text-muted: #8a8378;
+    --brand: #d1a86f;
+    --brand-hover: #c89e61;
+    --brand-dim: #b98d53;
+    --workspace-ink: #ffffff;
+    --workspace-panel: rgba(255, 255, 255, 0.78);
+    --workspace-panel-strong: rgba(255, 255, 255, 0.92);
+    --workspace-soft: rgba(17, 24, 39, 0.03);
+    --workspace-line: rgba(17, 24, 39, 0.08);
 }
 
 .workspace-shell .btn {
@@ -2589,6 +2609,11 @@ html.light .header-with-fade::after {
     color: var(--text-primary);
 }
 
+.light .workspace-shell .btn-secondary:hover {
+    background: rgba(17, 24, 39, 0.04);
+    border-color: rgba(17, 24, 39, 0.12);
+}
+
 .workspace-shell .btn-ghost {
     color: var(--text-muted);
 }
@@ -2604,6 +2629,10 @@ html.light .header-with-fade::after {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     box-shadow: none;
+}
+
+.light .workspace-shell .glass-input {
+    background: rgba(255, 255, 255, 0.78);
 }
 
 .workspace-shell .glass-input:focus {
@@ -2629,6 +2658,9 @@ html.light .header-with-fade::after {
 
 .workspace-shell .main-content {
     position: relative;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .workspace-shell .main-content::before {
@@ -2640,6 +2672,12 @@ html.light .header-with-fade::after {
       linear-gradient(180deg, rgba(0, 0, 0, 0.22), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.22)),
       radial-gradient(circle at top center, rgba(255, 255, 255, 0.045), transparent 48%);
     z-index: 0;
+}
+
+.light .workspace-shell .main-content::before {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.2)),
+      radial-gradient(circle at top center, rgba(209, 168, 111, 0.08), transparent 48%);
 }
 
 .workspace-topbar {
@@ -2665,6 +2703,11 @@ html.light .header-with-fade::after {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+}
+
+.light .workspace-topbar__inner {
+    background: rgba(255, 255, 255, 0.86);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
 }
 
 .workspace-topbar__label {
@@ -2696,6 +2739,10 @@ html.light .header-with-fade::after {
     padding: 6px;
 }
 
+.light .workspace-topbar__section {
+    background: rgba(17, 24, 39, 0.02);
+}
+
 .workspace-topbar__ghost,
 .workspace-topbar__pill {
     display: inline-flex;
@@ -2717,9 +2764,18 @@ html.light .header-with-fade::after {
     background: rgba(255, 255, 255, 0.035);
 }
 
+.light .workspace-topbar__ghost:hover,
+.light .workspace-topbar__pill:hover {
+    background: rgba(17, 24, 39, 0.04);
+}
+
 .workspace-topbar__pill {
     border-color: var(--workspace-line);
     background: rgba(255, 255, 255, 0.025);
+}
+
+.light .workspace-topbar__pill {
+    background: rgba(17, 24, 39, 0.02);
 }
 
 .workspace-panel {
@@ -2731,10 +2787,20 @@ html.light .header-with-fade::after {
     box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
 }
 
+.light .workspace-panel {
+    background: rgba(255, 255, 255, 0.84);
+    box-shadow: 0 20px 42px rgba(15, 23, 42, 0.08);
+}
+
 .workspace-card {
     border: 1px solid var(--workspace-line);
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.02);
+}
+
+.light .workspace-card,
+.light .workspace-card-muted {
+    background: rgba(255, 255, 255, 0.72);
 }
 
 .workspace-card-muted {
