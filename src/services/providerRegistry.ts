@@ -326,6 +326,7 @@ export const PROVIDER_REGISTRY: Record<ProviderID, ProviderConfig> = {
     supportsProxy: false,
     supportsBYOK: true,
     models: [
+      { id: 'openrouter/elephant-alpha', name: 'Elephant Alpha', contextWindow: 128000, maxOutputTokens: 8192 },
       { id: 'nvidia/nemotron-3-super-120b-a12b:free', name: 'Nemotron 3 Super 120B (Free)', contextWindow: 131072, maxOutputTokens: 16384 },
       { id: 'z-ai/glm-4.5-air:free', name: 'GLM-4.5 Air (Free)', contextWindow: 128000, maxOutputTokens: 8192 },
       { id: 'minimax/minimax-m2.5:free', name: 'MiniMax M2.5 (Free)', contextWindow: 1048576, maxOutputTokens: 16384 },
