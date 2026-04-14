@@ -451,10 +451,7 @@ const HomeView = ({
     ?? settings.selectedModel;
 
   return (
-    <div
-      className="relative w-full min-h-full bg-[var(--bg-base)] px-6 pb-24 pt-24"
-      style={{ background: 'var(--bg-base)' }}
-    >
+    <div className="relative w-full min-h-full px-6 pb-24 pt-24">
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
           <div>
@@ -790,7 +787,7 @@ const BookListGrid = ({
   const inProgressCount = books.filter(book => ['planning', 'generating_roadmap', 'roadmap_completed', 'generating_content', 'assembling'].includes(book.status)).length;
 
   return (
-    <div className="min-h-full bg-[var(--bg-base)] pt-24">
+    <div className="min-h-full pt-24">
       <div className="mx-auto w-full max-w-6xl px-4 pb-12 md:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
