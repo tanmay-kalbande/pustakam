@@ -808,7 +808,7 @@ function App() {
             </>
           ) : (
             /* B. Application Main Path */
-            <>
+            <div className="workspace-shell">
               <TopHeader
                 settings={settings}
                 books={books}
@@ -947,7 +947,7 @@ function App() {
                   setShowWelcomeModal(true);
                 }}
               />
-            </>
+            </div>
           )}
         </>
       )}
@@ -972,7 +972,7 @@ function App() {
         const studyBook = books.find(b => b.id === studyModeBookId);
         if (!studyBook || studyBook.status !== 'completed') return null;
         return (
-          <div className="fixed inset-0 z-[200]" style={{ background: '#050505' }}>
+          <div className="workspace-shell fixed inset-0 z-[200]" style={{ background: '#050505' }}>
             <NebulaBackground theme={theme} quality={isMobile ? 'low' : 'medium'} />
             <div className="relative z-10 flex h-full flex-col">
               <main id="main-scroll-area" className="main-content">

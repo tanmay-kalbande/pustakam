@@ -36,45 +36,79 @@ export function BookAnalytics({ book }: BookAnalyticsProps) {
     downloadFile(studyMaterials.summary, `${book.title.replace(/ /g, '_')}_summary.md`, 'text/markdown;charset=utf-8');
   };
 
-  const complexityColor = {
-    beginner: 'text-green-500',
-    intermediate: 'text-yellow-500', 
-    advanced: 'text-red-500'
+  const complexityLabel = {
+    beginner: 'Beginner',
+    intermediate: 'Intermediate',
+    advanced: 'Advanced',
   };
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* Main Analytics */}
-      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <BarChart3 className="w-5 h-5 text-amber-500" />
-          <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">Book Analytics</h3>
+      <div className="workspace-panel p-6">
+        <div className="mb-6 flex items-center gap-3">
+          <BarChart3 className="h-5 w-5 text-[var(--brand)]" />
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Analytics</p>
+            <h3 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">Book overview</h3>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="text-center"><div className="flex items-center justify-center w-12 h-12 bg-amber-500/10 rounded-lg mb-2 mx-auto"><Hash className="w-6 h-6 text-amber-500" /></div><div className="text-2xl font-bold">{analytics.totalWords.toLocaleString()}</div><div className="text-sm text-gray-400">Total Words</div></div>
-          <div className="text-center"><div className="flex items-center justify-center w-12 h-12 bg-green-500/10 rounded-lg mb-2 mx-auto"><Clock className="w-6 h-6 text-green-500" /></div><div className="text-2xl font-bold">{analytics.readingTime}</div><div className="text-sm text-gray-400">Reading Time</div></div>
-          <div className="text-center"><div className="flex items-center justify-center w-12 h-12 bg-purple-500/10 rounded-lg mb-2 mx-auto"><Brain className={`w-6 h-6 ${complexityColor[analytics.complexity]}`} /></div><div className={`text-2xl font-bold ${complexityColor[analytics.complexity]} capitalize`}>{analytics.complexity}</div><div className="text-sm text-gray-400">Complexity</div></div>
-          <div className="text-center"><div className="flex items-center justify-center w-12 h-12 bg-amber-500/10 rounded-lg mb-2 mx-auto"><BookOpen className="w-6 h-6 text-amber-500" /></div><div className="text-2xl font-bold">{book.modules.length}</div><div className="text-sm text-gray-400">Modules</div></div>
-        </div>
-      </div>
-
-      {/* Key Topics */}
-      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-6">
-        <div className="flex items-center gap-3 mb-4"><Target className="w-5 h-5 text-purple-500" /><h4 className="text-lg font-semibold">Key Topics</h4></div>
-        <div className="flex flex-wrap gap-2">
-          {analytics.topics.map((topic, index) => (
-            <span key={index} className="px-3 py-1 bg-purple-500/10 text-purple-400 rounded-full text-sm font-medium">{topic}</span>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            { label: 'Total words', value: analytics.totalWords.toLocaleString(), icon: Hash },
+            { label: 'Reading time', value: analytics.readingTime, icon: Clock },
+            { label: 'Complexity', value: complexityLabel[analytics.complexity], icon: Brain },
+            { label: 'Chapters', value: book.modules.length, icon: BookOpen },
+          ].map(({ label, value, icon: Icon }) => (
+            <div key={label} className="workspace-card p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{label}</p>
+                <Icon className="h-4 w-4 text-[var(--brand)]" />
+              </div>
+              <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">{value}</p>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Study Materials */}
-      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-6">
-        <div className="flex items-center gap-3 mb-4"><FileText className="w-5 h-5 text-green-500" /><h4 className="text-lg font-semibold">Study Materials</h4></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button onClick={downloadProgressTracker} className="flex items-center gap-3 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg hover:border-green-500 transition-colors group"><div className="w-10 h-10 flex items-center justify-center bg-green-500/10 rounded-lg"><Download className="w-5 h-5 text-green-500" /></div><div className="text-left"><div className="font-semibold group-hover:text-green-400">Progress Tracker</div><div className="text-sm text-gray-400">Checklist for modules</div></div></button>
-          <button onClick={downloadStudySummary} className="flex items-center gap-3 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg hover:border-amber-500 transition-colors group"><div className="w-10 h-10 flex items-center justify-center bg-amber-500/10 rounded-lg"><Download className="w-5 h-5 text-amber-500" /></div><div className="text-left"><div className="font-semibold group-hover:text-amber-400">Study Summary</div><div className="text-sm text-gray-400">Key points & objectives</div></div></button>
+      <div className="workspace-panel p-6">
+        <div className="mb-4 flex items-center gap-3">
+          <Target className="h-5 w-5 text-[var(--brand)]" />
+          <h4 className="text-lg font-semibold text-[var(--text-primary)]">Key topics</h4>
+        </div>
+        <div className="flex flex-wrap gap-2.5">
+          {analytics.topics.map((topic, index) => (
+            <span key={index} className="rounded-full border border-[var(--workspace-line)] bg-white/[0.02] px-3 py-1.5 text-sm text-[var(--text-secondary)]">
+              {topic}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="workspace-panel p-6">
+        <div className="mb-4 flex items-center gap-3">
+          <FileText className="h-5 w-5 text-[var(--brand)]" />
+          <h4 className="text-lg font-semibold text-[var(--text-primary)]">Study materials</h4>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button onClick={downloadProgressTracker} className="workspace-card flex items-center gap-3 p-4 text-left transition-colors hover:bg-white/[0.04]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--workspace-line)] bg-white/[0.02]">
+              <Download className="h-4 w-4 text-[var(--brand)]" />
+            </div>
+            <div>
+              <div className="font-semibold text-[var(--text-primary)]">Progress tracker</div>
+              <div className="mt-1 text-sm text-[var(--text-secondary)]">Checklist for chapters and completion</div>
+            </div>
+          </button>
+          <button onClick={downloadStudySummary} className="workspace-card flex items-center gap-3 p-4 text-left transition-colors hover:bg-white/[0.04]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--workspace-line)] bg-white/[0.02]">
+              <Download className="h-4 w-4 text-[var(--brand)]" />
+            </div>
+            <div>
+              <div className="font-semibold text-[var(--text-primary)]">Study summary</div>
+              <div className="mt-1 text-sm text-[var(--text-secondary)]">Key points and objectives</div>
+            </div>
+          </button>
         </div>
       </div>
     </div>

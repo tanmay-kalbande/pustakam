@@ -2541,6 +2541,264 @@ html.light .header-with-fade::after {
     pointer-events: none;
 }
 
+.workspace-shell {
+    --bg-base: #080808;
+    --bg-surface: rgba(15, 15, 15, 0.92);
+    --bg-elevated: rgba(21, 21, 21, 0.98);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-default: rgba(255, 255, 255, 0.14);
+    --text-primary: #f3f1ec;
+    --text-secondary: #b2aea4;
+    --text-muted: #777267;
+    --brand: #f1c98b;
+    --brand-hover: #f5d7a8;
+    --brand-dim: #c8a169;
+    --workspace-ink: #050505;
+    --workspace-panel: #101010;
+    --workspace-panel-strong: #151515;
+    --workspace-soft: rgba(255, 255, 255, 0.03);
+    --workspace-line: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+.workspace-shell .btn {
+    border-radius: 10px;
+    font-size: 12px;
+    letter-spacing: 0.01em;
+}
+
+.workspace-shell .btn-primary {
+    background: var(--brand);
+    color: #111111;
+    border: 1px solid transparent;
+}
+
+.workspace-shell .btn-primary:hover {
+    background: var(--brand-hover);
+}
+
+.workspace-shell .btn-secondary {
+    background: var(--workspace-soft);
+    border: 1px solid var(--workspace-line);
+    color: var(--text-secondary);
+}
+
+.workspace-shell .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: var(--text-primary);
+}
+
+.workspace-shell .btn-ghost {
+    color: var(--text-muted);
+}
+
+.workspace-shell .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+}
+
+.workspace-shell .glass-input {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--workspace-line);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: none;
+}
+
+.workspace-shell .glass-input:focus {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(241, 201, 139, 0.34);
+    box-shadow: 0 0 0 1px rgba(241, 201, 139, 0.1);
+}
+
+.workspace-shell .home-options-panel,
+.workspace-shell .card,
+.workspace-shell .card-elevated,
+.workspace-shell .book-card {
+    background: var(--workspace-panel);
+    border: 1px solid var(--workspace-line);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.24);
+}
+
+.workspace-shell .home-options-panel {
+    background-image: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.workspace-shell .main-content {
+    position: relative;
+}
+
+.workspace-shell .main-content::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.22), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.22)),
+      radial-gradient(circle at top center, rgba(255, 255, 255, 0.045), transparent 48%);
+    z-index: 0;
+}
+
+.workspace-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    padding: 14px 16px 0;
+    pointer-events: none;
+}
+
+.workspace-topbar__inner {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 62px;
+    padding: 0 16px;
+    border: 1px solid var(--workspace-line);
+    border-radius: 18px;
+    background: rgba(9, 9, 9, 0.84);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+}
+
+.workspace-topbar__label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.workspace-topbar__title {
+    display: block;
+    margin-top: 2px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.workspace-topbar__section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--workspace-line);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 6px;
+}
+
+.workspace-topbar__ghost,
+.workspace-topbar__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    transition: all 0.18s ease;
+}
+
+.workspace-topbar__ghost:hover,
+.workspace-topbar__pill:hover {
+    color: var(--text-primary);
+    border-color: var(--workspace-line);
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.workspace-topbar__pill {
+    border-color: var(--workspace-line);
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.workspace-panel {
+    border: 1px solid var(--workspace-line);
+    border-radius: 20px;
+    background: rgba(11, 11, 11, 0.84);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
+}
+
+.workspace-card {
+    border: 1px solid var(--workspace-line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.workspace-card-muted {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.workspace-kicker {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.workspace-rule {
+    height: 1px;
+    background: var(--workspace-line);
+}
+
+.workspace-stat {
+    border: 1px solid var(--workspace-line);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.015);
+    padding: 14px 16px;
+}
+
+.workspace-stat__label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.workspace-stat__value {
+    display: block;
+    margin-top: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+.workspace-stat__hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 767px) {
+    .workspace-topbar {
+      padding: 10px 10px 0;
+    }
+
+    .workspace-topbar__inner {
+      min-height: 56px;
+      padding: 0 12px;
+      border-radius: 14px;
+    }
+}
+
 .glass-input {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(16px);

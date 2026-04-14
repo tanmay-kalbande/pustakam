@@ -306,7 +306,7 @@ export function ReadingMode({
 
   if (!currentModule) {
     return (
-      <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-8 text-sm text-[var(--text-secondary)]">
+      <div className="workspace-panel p-8 text-sm text-[var(--text-secondary)]">
         No module content is available for this book yet.
       </div>
     );
@@ -350,11 +350,11 @@ export function ReadingMode({
 
       {/* Reader container */}
       <div
-        className="reading-container overflow-hidden rounded-[26px] border border-[var(--border-subtle)] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
-        style={{ backgroundColor: currentTheme.bg, color: currentTheme.text, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+        className="reading-container overflow-hidden rounded-[20px] border border-[var(--workspace-line)] shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+        style={{ backgroundColor: currentTheme.contentBg, color: currentTheme.text }}
       >
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-4 py-3" style={{ backgroundColor: currentTheme.bg }}>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--workspace-line)] px-4 py-3" style={{ backgroundColor: currentTheme.contentBg }}>
           <div className="flex flex-wrap items-center gap-3">
             {/* Theme switcher */}
             <div className="flex items-center gap-1 rounded-full p-1" style={{ backgroundColor: currentTheme.contentBg }}>
@@ -440,15 +440,15 @@ export function ReadingMode({
         {/* Content */}
         <div className="px-4 py-5 sm:px-7">
           {readerSurface === 'module' ? (
-            <div className="mb-5 rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] p-4">
+            <div className="mb-5 rounded-[18px] border border-[var(--workspace-line)] bg-white/[0.02] p-4">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border border-[var(--border-subtle)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                    <span className="rounded-full border border-[var(--workspace-line)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                       Chapter {selectedModuleIndex + 1} of {orderedModules.length}
                     </span>
                     {roadmapModule?.estimatedTime ? (
-                      <span className="rounded-full border border-[var(--border-subtle)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                      <span className="rounded-full border border-[var(--workspace-line)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                         {roadmapModule.estimatedTime}
                       </span>
                     ) : null}
@@ -463,7 +463,7 @@ export function ReadingMode({
               {roadmapModule?.objectives?.length ? (
                 <div className="mt-4 grid gap-2.5 md:grid-cols-2">
                   {roadmapModule.objectives.slice(0, 4).map(objective => (
-                    <div key={objective} className="rounded-[18px] border border-[var(--border-subtle)] bg-[var(--bg-base)]/90 px-3.5 py-3 text-sm leading-6 text-[var(--text-secondary)]">
+                    <div key={objective} className="rounded-[16px] border border-[var(--workspace-line)] bg-white/[0.02] px-3.5 py-3 text-sm leading-6 text-[var(--text-secondary)]">
                       <div className="flex items-start gap-3">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--brand)]" />
                         <span>{objective}</span>
@@ -474,14 +474,14 @@ export function ReadingMode({
               ) : null}
             </div>
           ) : (
-            <div className="mb-5 rounded-[22px] border border-[var(--border-subtle)] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-4 text-sm leading-7 text-[var(--text-secondary)]">
-              Full book view — scroll through the complete content.
+            <div className="mb-5 rounded-[18px] border border-[var(--workspace-line)] bg-white/[0.02] p-4 text-sm leading-7 text-[var(--text-secondary)]">
+              Full book view keeps the entire draft in one scrollable surface.
             </div>
           )}
 
           {readerSurface === 'full_book' && isEditing ? (
             <textarea
-              className="w-full rounded-[28px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 font-mono text-sm leading-relaxed text-[var(--text-primary)] outline-none"
+              className="w-full rounded-[20px] border border-[var(--workspace-line)] bg-white/[0.02] p-5 font-mono text-sm leading-relaxed text-[var(--text-primary)] outline-none"
               value={editedContent}
               onChange={event => onContentChange(event.target.value)}
               style={{ minHeight: '70vh', fontSize: `${settings.fontSize - 2}px` }}

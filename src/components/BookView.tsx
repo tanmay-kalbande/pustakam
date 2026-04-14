@@ -1,4 +1,4 @@
-// src/components/BookView.tsx
+﻿// src/components/BookView.tsx
 import React, { Suspense, lazy, useEffect, ReactNode, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -430,33 +430,39 @@ const HomeView = ({
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,rgba(255,255,255,0.02),transparent_70%)] -z-10" />
       
-      {/* Spacer for smooth vertical centering transition */}
-      <div 
-        className="w-full transition-all duration-1000"
-        style={{ height: showAdvanced ? '8rem' : '22vh', transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)' }}
-      />
+      <div className="w-full h-24 shrink-0 md:h-28" />
 
-      <div className="w-full max-w-2xl mx-auto animate-subtle-fade relative z-10 shrink-0 pb-32">
-        {/* Badge + logo + headline */}
-        <div className="mb-10 text-center flex flex-col items-center">
-          <div
-            className={`w-11 h-11 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center shadow-lg mb-6 transition-all duration-200 ${
-              showAdvanced ? 'opacity-0 scale-95 pointer-events-none -mb-1' : 'opacity-100 scale-100'
-            }`}
-            aria-hidden={showAdvanced}
-          >
-            <Sparkles size={20} className="text-[var(--brand)] opacity-80" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-[1.1]">
-            Build Better<br />
-            <span className="text-[var(--text-secondary)]">Learning Books</span>
+      <div className="relative z-10 mx-auto w-full max-w-6xl shrink-0 pb-24">
+        <div className="mb-10">
+          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">
+            Internal Builder
+          </p>
+          <h1 className="max-w-4xl text-4xl font-bold tracking-[-0.05em] text-[var(--text-primary)] md:text-6xl md:leading-[0.98]">
+            Start with one topic.
+            <span className="mt-2 block text-[var(--text-secondary)]">We map the book, then write it.</span>
           </h1>
+          <p className="mt-5 max-w-3xl text-sm leading-7 text-[var(--text-secondary)] md:text-[15px]">
+            Type the topic, tighten the brief, and generate the roadmap first. Ten chapters. Around 30,000 words. One controlled run.
+          </p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: 'Default path', value: 'GLM-5', hint: 'Shared long-form engine' },
+              { label: 'Typical scope', value: '10 chapters', hint: 'Roadmap before writing' },
+              { label: 'Target output', value: '30,000 words', hint: 'Full learning book' },
+            ].map((item) => (
+              <div key={item.label} className="workspace-card px-4 py-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</p>
+                <p className="mt-2 text-lg font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{item.value}</p>
+                <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">{item.hint}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
 
 
         {/* Input bar */}
-        <div className="relative flex items-center w-full glass-input shadow-2xl rounded-full p-1.5 pl-6 transition-all duration-300">
+        <div className="relative w-full overflow-hidden rounded-[26px] border border-[var(--workspace-line)] bg-white/[0.02] shadow-[0_24px_48px_rgba(0,0,0,0.2)]">
           <textarea
             value={formData.goal}
             onChange={e => {
@@ -491,91 +497,103 @@ const HomeView = ({
                 }
               }
             }}
-            placeholder="Describe the book you want to create..."
-            className="flex-1 bg-transparent border-none outline-none text-[var(--text-primary)] placeholder-[var(--text-muted)] text-base resize-none pt-2.5 pb-2"
+            placeholder="What should this book teach?"
+            className="w-full resize-none border-none bg-transparent px-5 py-5 text-[15px] leading-7 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
             rows={1}
-            style={{ minHeight: '28px', maxHeight: '200px' }}
+            style={{ minHeight: '148px', maxHeight: '260px' }}
           />
-          <button
-            onClick={() => { if (!showAdvanced) setShowAdvanced(true); handleEnhanceWithAI(); }}
-            disabled={!formData.goal.trim() || isEnhancing}
-            className="shrink-0 btn btn-primary h-9 px-4 rounded-full text-xs"
-            title="Enhance prompt with AI"
-          >
-            {isEnhancing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{isEnhancing ? 'Refining' : 'Enhance'}</span>
-          </button>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--workspace-line)] px-4 py-3">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
+              <span>Shift + Enter for line breaks</span>
+              <span className="h-1 w-1 rounded-full bg-[var(--workspace-line)]" />
+              <span>Roadmap comes before the chapter run</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => { if (!showAdvanced) setShowAdvanced(true); handleEnhanceWithAI(); }}
+                disabled={!formData.goal.trim() || isEnhancing}
+                className="btn btn-secondary px-4 py-2"
+                title="Refine prompt with AI"
+              >
+                {isEnhancing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                <span>{isEnhancing ? 'Refining brief' : 'Refine prompt'}</span>
+              </button>
+              <button
+                onClick={() => canGenerate ? handleCreateRoadmap(formData) : onOpenSettings()}
+                disabled={!formData.goal.trim() || localIsGenerating}
+                className="btn btn-primary px-4 py-2.5"
+              >
+                {localIsGenerating ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Building roadmap</>
+                ) : (
+                  <><Sparkles className="h-4 w-4" /> Generate roadmap</>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
 
         {enhanceError && (
-          <div className="mt-4 max-w-[620px] mx-auto animate-fade-in-up">
+          <div className="mt-4 animate-fade-in-up">
             <HighDemandNotice compact />
           </div>
         )}
 
-        {/* Action chips */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mt-6 max-w-[620px] mx-auto">
-          <button onClick={() => setShowAdvanced(!showAdvanced)} className="btn btn-secondary px-4 py-1.5 rounded-full text-xs">
-            <List size={14} /> Options
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <button onClick={() => setShowAdvanced(!showAdvanced)} className="btn btn-secondary px-4 py-2 text-xs">
+            <List size={14} /> Build Settings
             <ChevronDown size={12} className={`transition-transform opacity-50 ${showAdvanced ? 'rotate-180' : ''}`} />
           </button>
           {bookCount > 0 && (
-            <button onClick={onShowList} className="btn btn-secondary px-4 py-1.5 rounded-full text-xs">
-              <BookOpen size={14} /> My Library <span className="opacity-40">({bookCount})</span>
+            <button onClick={onShowList} className="btn btn-secondary px-4 py-2 text-xs">
+              <BookOpen size={14} /> Open Library <span className="opacity-40">({bookCount})</span>
             </button>
           )}
         </div>
 
-        {/* Quota indicator */}
         {quotaStatus && (
-          <div className="flex justify-center mt-4">
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-medium transition-all ${
-              quotaStatus.remaining > 0
-                ? 'border-[var(--brand)]/20 bg-[var(--brand)]/5 text-[var(--brand)]'
-                : quotaStatus.hasBYOK
-                  ? 'border-green-500/20 bg-green-500/5 text-green-500'
-                  : 'border-amber-500/30 bg-amber-500/5 text-amber-500'
-            }`}>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <div className="workspace-card inline-flex items-center gap-2 px-4 py-3 text-sm text-[var(--text-secondary)]">
               {quotaStatus.remaining > 0 ? (
                 <>
-                  <Zap size={12} />
+                  <Zap size={14} className="text-[var(--brand)]" />
                   <span>{quotaStatus.remaining} free {quotaStatus.remaining === 1 ? 'book' : 'books'} remaining</span>
                 </>
               ) : quotaStatus.hasBYOK ? (
                 <>
-                  <Key size={12} />
-                  <span>Using your API key</span>
+                  <Key size={14} className="text-[var(--brand)]" />
+                  <span>Using your own API key</span>
                 </>
               ) : (
                 <>
-                  <AlertTriangle size={12} />
+                  <AlertTriangle size={14} className="text-amber-400" />
                   <span>Free quota used</span>
-                  <button
-                    onClick={onOpenSettings}
-                    className="underline hover:no-underline font-bold ml-1"
-                  >
-                    Add API key →
-                  </button>
                 </>
               )}
             </div>
+            {!quotaStatus.hasBYOK && !quotaStatus.remaining && (
+              <button onClick={onOpenSettings} className="btn btn-secondary px-4 py-2 text-xs">
+                <Key size={14} />
+                Add API key
+              </button>
+            )}
           </div>
         )}
 
         {/* Advanced options */}
         {showAdvanced && (
           <div
-            className="mt-6 p-6 glass-input home-options-panel rounded-[24px] shadow-xl"
+            className="mt-6 p-6 home-options-panel rounded-[24px]"
             style={{ animation: 'dropdownSlideIn 0.2s cubic-bezier(0.16,1,0.3,1)', transformOrigin: 'top center' }}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Target Audience</label>
+                <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Audience</label>
                 <input
                   type="text"
                   value={formData.targetAudience}
                   onChange={e => setFormData(p => ({ ...p, targetAudience: e.target.value }))}
-                  placeholder="Beginners, Professionals..."
+                  placeholder="Beginners, operators, analysts..."
                   className="w-full h-10 glass-input rounded-md px-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-all shadow-sm"
                 />
               </div>
@@ -594,11 +612,11 @@ const HomeView = ({
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Context & Goals (Optional)</label>
+              <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Extra Context</label>
               <textarea
                 value={formData.reasoning}
                 onChange={e => setFormData(p => ({ ...p, reasoning: e.target.value }))}
-                placeholder="What should the reader achieve?"
+                placeholder="What should the reader be able to do when they finish?"
                 className="w-full glass-input rounded-md p-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none resize-none transition-all"
                 rows={3}
               />
@@ -659,12 +677,12 @@ const HomeView = ({
               <button
                 onClick={() => canGenerate ? handleCreateRoadmap(formData) : onOpenSettings()}
                 disabled={!formData.goal.trim() || localIsGenerating}
-                className="w-full h-12 bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] hover:brightness-110 active:scale-[0.98] text-black font-black uppercase tracking-[0.15em] text-xs rounded-xl shadow-[0_4px_20px_rgba(254,205,140,0.2)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="btn btn-primary w-full justify-center py-3"
               >
                 {localIsGenerating ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> Generating Roadmap…</>
+                  <><Loader2 className="w-5 h-5 animate-spin" /> Building roadmap</>
                 ) : (
-                  <><Sparkles className="w-5 h-5" /> Generate Book Roadmap</>
+                  <><Sparkles className="w-5 h-5" /> Generate roadmap</>
                 )}
               </button>
             </div>
@@ -701,78 +719,135 @@ const BookListGrid = ({
     return Book;
   };
 
-  const filtered = books.filter(b => b.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filtered = books
+    .filter(b => `${b.title} ${b.goal}`.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  const featuredBook = filtered[0] || null;
+  const completedCount = books.filter(book => book.status === 'completed').length;
+  const inProgressCount = books.filter(book => ['planning', 'generating_roadmap', 'roadmap_completed', 'generating_content', 'assembling'].includes(book.status)).length;
 
   return (
-    <div className="min-h-full flex flex-col bg-[var(--bg-base)] pt-16">
-      <div className="flex-shrink-0 w-full sticky top-16 z-40 bg-[var(--bg-base)]/80 pb-3 pt-1 px-8 lg:px-12 backdrop-blur-md border-b border-[var(--border-subtle)]">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div className="min-h-full bg-[var(--bg-base)] pt-24">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-12 md:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="flex items-baseline gap-3">
-              <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Your Bookshelf</h2>
-              <p className="text-sm text-[var(--text-secondary)]">{books.length} {books.length === 1 ? 'project' : 'projects'}</p>
-            </div>
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Library</p>
+            <h2 className="text-3xl font-bold tracking-[-0.05em] text-[var(--text-primary)] md:text-5xl">Your books</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">
+              Open any draft, review the finished exports, or start another run from the builder.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-              <input type="text" placeholder="Search books..." value={searchQuery}
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+              <input
+                type="text"
+                placeholder="Search title or topic"
+                value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                className="w-52 rounded-full glass-input pl-10 pr-4 py-1.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all focus:w-60 focus:outline-none" />
+                className="glass-input h-11 w-64 rounded-full pl-10 pr-4 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
+              />
             </div>
-            <button onClick={() => setShowListInMain(false)} className="btn btn-secondary px-4 py-1.5 rounded-full text-xs">
-              <ArrowLeft className="w-3.5 h-3.5" /> Back
+            <button onClick={() => setShowListInMain(false)} className="btn btn-secondary px-4 py-2 text-xs">
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Builder
             </button>
           </div>
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="w-full max-w-[1400px] mx-auto px-8 lg:px-12 pt-6 pb-10">
-          {filtered.length === 0 ? (
-            <div className="text-center py-20 bg-[var(--bg-surface)] rounded-lg border border-[var(--border-subtle)] border-dashed">
-              <div className="w-14 h-14 mx-auto mb-5 bg-[var(--bg-base)] rounded-full flex items-center justify-center border border-[var(--border-subtle)]">
-                <BookOpen className="w-6 h-6 text-[var(--text-muted)]" />
+        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_320px]">
+          <div className="workspace-panel p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Featured</p>
+                <h3 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
+                  {featuredBook ? featuredBook.title : 'No matching books'}
+                </h3>
               </div>
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">{searchQuery ? 'No books found' : 'Empty Bookshelf'}</h3>
-              <p className="text-[var(--text-secondary)] mb-6 max-w-xs mx-auto text-sm">
-                {searchQuery ? 'Try adjusting your search terms.' : 'Create your first professional learning book in minutes.'}
+              {featuredBook ? getStatusIcon(featuredBook.status) : null}
+            </div>
+            {featuredBook ? (
+              <>
+                <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">{featuredBook.goal}</p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  {[
+                    { label: 'Status', value: STATUS_LABELS[featuredBook.status] },
+                    { label: 'Updated', value: new Date(featuredBook.updatedAt).toLocaleDateString() },
+                    { label: 'Words', value: `${(featuredBook.modules.reduce((a, m) => a + (m.wordCount || 0), 0) || featuredBook.totalWords || 0).toLocaleString()}` },
+                  ].map((item) => (
+                    <div key={item.label} className="workspace-card px-4 py-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</p>
+                      <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6">
+                  <GradientProgressBar progress={Math.min(100, Math.round(featuredBook.progress || 0))} />
+                </div>
+              </>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-dashed border-[var(--workspace-line)] px-4 py-6 text-sm text-[var(--text-secondary)]">
+                Nothing matches that search yet.
+              </div>
+            )}
+          </div>
+
+          <div className="workspace-panel p-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Overview</p>
+            <div className="mt-4 grid gap-3">
+              {[
+                { label: 'Total books', value: books.length },
+                { label: 'Completed', value: completedCount },
+                { label: 'In progress', value: inProgressCount },
+              ].map((item) => (
+                <div key={item.label} className="workspace-card px-4 py-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</p>
+                  <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="workspace-panel mt-8 overflow-hidden">
+          {filtered.length === 0 ? (
+            <div className="px-6 py-12 text-center">
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-[var(--workspace-line)] bg-white/[0.02]">
+                <BookOpen className="h-6 w-6 text-[var(--text-muted)]" />
+              </div>
+              <h3 className="text-lg font-semibold text-[var(--text-primary)]">{searchQuery ? 'No books found' : 'Empty library'}</h3>
+              <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-[var(--text-secondary)]">
+                {searchQuery ? 'Try a different word or clear the search.' : 'Your first book will show up here once the roadmap is created.'}
               </p>
               {!searchQuery && (
-                <button onClick={() => { setView('create'); setShowListInMain(false); }}
-                  className="btn btn-primary px-6 rounded-full text-sm">
-                  <Sparkles size={16} /> Create Book
+                <button onClick={() => { setView('create'); setShowListInMain(false); }} className="btn btn-primary mt-5 px-6 py-2.5">
+                  <Sparkles size={16} /> Start a New Book
                 </button>
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="divide-y divide-[var(--workspace-line)]">
               {filtered.map(book => {
                 const wordCount = book.modules.reduce((a, m) => a + (m.wordCount || 0), 0) || book.totalWords || 0;
                 const Icon = getBookIcon(book.title);
                 return (
-                  <div key={book.id} onClick={() => onSelectBook(book.id)}
-                    className="group relative cursor-pointer overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 transition-all duration-200 hover:border-[var(--border-default)] hover:bg-[var(--bg-elevated)] hover:-translate-y-0.5">
-                    <div className="flex items-center gap-3">
-                      <div className={`relative h-20 w-[52px] shrink-0 overflow-hidden rounded border border-[var(--border-subtle)] ${getBookCoverTone(book.title)} flex items-center justify-center`}>
-                        <Icon className="h-5 w-5 text-white/40" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0 flex-1">
-                            <h3 className="break-words text-sm font-semibold leading-tight text-[var(--text-primary)]">{book.title}</h3>
-                            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-medium text-[var(--text-secondary)]">
-                              <span className="inline-flex items-center gap-1.5 uppercase tracking-wider"><Clock size={10} />{new Date(book.createdAt).toLocaleDateString()}</span>
-                              {wordCount > 0 && <span className="inline-flex items-center gap-1.5 uppercase tracking-wider"><Sparkles size={10} />{wordCount.toLocaleString()} wds</span>}
-                            </div>
-                          </div>
-                          <button onClick={(e: React.MouseEvent) => { e.stopPropagation(); onDeleteBook(book.id); }}
-                            className="rounded-full p-2 text-[var(--text-muted)] opacity-0 transition-all hover:bg-red-500/10 hover:text-red-500 group-hover:opacity-100">
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </div>
+                  <div key={book.id} onClick={() => onSelectBook(book.id)} className="group flex cursor-pointer items-center gap-4 px-6 py-5 transition-colors hover:bg-white/[0.02]">
+                    <div className={`relative flex h-16 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--workspace-line)] ${getBookCoverTone(book.title)}`}>
+                      <Icon className="h-4 w-4 text-white/45" />
                     </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="truncate text-sm font-semibold text-[var(--text-primary)]">{book.title}</h3>
+                        <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">{getStatusIcon(book.status)}{STATUS_LABELS[book.status]}</span>
+                      </div>
+                      <p className="mt-1 line-clamp-1 text-sm text-[var(--text-secondary)]">{book.goal}</p>
+                    </div>
+                    <div className="hidden text-right text-[11px] text-[var(--text-muted)] md:block">
+                      <div>{wordCount.toLocaleString()} words</div>
+                      <div className="mt-1">{new Date(book.updatedAt).toLocaleDateString()}</div>
+                    </div>
+                    <button onClick={(e: React.MouseEvent) => { e.stopPropagation(); onDeleteBook(book.id); }} className="rounded-full p-2 text-[var(--text-muted)] opacity-0 transition-all hover:bg-red-500/10 hover:text-red-300 group-hover:opacity-100">
+                      <Trash2 size={13} />
+                    </button>
                   </div>
                 );
               })}
@@ -864,7 +939,7 @@ export function BookView({
         generationMode: formData.generationMode,
         preferences: enhanced.preferences,
       });
-      showToast('Idea refined! ✨ Review and adjust as needed.', 'success');
+      showToast('Idea refined! ? Review and adjust as needed.', 'success');
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Refinement failed';
       setEnhanceError(msg);
@@ -951,7 +1026,7 @@ export function BookView({
   const getStatusText = (status: BookProject['status']) =>
     ({ planning: 'Planning', generating_roadmap: 'Creating Roadmap', roadmap_completed: 'Ready to Write', generating_content: 'Writing Chapters', assembling: 'Finalizing Book', completed: 'Completed', error: 'Error' }[status] || 'Unknown');
 
-  // ── LIST VIEW ──
+  // -- LIST VIEW --
   if (view === 'list') {
     if (showListInMain) {
       return (
@@ -989,79 +1064,34 @@ export function BookView({
     );
   }
 
-  // ── CREATE VIEW ──
+  // -- CREATE VIEW --
   if (view === 'create') {
     return (
-      <div className="w-full max-w-2xl mx-auto px-6 pt-24 pb-10 animate-fade-in-up">
-        <button onClick={() => { setView('list'); setShowListInMain(false); }}
-          className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-10 group uppercase tracking-widest">
-          <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
-          Back to Library
-        </button>
-
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[var(--text-primary)] tracking-tight leading-tight">
-            Build Better <span className="text-[var(--brand)]">Learning Books</span>
-          </h1>
-          <p className="text-[var(--text-secondary)] text-sm">Professional AI-powered content generation.</p>
-        </div>
-
-        <div className="space-y-6 bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-8 rounded-lg shadow-xl">
-          <div>
-            <label className="block text-xs font-semibold mb-3 text-[var(--text-secondary)] uppercase tracking-wider">What would you like to write about?</label>
-            <div className="relative">
-              <textarea
-                value={formData.goal}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData((p: BookSession) => ({ ...p, goal: e.target.value }))}
-                placeholder="A practical guide to organic gardening for beginners..."
-                className="w-full glass-input rounded-md p-4 text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none resize-none text-base leading-relaxed transition-all"
-                rows={4} required
-              />
-              <div className="absolute bottom-3 right-3">
-                <button onClick={handleEnhanceWithAI} disabled={!formData.goal.trim() || isEnhancing}
-                  className="btn btn-secondary px-3 py-1.5 rounded-full text-[10px]">
-                  {isEnhancing ? <Loader2 className="animate-spin w-3 h-3" /> : <Sparkles className="w-3 h-3 text-[var(--brand)]" />}
-                  {isEnhancing ? 'Refining…' : 'Enhance with AI'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Target Audience</label>
-              <input type="text" value={formData.targetAudience}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((p: BookSession) => ({ ...p, targetAudience: e.target.value }))}
-                placeholder="Beginners, Professionals..."
-                className="w-full h-11 glass-input rounded-md px-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-all" />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Complexity Level</label>
-              <CustomSelect
-                value={formData.complexityLevel || 'intermediate'}
-                onChange={val => setFormData((p: BookSession) => ({ ...p, complexityLevel: val as any }))}
-                options={[{ value: 'beginner', label: 'Beginner' }, { value: 'intermediate', label: 'Intermediate' }, { value: 'advanced', label: 'Advanced' }]}
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={() => handleCreateRoadmap(formData)}
-            disabled={!formData.goal.trim() || localIsGenerating}
-            className="btn btn-primary w-full py-4 rounded-md text-base"
-          >
-            {localIsGenerating ? (
-              <><Loader2 className="animate-spin w-5 h-5" /><span>Designing Roadmap…</span></>
-            ) : (
-              <><Sparkles size={18} /><span>Generate Book Roadmap</span></>
-            )}
-          </button>
-        </div>
-      </div>
+      <HomeView
+        onNewBook={() => { setView('create'); }}
+        onShowList={() => { setShowListInMain(true); setView('list'); }}
+        hasApiKey={hasApiKey}
+        bookCount={books.length}
+        theme={theme}
+        formData={formData}
+        setFormData={setFormData}
+        showAdvanced={true}
+        setShowAdvanced={setShowAdvanced}
+        handleCreateRoadmap={handleCreateRoadmap}
+        handleEnhanceWithAI={handleEnhanceWithAI}
+        isEnhancing={isEnhancing}
+        enhanceError={enhanceError}
+        setIsEnhancing={setIsEnhancing}
+        localIsGenerating={localIsGenerating}
+        onOpenSettings={onOpenSettings}
+        settings={settings}
+        onModelChange={onModelChange}
+        quotaStatus={quotaStatus}
+      />
     );
   }
 
-  // ── DETAIL VIEW ──
+  // -- DETAIL VIEW --
   if (view === 'detail' && currentBook) {
     const areAllModulesDone =
       currentBook.roadmap &&
@@ -1083,19 +1113,20 @@ export function BookView({
               <ArrowLeft className="w-3.5 h-3.5" /> Back to Library
             </button>
 
-            <div className="overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
-              <div className="relative overflow-hidden border-b border-[var(--border-subtle)] p-7 md:p-8">
+            <div className="workspace-panel overflow-hidden">
+              <div className="relative overflow-hidden border-b border-[var(--workspace-line)] p-7 md:p-8">
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
                   <div>
-                    <h1 className="mb-3 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl md:leading-tight">{currentBook.title}</h1>
-                    <p className="max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)]">{currentBook.goal}</p>
+                    <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--text-muted)]">Book Workspace</p>
+                    <h1 className="mb-3 text-3xl font-bold tracking-[-0.04em] text-[var(--text-primary)] md:text-5xl md:leading-[1.02]">{currentBook.title}</h1>
+                    <p className="max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">{currentBook.goal}</p>
                     <div className="mt-5 flex flex-wrap gap-2">
                       {[
-                        { icon: FileText, text: `${totalModuleCount} modules` },
+                        { icon: FileText, text: `${totalModuleCount} chapters` },
                         { icon: Sparkles, text: `${totalWords.toLocaleString()} words` },
                         { icon: Clock, text: `${estimatedReadTime} min read` },
                       ].map(({ icon: Icon, text }) => (
-                        <span key={text} className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-base)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                        <span key={text} className="inline-flex items-center gap-2 rounded-full border border-[var(--workspace-line)] bg-white/[0.02] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
                           <Icon className="h-3 w-3" /> {text}
                         </span>
                       ))}
@@ -1104,11 +1135,11 @@ export function BookView({
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { label: 'Status', value: <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">{getStatusIcon(currentBook.status)}{getStatusText(currentBook.status)}</div> },
-                      { label: 'Progress', value: `${completedModules.length}/${totalModuleCount} modules` },
+                      { label: 'Progress', value: `${completedModules.length}/${totalModuleCount} chapters` },
                       { label: 'Updated', value: new Date(currentBook.updatedAt).toLocaleDateString() },
                       { label: 'Mode', value: currentBook.generationMode === 'blackhole' ? 'Street' : 'Stellar' },
                     ].map(({ label, value }) => (
-                      <div key={label} className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] p-3">
+                      <div key={label} className="workspace-card p-3">
                         <p className="text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{label}</p>
                         <div className="mt-1.5 text-xs font-semibold text-[var(--text-secondary)]">{value}</div>
                       </div>
@@ -1126,12 +1157,10 @@ export function BookView({
               <DetailTabButton label="Read Book" Icon={BookText}   isActive={detailTab === 'read'}      onClick={() => setDetailTab('read')} />
               <button
                 onClick={() => onOpenStudyMode?.(currentBook.id)}
-                className="group relative flex items-center gap-2 rounded-full border border-[var(--brand)]/30 bg-[linear-gradient(135deg,rgba(254,205,140,0.12),rgba(254,205,140,0.04))] px-5 py-1.5 text-xs font-bold text-[var(--brand)] transition-all duration-300 hover:border-[var(--brand)]/50 hover:bg-[linear-gradient(135deg,rgba(254,205,140,0.2),rgba(254,205,140,0.08))] hover:shadow-[0_0_20px_rgba(254,205,140,0.15)] hover:scale-[1.02] active:scale-[0.98]"
+                className="btn btn-primary px-4 py-2"
               >
-                <div className="absolute inset-0 rounded-full bg-[var(--brand)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Brain className="w-4 h-4 relative z-10" />
-                <span className="relative z-10">Study Companion</span>
-                <Sparkles className="w-3 h-3 relative z-10 opacity-60" />
+                <Brain className="w-4 h-4" />
+                <span>Study Companion</span>
               </button>
 
             </div>
@@ -1355,3 +1384,4 @@ export function BookView({
 
   return null;
 }
+

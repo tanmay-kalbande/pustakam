@@ -1,4 +1,4 @@
-// src/components/SettingsModal.tsx
+﻿// src/components/SettingsModal.tsx
 import React from 'react';
 import { X, Database, Download, Upload, Trash2, Settings, Sparkles, Globe, Cpu, BookOpen, ChevronRight, Crown, Sun, Moon, Info, Shield, Key, Eye, EyeOff, CheckCircle, XCircle, Loader2, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,7 +7,6 @@ import type { ProviderID, QuotaStatus } from '../types/providers';
 import { storageUtils } from '../utils/storage';
 import { byokStorage } from '../utils/byokStorage';
 import { DisclaimerPage } from './DisclaimerPage';
-import NebulaBackground from './NebulaBackground';
 import { AI_SUITE_NAME, APP_AI_BRANDLINE, PROVIDERS, BYOK_PROVIDERS, PROXY_PROVIDERS } from '../constants/ai';
 import { getProviderConfig, getModelsForProvider, getDefaultModel } from '../services/providerRegistry';
 import { validateApiKey } from '../services/providerService';
@@ -308,13 +307,9 @@ export function SettingsModal({
         onClick={onClose}
       >
         <div
-          className="relative my-auto flex max-h-[calc(100vh-24px)] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-white/10 bg-[var(--bg-base)] shadow-2xl md:max-h-[calc(100vh-40px)]"
+          className="relative my-auto flex max-h-[calc(100vh-24px)] w-full max-w-5xl flex-col overflow-hidden rounded-[20px] border border-[var(--workspace-line)] bg-[var(--bg-base)] shadow-[0_24px_60px_rgba(0,0,0,0.3)] md:max-h-[calc(100vh-40px)]"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Background effects */}
-          <div className="pointer-events-none absolute inset-0 opacity-20">
-            <NebulaBackground opacity={0.2} />
-          </div>
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent)]" />
 
           {/* Header */}
@@ -324,8 +319,8 @@ export function SettingsModal({
                 <Settings size={16} />
               </div>
               <div>
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--brand)]/80">System Preferences</h2>
-                <p className="mt-0.5 text-xs text-[var(--text-muted)]">Configuration & Workspace Controls</p>
+                <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--brand)]/80">Workspace Settings</h2>
+                <p className="mt-0.5 text-xs text-[var(--text-muted)]">Models, keys, storage, and local setup</p>
               </div>
             </div>
             <button
@@ -342,7 +337,7 @@ export function SettingsModal({
               <div className="flex flex-1 items-center overflow-x-auto p-4 whitespace-nowrap custom-scrollbar md:flex-col md:items-start md:overflow-x-hidden md:overflow-y-auto md:p-6 md:whitespace-normal">
                 <div className="flex items-center gap-2 mb-0 md:mb-8 mr-6 md:mr-0 shrink-0">
                   <div className="h-6 w-1 rounded-full bg-[var(--brand)]" />
-                  <h2 className="text-base font-bold uppercase tracking-tight text-[var(--text-primary)] md:text-lg">Settings</h2>
+                  <h2 className="text-base font-bold uppercase tracking-tight text-[var(--text-primary)] md:text-lg">Workspace</h2>
                 </div>
 
                 <nav className="flex md:flex-col space-x-1 md:space-x-0 md:space-y-1 shrink-0 w-full">
@@ -414,7 +409,7 @@ export function SettingsModal({
             {/* Content area */}
             <div className="flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] p-5 text-[var(--color-text-primary)] scroll-smooth md:p-6">
 
-              {/* ── PERSONALITY TAB ── */}
+              {/* â”€â”€ PERSONALITY TAB â”€â”€ */}
               {activeTab === 'personality' && (
                 <div className="space-y-8">
                   <header>
@@ -504,7 +499,7 @@ export function SettingsModal({
                 </div>
               )}
 
-              {/* ── API KEYS TAB ── */}
+              {/* â”€â”€ API KEYS TAB â”€â”€ */}
               {activeTab === 'apikeys' && (
                 <div className="space-y-8">
                   <header>
@@ -512,7 +507,7 @@ export function SettingsModal({
                     <p className="text-sm text-[var(--text-secondary)]">Manage your AI provider keys and select your preferred model.</p>
                   </header>
 
-                  {/* ── Quota Status ── */}
+                  {/* â”€â”€ Quota Status â”€â”€ */}
                   {quotaStatus && (
                     <section className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)]/50 p-5">
                       <div className="flex items-center justify-between mb-3">
@@ -549,7 +544,7 @@ export function SettingsModal({
                     </section>
                   )}
 
-                  {/* ── Active Provider & Model Selector ── */}
+                  {/* â”€â”€ Active Provider & Model Selector â”€â”€ */}
                   <section className="space-y-4 pt-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Active Provider</label>
                     <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
@@ -618,7 +613,7 @@ export function SettingsModal({
                     </div>
                   </section>
 
-                  {/* ── BYOK Key Management ── */}
+                  {/* â”€â”€ BYOK Key Management â”€â”€ */}
                   <section className="space-y-4 pt-6 border-t border-[var(--border-subtle)]">
                     <div className="flex items-center justify-between">
                       <div>
@@ -728,7 +723,7 @@ export function SettingsModal({
                 </div>
               )}
 
-              {/* ── DATA TAB ── */}
+              {/* â”€â”€ DATA TAB â”€â”€ */}
               {activeTab === 'data' && (
                 <div className="space-y-8">
                   <header>
@@ -769,7 +764,7 @@ export function SettingsModal({
                 </div>
               )}
 
-              {/* ── ABOUT TAB ── */}
+              {/* â”€â”€ ABOUT TAB â”€â”€ */}
               {activeTab === 'about' && (
                 <div className="space-y-10">
                   <div className="flex items-start gap-6">
@@ -837,7 +832,7 @@ export function SettingsModal({
           <div className="relative z-10 flex shrink-0 flex-col items-center justify-between gap-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] px-6 py-4 md:flex-row md:gap-0">
             <div className="flex items-center gap-2 order-2 md:order-1">
               <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-sm shadow-green-500/20" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Edge Engine Online</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Local Settings Active</span>
             </div>
             <div className="flex items-center gap-3 order-1 md:order-2 w-full md:w-auto">
               <button
@@ -851,7 +846,7 @@ export function SettingsModal({
                 disabled={isSaving}
                 className="btn btn-primary flex-1 md:flex-none px-6 rounded-md h-10 text-xs"
               >
-                {isSaving ? 'Saving…' : 'Save Preferences'}
+                {isSaving ? 'Saving...' : 'Save Settings'}
               </button>
             </div>
           </div>
@@ -878,7 +873,7 @@ export function SettingsModal({
 
             {importPreview.conflicts.duplicateBooks > 0 && (
               <div className="p-4 rounded-md border border-[var(--brand)]/20 bg-[var(--brand)]/5 mb-6">
-                <p className="text-xs font-bold text-[var(--brand)] mb-1">⚠️ Conflicts detected</p>
+                <p className="text-xs font-bold text-[var(--brand)] mb-1">âš ï¸ Conflicts detected</p>
                 <p className="text-xs text-[var(--text-secondary)]">{importPreview.conflicts.duplicateBooks} existing record(s) will be updated</p>
               </div>
             )}
@@ -913,3 +908,4 @@ export function SettingsModal({
     </>
   );
 }
+

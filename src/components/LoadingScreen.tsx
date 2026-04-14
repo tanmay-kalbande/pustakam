@@ -25,18 +25,23 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       )}
 
       <div className="relative z-10 flex h-full flex-col items-center justify-center pb-10">
-        <div className="mb-12 text-center">
-          <h1 className="mb-2 text-4xl uppercase opacity-90 md:text-6xl">
-            <span className="font-sans font-bold tracking-[0.02em] text-[var(--color-text-primary)]">Pustakam</span>
-            <span className="font-sans font-bold tracking-[0.02em] text-[var(--color-accent-primary)]">.ai</span>
+        <div className="mb-10 flex flex-col items-center text-center">
+          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/20 backdrop-blur-md">
+            <img src={theme === 'light' ? '/black-logo.png' : '/white-logo.png'} alt="Pustakam" className="h-8 w-8 opacity-90" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-[-0.04em] text-[var(--color-text-primary)] md:text-5xl">
+            Pustakam
           </h1>
-          <p className="text-xs font-medium uppercase tracking-[0.3em] text-[var(--color-text-secondary)] opacity-60 md:text-sm">
-            by Tanmay Kalbande
+          <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.26em] text-[var(--color-text-secondary)] opacity-60 md:text-xs">
+            Internal Workspace
           </p>
         </div>
 
         <div className="absolute bottom-12 flex flex-col items-center gap-4">
-          <div className="animate-pulse-subtle text-xs font-medium uppercase tracking-widest text-[var(--color-text-muted)] opacity-50">
+          <div className="grok-loader">
+            {Array.from({ length: 9 }).map((_, index) => <div key={index} className="dot" />)}
+          </div>
+          <div className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-60">
             {message}
           </div>
         </div>
