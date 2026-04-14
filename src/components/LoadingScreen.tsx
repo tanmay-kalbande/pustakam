@@ -28,9 +28,9 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
       <div className="relative z-10 flex h-full flex-col items-center justify-center pb-10">
         <div className="mb-10 flex flex-col items-center text-center">
-          {theme !== 'dark' && (
+          {theme === 'light' && (
             <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/20 backdrop-blur-md">
-              <img src={theme === 'light' ? '/black-logo.png' : '/white-logo.png'} alt="Pustakam" className="h-8 w-8 opacity-90" />
+              <img src="/black-logo.png" alt="Pustakam" className="h-8 w-8 opacity-90" />
             </div>
           )}
           <h1 className="text-3xl font-bold tracking-[-0.04em] text-[var(--color-text-primary)] md:text-5xl">
