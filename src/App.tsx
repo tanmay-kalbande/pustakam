@@ -23,6 +23,7 @@ import { TopHeader } from './components/TopHeader';
 import { CustomAlertDialog } from './components/CustomAlertDialog';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthModal } from './components/AuthModal';
+import { MobileBlockScreen } from './components/MobileBlockScreen';
 import { WelcomeModal } from './components/WelcomeModal';
 import LandingPage from './components/LandingPage';
 import NebulaBackground from './components/NebulaBackground';
@@ -752,6 +753,10 @@ function App() {
   // ============================================================================
   // RENDER
   // ============================================================================
+
+  if (isMobile) {
+    return <MobileBlockScreen />;
+  }
 
   return (
     <div className="app-container">

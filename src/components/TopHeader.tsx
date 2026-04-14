@@ -255,31 +255,25 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             </div>
           ) : null}
 
-          {onOpenDocs ? (
-            <button onClick={onOpenDocs} className="workspace-topbar__ghost hidden sm:inline-flex">
-              <BookOpen size={16} />
-              <span className="text-sm font-medium">Guide</span>
+          {theme === 'dark' ? (
+            <button
+              onClick={onToggleTheme}
+              className="workspace-topbar__ghost"
+              title="Switch to light mode"
+            >
+              <Sun size={16} />
             </button>
-          ) : null}
-
-          {onOpenAPIDocs ? (
-            <button onClick={onOpenAPIDocs} className="workspace-topbar__ghost hidden lg:inline-flex">
-              <Shield size={16} />
-              <span className="text-sm font-medium">API</span>
+          ) : (
+            <button
+              onClick={onToggleTheme}
+              className="workspace-topbar__ghost"
+              title="Switch to dark mode"
+            >
+              <Moon size={16} />
             </button>
-          ) : null}
+          )}
 
-          <button
-            onClick={onToggleTheme}
-            className="workspace-topbar__ghost"
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
 
-          <button onClick={onOpenSettings} className="workspace-topbar__ghost" title="Settings">
-            <Settings size={16} />
-          </button>
 
           {isAuthenticated ? (
             <div className="relative">
@@ -302,20 +296,44 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               {showUserMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-                  <div className="absolute right-0 top-full z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-[var(--workspace-line)] bg-[rgba(10,10,10,0.96)] shadow-[0_24px_48px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+                  <div className={`absolute right-0 top-full z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-[var(--workspace-line)] ${theme === 'light' ? 'bg-white/95 shadow-[0_20px_40px_rgba(0,0,0,0.08)]' : 'bg-[rgba(10,10,10,0.96)] shadow-[0_24px_48px_rgba(0,0,0,0.35)]'} backdrop-blur-xl`}>
                     <div className="border-b border-[var(--workspace-line)] px-4 py-3">
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                         Signed in
                       </p>
                       <p className="mt-1 truncate text-sm text-[var(--text-primary)]">{user?.email}</p>
                     </div>
-                    <div className="p-2">
+                    <div className="p-2 space-y-0.5">
+                      {onOpenDocs && (
+                        <button
+                          onClick={() => {
+                            onOpenDocs();
+                            setShowUserMenu(false);
+                          }}
+                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${theme === 'light' ? 'text-gray-600 hover:bg-gray-100' : 'text-[var(--text-secondary)] hover:bg-white/[0.03] hover:text-[var(--text-primary)]'}`}
+                        >
+                          <BookOpen size={15} />
+                          Guide
+                        </button>
+                      )}
+                      {onOpenAPIDocs && (
+                        <button
+                          onClick={() => {
+                            onOpenAPIDocs();
+                            setShowUserMenu(false);
+                          }}
+                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${theme === 'light' ? 'text-gray-600 hover:bg-gray-100' : 'text-[var(--text-secondary)] hover:bg-white/[0.03] hover:text-[var(--text-primary)]'}`}
+                        >
+                          <Shield size={15} />
+                          API Reference
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           onOpenSettings();
                           setShowUserMenu(false);
                         }}
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-[var(--text-secondary)] transition-colors hover:bg-white/[0.03] hover:text-[var(--text-primary)]"
+                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${theme === 'light' ? 'text-gray-600 hover:bg-gray-100 focus:bg-gray-100' : 'text-[var(--text-secondary)] hover:bg-white/[0.03] hover:text-[var(--text-primary)] focus:bg-white/[0.03]'}`}
                       >
                         <Settings size={15} />
                         Workspace settings
