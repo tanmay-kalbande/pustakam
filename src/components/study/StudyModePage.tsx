@@ -2,8 +2,6 @@ import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus, prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {
   ArrowLeft,
   ArrowRight,
@@ -139,14 +137,17 @@ const CodeBlock = React.memo(function CodeBlock({
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <SyntaxHighlighter
-        style={isDark ? vscDarkPlus : prism}
-        language={language}
-        PreTag="div"
-        customStyle={{ backgroundColor: 'transparent', padding: '1rem 1.25rem', fontSize: '0.8125rem', lineHeight: '1.65', margin: 0 }}
+      <pre
+        className="overflow-x-auto px-5 py-4 text-[13px] leading-7"
+        style={{
+          margin: 0,
+          backgroundColor: 'transparent',
+          color: isDark ? '#e5e7eb' : '#1f2937',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+        }}
       >
-        {String(children).replace(/\n$/, '')}
-      </SyntaxHighlighter>
+        <code>{String(children).replace(/\n$/, '')}</code>
+      </pre>
     </div>
   );
 });

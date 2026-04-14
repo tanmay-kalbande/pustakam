@@ -3,8 +3,6 @@
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus, prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {
   ArrowLeft,
   ArrowRight,
@@ -135,20 +133,28 @@ const CodeBlock = React.memo(function CodeBlock({
         </span>
         <button
           onClick={handleCopy}
-          className="inline-flex items-center gap-1 rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/70 transition hover:text-white"
+          className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition"
+          style={{
+            color: selectedTheme.headerText,
+            border: `1px solid ${readingTheme === 'light' || readingTheme === 'sepia' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)'}`,
+            backgroundColor: readingTheme === 'light' || readingTheme === 'sepia' ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.04)',
+          }}
         >
           {isCopied ? <Check size={12} /> : <Copy size={12} />}
           {isCopied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <SyntaxHighlighter
-        style={readingTheme === 'light' || readingTheme === 'sepia' ? prism : vscDarkPlus}
-        language={language}
-        PreTag="div"
-        customStyle={{ backgroundColor: 'transparent', padding: '1rem 1.5rem', fontSize: '0.875rem', lineHeight: '1.5' }}
+      <pre
+        className="overflow-x-auto px-6 py-4 text-sm leading-6"
+        style={{
+          margin: 0,
+          backgroundColor: 'transparent',
+          color: readingTheme === 'light' || readingTheme === 'sepia' ? '#1f2937' : '#e5e7eb',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+        }}
       >
-        {String(children).replace(/\n$/, '')}
-      </SyntaxHighlighter>
+        <code>{String(children).replace(/\n$/, '')}</code>
+      </pre>
     </div>
   );
 });

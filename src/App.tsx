@@ -5,12 +5,11 @@ import React, { Suspense, lazy, useState, useEffect, useMemo, useCallback } from
 import { Analytics } from '@vercel/analytics/react';
 import { LoadingScreen } from './components/LoadingScreen';
 import { InstallPrompt } from './components/InstallPrompt';
-import { SettingsModal } from './components/SettingsModal';
 import { useGenerationStats } from './components/GenerationProgressPanel';
 import { APISettings, ModelProvider } from './types';
 import type { QuotaStatus } from './types/providers';
 import { usePWA } from './hooks/usePWA';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { WifiOff, Loader2 } from 'lucide-react';
 import { storageUtils } from './utils/storage';
 import { bookService } from './services/bookService';
@@ -26,15 +25,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthModal } from './components/AuthModal';
 import { WelcomeModal } from './components/WelcomeModal';
 import LandingPage from './components/LandingPage';
-import AboutPage from './components/AboutPage';
-import TermsPage from './components/TermsPage';
-import PrivacyPage from './components/PrivacyPage';
 import NebulaBackground from './components/NebulaBackground';
-import APIDocsPage from './components/APIDocsPage';
-import UsageGuidePage from './components/UsageGuidePage';
-import CompliancePage from './components/CompliancePage';
-import { DisclaimerPage } from './components/DisclaimerPage';
-import BlogPage from './components/BlogPage';
 import { Toast, ToastType } from './components/Toast';
 import { PROVIDERS } from './constants/ai';
 import { getDefaultModel, getProviderConfig } from './services/providerRegistry';
@@ -43,8 +34,22 @@ type AppView = 'list' | 'create' | 'detail';
 type Theme = 'light' | 'dark';
 const MAX_BOOK_TITLE_LENGTH = 72;
 const STUDY_MODE_PREFIX = '/study';
+const FAST_EXIT_MS = 220;
+const LOADING_SAFETY_TIMEOUT_MS = 7000;
+const TRANSITION_SAFETY_TIMEOUT_MS = 5000;
+const WELCOME_MODAL_DELAY_MS = 900;
+const QUOTA_REFRESH_DELAY_MS = 900;
 const BookView = lazy(() => import('./components/BookView').then(module => ({ default: module.BookView })));
 const StudyModePage = lazy(() => import('./components/study/StudyModePage').then(module => ({ default: module.StudyModePage })));
+const SettingsModal = lazy(() => import('./components/SettingsModal').then(module => ({ default: module.SettingsModal })));
+const AboutPage = lazy(() => import('./components/AboutPage'));
+const TermsPage = lazy(() => import('./components/TermsPage'));
+const PrivacyPage = lazy(() => import('./components/PrivacyPage'));
+const APIDocsPage = lazy(() => import('./components/APIDocsPage'));
+const UsageGuidePage = lazy(() => import('./components/UsageGuidePage'));
+const CompliancePage = lazy(() => import('./components/CompliancePage'));
+const DisclaimerPage = lazy(() => import('./components/DisclaimerPage').then(module => ({ default: module.DisclaimerPage })));
+const BlogPage = lazy(() => import('./components/BlogPage'));
 
 function formatBookTitle(session: Pick<BookSession, 'title' | 'goal'>): string {
   const rawTitle = (session.title || session.goal || 'Untitled Book').replace(/\s+/g, ' ').trim();
@@ -292,7 +297,7 @@ function App() {
   useEffect(() => {
     if (!isLoading && hasLoadedUserBooksRef.current) {
       // Small timeout ensures Supabase triggers have fired after storage sync
-      const timer = setTimeout(() => refreshQuota({ forceRefresh: true, silent: true }), 1500);
+      const timer = setTimeout(() => refreshQuota({ forceRefresh: true, silent: true }), QUOTA_REFRESH_DELAY_MS);
       return () => clearTimeout(timer);
     }
   }, [completedBooksCount, isLoading, refreshQuota]);
@@ -352,26 +357,26 @@ function App() {
       setIsAuthTransitioning(false);
       setIsLoadingScreenVisible(false);
       setIsLoadingScreenExiting(false);
-    }, 8000);
+    }, TRANSITION_SAFETY_TIMEOUT_MS);
 
     return () => clearTimeout(transitionSafetyTimer);
   }, [isAuthTransitioning]);
 
-  // Hard safety: never let the loading screen stay more than 15 seconds
+  // Hard safety: never let the loading screen linger longer than needed.
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       if (isLoadingScreenVisible) {
-        console.warn('[App] Loading screen safety timeout  -  forcing dismiss');
+        console.warn('[App] Loading screen safety timeout - forcing dismiss');
         setIsLoadingScreenExiting(true);
         setTimeout(() => {
           setIsLoadingScreenVisible(false);
           setIsLoadingScreenExiting(false);
           setIsAuthTransitioning(false);
-        }, 400);
+        }, FAST_EXIT_MS);
       }
-    }, 15000);   // ← was 6000
+    }, LOADING_SAFETY_TIMEOUT_MS);
     return () => clearTimeout(safetyTimer);
-  }, []); // run once on mount
+  }, [isLoadingScreenVisible]);
 
   // Load user books when auth resolves
   useEffect(() => {
@@ -379,13 +384,11 @@ function App() {
 
     let isCancelled = false;
     let welcomeTimer: ReturnType<typeof setTimeout> | undefined;
-    let exitTimer: ReturnType<typeof setTimeout> | undefined;
     let exitCleanupTimer: ReturnType<typeof setTimeout> | undefined;
 
     const loadBooks = async () => {
       if (isAuthenticated && !sessionStorage.getItem('welcome_shown')) {
-        // Small delay so it pops up cleanly after other loading finishes
-        welcomeTimer = setTimeout(() => setShowWelcomeModal(true), 2500);
+        welcomeTimer = setTimeout(() => setShowWelcomeModal(true), WELCOME_MODAL_DELAY_MS);
         sessionStorage.setItem('welcome_shown', 'true');
       }
 
@@ -395,15 +398,13 @@ function App() {
       setBooks(loadedBooks);
       hasLoadedUserBooksRef.current = true;
 
-      // Ensure a smooth transition even for fast-loading landing page
-      const holdTime = user ? 1500 : 1000;
-      exitTimer = setTimeout(() => {
-        setIsLoadingScreenExiting(true);
-        exitCleanupTimer = setTimeout(() => {
-          setIsLoadingScreenVisible(false);
-          setIsLoadingScreenExiting(false);
-        }, 700);
-      }, holdTime);
+      setIsLoadingScreenExiting(true);
+      exitCleanupTimer = setTimeout(() => {
+        if (isCancelled) return;
+        setIsLoadingScreenVisible(false);
+        setIsLoadingScreenExiting(false);
+        setIsAuthTransitioning(false);
+      }, FAST_EXIT_MS);
 
       if (user?.id && loadedBooks.length > 0) {
         planService.syncBooksCount(loadedBooks.length)
@@ -419,7 +420,6 @@ function App() {
     return () => {
       isCancelled = true;
       if (welcomeTimer) clearTimeout(welcomeTimer);
-      if (exitTimer) clearTimeout(exitTimer);
       if (exitCleanupTimer) clearTimeout(exitCleanupTimer);
     };
   }, [user?.id, isLoading, refreshProfile, isAuthenticated]);
@@ -756,8 +756,12 @@ function App() {
   return (
     <div className="app-container">
       {/* 1. Global Background Layers */}
-      {theme === 'dark' ? <NebulaBackground className="z-[-1]" /> : <div className="sun-background" />}
-      {theme === 'dark' && !shouldShowLanding && <div className="app-bg-overlay" />}
+      {!isLoadingScreenVisible && (
+        theme === 'dark'
+          ? <NebulaBackground className="z-[-1]" quality={isMobile ? 'low' : 'medium'} />
+          : <div className="sun-background" />
+      )}
+      {theme === 'dark' && !shouldShowLanding && !isLoadingScreenVisible && <div className="app-bg-overlay" />}
 
       {/* 2. Loading Phase (Full Screen Portal/Overlay) */}
       {isLoadingScreenVisible && (
@@ -795,18 +799,10 @@ function App() {
                 onClose={() => setShowAuthModal(false)}
                 initialMode={authMode}
                 onSuccess={() => {
+                  setShowAuthModal(false);
                   setIsAuthTransitioning(true);
                   setIsLoadingScreenVisible(true);
-                  setShowAuthModal(false);
-                  setTimeout(() => {
-                    setIsLoadingScreenExiting(true);
-                    setTimeout(() => {
-                      setIsLoadingScreenVisible(false);
-                      setIsLoadingScreenExiting(false);
-                      setIsAuthTransitioning(false);
-                      setShowWelcomeModal(true);
-                    }, 700);
-                  }, 2500);
+                  setIsLoadingScreenExiting(false);
                 }}
               />
             </>
@@ -886,19 +882,23 @@ function App() {
                 </Suspense>
               </main>
 
-              <SettingsModal
-                isOpen={settingsOpen}
-                onClose={() => setSettingsOpen(false)}
-                settings={settings}
-                onSaveSettings={handleSaveSettings}
-                theme={theme}
-                onToggleTheme={toggleTheme}
-                onOpenAPIDocs={() => setShowAPIDocsPage(true)}
-                onOpenUsageGuide={() => setShowUsageGuidePage(true)}
-                onOpenCompliance={() => setShowCompliancePage(true)}
-                quotaStatus={quotaStatus}
-                showAlertDialog={showAlertDialog}
-              />
+              {settingsOpen && (
+                <Suspense fallback={<WorkspaceFallback />}>
+                  <SettingsModal
+                    isOpen={settingsOpen}
+                    onClose={() => setSettingsOpen(false)}
+                    settings={settings}
+                    onSaveSettings={handleSaveSettings}
+                    theme={theme}
+                    onToggleTheme={toggleTheme}
+                    onOpenAPIDocs={() => setShowAPIDocsPage(true)}
+                    onOpenUsageGuide={() => setShowUsageGuidePage(true)}
+                    onOpenCompliance={() => setShowCompliancePage(true)}
+                    quotaStatus={quotaStatus}
+                    showAlertDialog={showAlertDialog}
+                  />
+                </Suspense>
+              )}
 
               {/* Model switch modal */}
               {showModelSwitch && (
@@ -955,21 +955,25 @@ function App() {
       <WelcomeModal isOpen={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} />
 
       {/* 4. Support Modals (Legal Pages) - Rendered over everything else */}
-      {showAboutPage && <AboutPage onClose={() => setShowAboutPage(false)} />}
-      {showTermsPage && <TermsPage onClose={() => setShowTermsPage(false)} />}
-      {showPrivacyPage && <PrivacyPage onClose={() => setShowPrivacyPage(false)} />}
-      {showAPIDocsPage && <APIDocsPage onClose={() => setShowAPIDocsPage(false)} />}
-      {showUsageGuidePage && <UsageGuidePage onClose={() => setShowUsageGuidePage(false)} />}
-      {showCompliancePage && <CompliancePage onClose={() => setShowCompliancePage(false)} />}
-      {showDisclaimerPage && <DisclaimerPage isOpen={showDisclaimerPage} onClose={() => setShowDisclaimerPage(false)} />}
-      {showBlogPage && <BlogPage onClose={() => setShowBlogPage(false)} />}
+      {(showAboutPage || showTermsPage || showPrivacyPage || showAPIDocsPage || showUsageGuidePage || showCompliancePage || showDisclaimerPage || showBlogPage) && (
+        <Suspense fallback={<WorkspaceFallback />}>
+          {showAboutPage && <AboutPage onClose={() => setShowAboutPage(false)} />}
+          {showTermsPage && <TermsPage onClose={() => setShowTermsPage(false)} />}
+          {showPrivacyPage && <PrivacyPage onClose={() => setShowPrivacyPage(false)} />}
+          {showAPIDocsPage && <APIDocsPage onClose={() => setShowAPIDocsPage(false)} />}
+          {showUsageGuidePage && <UsageGuidePage onClose={() => setShowUsageGuidePage(false)} />}
+          {showCompliancePage && <CompliancePage onClose={() => setShowCompliancePage(false)} />}
+          {showDisclaimerPage && <DisclaimerPage isOpen={showDisclaimerPage} onClose={() => setShowDisclaimerPage(false)} />}
+          {showBlogPage && <BlogPage onClose={() => setShowBlogPage(false)} />}
+        </Suspense>
+      )}
 
       {studyModeBookId && (() => {
         const studyBook = books.find(b => b.id === studyModeBookId);
         if (!studyBook || studyBook.status !== 'completed') return null;
         return (
           <div className="fixed inset-0 z-[200]" style={{ background: '#050505' }}>
-            <NebulaBackground theme={theme} />
+            <NebulaBackground theme={theme} quality={isMobile ? 'low' : 'medium'} />
             <div className="relative z-10 flex h-full flex-col">
               <main id="main-scroll-area" className="main-content">
                 <Suspense fallback={<WorkspaceFallback />}>

@@ -1,5 +1,5 @@
 // src/components/BookView.tsx
-import React, { useEffect, ReactNode, useState, useRef } from 'react';
+import React, { Suspense, lazy, useEffect, ReactNode, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   Book, Download, Trash2, Clock, CheckCircle, AlertCircle, Loader2,
@@ -13,11 +13,12 @@ import { APISettings, ModelProvider } from '../types';
 import type { QuotaStatus } from '../types/providers';
 import { BookProject, BookSession } from '../types/book';
 import { bookService } from '../services/bookService';
-import { BookAnalytics } from './BookAnalytics';
 import { CustomSelect } from './CustomSelect';
 import { readingProgressUtils } from '../utils/readingProgress';
 import { ZHIPU_PROVIDER, DEFAULT_ZHIPU_MODEL } from '../constants/ai';
-import { ReadingMode } from './ReadingMode';
+
+const BookAnalytics = lazy(() => import('./BookAnalytics').then(module => ({ default: module.BookAnalytics })));
+const ReadingMode = lazy(() => import('./ReadingMode').then(module => ({ default: module.ReadingMode })));
 
 // ============================================================================
 // TYPES
@@ -366,6 +367,15 @@ const DetailTabButton = ({ label, Icon, isActive, onClick }: { label: ReactNode;
   >
     <Icon className="w-3.5 h-3.5" /> {label}
   </button>
+);
+
+const DetailPaneFallback = ({ label }: { label: string }) => (
+  <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-8 text-center">
+    <div className="mx-auto flex w-fit items-center gap-3 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-base)] px-4 py-2">
+      <Loader2 className="h-4 w-4 animate-spin text-[var(--brand)]" />
+      <span className="text-sm text-[var(--text-secondary)]">{label}</span>
+    </div>
+  </div>
 );
 
 // ============================================================================
@@ -1128,20 +1138,24 @@ export function BookView({
           )}
 
           {detailTab === 'analytics' && currentBook.status === 'completed' ? (
-            <BookAnalytics book={currentBook} />
+            <Suspense fallback={<DetailPaneFallback label="Loading analytics..." />}>
+              <BookAnalytics book={currentBook} />
+            </Suspense>
           ) : detailTab === 'read' && currentBook.status === 'completed' ? (
-            <ReadingMode
-              book={currentBook}
-              theme={theme}
-              isEditing={isEditing}
-              editedContent={editedContent}
-              onEditFullBook={() => { setEditedContent(currentBook.finalBook || ''); setIsEditing(true); }}
-              onSaveFullBook={() => { onUpdateBookContent(currentBook.id, editedContent); setIsEditing(false); setEditedContent(''); showToast('Changes saved.', 'success'); }}
-              onCancelEdit={() => { setIsEditing(false); setEditedContent(''); }}
-              onContentChange={setEditedContent}
-              showToast={showToast}
-              isMobile={isMobile}
-            />
+            <Suspense fallback={<DetailPaneFallback label="Opening reader..." />}>
+              <ReadingMode
+                book={currentBook}
+                theme={theme}
+                isEditing={isEditing}
+                editedContent={editedContent}
+                onEditFullBook={() => { setEditedContent(currentBook.finalBook || ''); setIsEditing(true); }}
+                onSaveFullBook={() => { onUpdateBookContent(currentBook.id, editedContent); setIsEditing(false); setEditedContent(''); showToast('Changes saved.', 'success'); }}
+                onCancelEdit={() => { setIsEditing(false); setEditedContent(''); }}
+                onContentChange={setEditedContent}
+                showToast={showToast}
+                isMobile={isMobile}
+              />
+            </Suspense>
           ) : (
             <>
               {(isGenerating || isPaused || generationStatus?.status === 'waiting_retry') && generationStatus && generationStats && (

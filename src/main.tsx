@@ -4,13 +4,10 @@ import { inject } from '@vercel/analytics';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
-import '@fontsource/rubik/300.css';
-import '@fontsource/rubik/400.css';
-import '@fontsource/rubik/500.css';
-import '@fontsource/rubik/600.css';
-import '@fontsource/rubik/700.css';
-import '@fontsource/rubik/800.css';
-import '@fontsource/rubik/900.css';
+import '@fontsource/rubik/latin-400.css';
+import '@fontsource/rubik/latin-500.css';
+import '@fontsource/rubik/latin-700.css';
+import '@fontsource/rubik/latin-900.css';
 
 // Initialize Vercel Analytics
 inject();
@@ -48,26 +45,28 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-import NotFoundPage from './components/NotFoundPage';
-import OnboardingForm from './components/OnboardingForm';
-
 const pathname = window.location.pathname;
 const isStudyRoute = pathname === '/study' || pathname.startsWith('/study/');
+const root = createRoot(document.getElementById('root')!);
 
 if (pathname === '/join') {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <OnboardingForm />
-    </StrictMode>
-  );
+  void import('./components/OnboardingForm').then(({ default: OnboardingForm }) => {
+    root.render(
+      <StrictMode>
+        <OnboardingForm />
+      </StrictMode>
+    );
+  });
 } else if (pathname !== '/' && pathname !== '/index.html' && !isStudyRoute) {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <NotFoundPage />
-    </StrictMode>
-  );
+  void import('./components/NotFoundPage').then(({ default: NotFoundPage }) => {
+    root.render(
+      <StrictMode>
+        <NotFoundPage />
+      </StrictMode>
+    );
+  });
 } else {
-  createRoot(document.getElementById('root')!).render(
+  root.render(
     <StrictMode>
       <ErrorBoundary>
         <App />

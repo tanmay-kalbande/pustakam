@@ -1,342 +1,357 @@
-// src/components/NebulaBackground.tsx
-// Advanced Black Hole effect with realistic orbital physics and diverse celestial objects
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface NebulaBackgroundProps {
-    opacity?: number;
-    className?: string;
+  opacity?: number;
+  className?: string;
+  theme?: 'light' | 'dark';
+  quality?: 'low' | 'medium' | 'high';
 }
 
 interface Star {
-    x: number;
-    y: number;
-    size: number;
-    brightness: number;
-    twinkleSpeed: number;
-    twinklePhase: number;
+  x: number;
+  y: number;
+  size: number;
+  brightness: number;
+  twinkleSpeed: number;
+  twinklePhase: number;
 }
 
 type OrbiterType = 'comet' | 'planet' | 'asteroid';
 
 interface Orbiter {
-    type: OrbiterType;
-    angle: number;
-    radius: number;
-    baseSpeed: number;
-    pullSpeed: number;
-    size: number;
-    alpha: number;
-    color: string;
-    trail: { x: number, y: number }[]; // For smooth tails
-    inclination: number; // For 3D orbital plane effect
-    direction: 1 | -1; // Clockwise or counter-clockwise
+  type: OrbiterType;
+  angle: number;
+  radius: number;
+  baseSpeed: number;
+  pullSpeed: number;
+  size: number;
+  alpha: number;
+  color: string;
+  trail: Array<{ x: number; y: number }>;
+  inclination: number;
+  direction: 1 | -1;
+  shapePoints: number[];
 }
 
-export const NebulaBackground: React.FC<NebulaBackgroundProps> = ({ opacity = 1, className = '' }) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+const QUALITY_MULTIPLIER: Record<NonNullable<NebulaBackgroundProps['quality']>, number> = {
+  low: 0.42,
+  medium: 0.68,
+  high: 1,
+};
 
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        setPrefersReducedMotion(mediaQuery.matches);
-        const handleChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
-    }, []);
+export const NebulaBackground: React.FC<NebulaBackgroundProps> = ({
+  opacity = 1,
+  className = '',
+  theme = 'dark',
+  quality = 'medium',
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isDocumentVisible, setIsDocumentVisible] = useState(() => document.visibilityState === 'visible');
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleMotionChange = (event: MediaQueryListEvent) => setPrefersReducedMotion(event.matches);
 
-        let animationFrameId: number;
-        let time = 0;
-        let lastFrameTime = 0;
-        const targetFPS = prefersReducedMotion ? 30 : 60;
-        const frameInterval = 1000 / targetFPS;
+    setPrefersReducedMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleMotionChange);
 
-        let orbiters: Orbiter[] = [];
-        let stars: Star[] = [];
-        let centerX = 0;
-        let centerY = 0;
+    return () => mediaQuery.removeEventListener('change', handleMotionChange);
+  }, []);
 
-        const initStars = (width: number, height: number) => {
-            const starCount = Math.min(300, Math.floor((width * height) / 7000));
-            stars = [];
-            for (let i = 0; i < starCount; i++) {
-                stars.push({
-                    x: Math.random() * width,
-                    y: Math.random() * height,
-                    size: Math.random() * 1.8 + 0.3,
-                    brightness: Math.random() * 0.6 + 0.3,
-                    twinkleSpeed: Math.random() * 0.02 + 0.005,
-                    twinklePhase: Math.random() * Math.PI * 2
-                });
-            }
-        };
+  useEffect(() => {
+    const handleVisibilityChange = () => setIsDocumentVisible(document.visibilityState === 'visible');
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
-        const createOrbiter = (type?: OrbiterType): Orbiter => {
-            // Remove dust - favor asteroids (70%), comets (20%), planets (10%)
-            const random = Math.random();
-            const orbType = type || (random > 0.9 ? 'planet' : (random > 0.7 ? 'comet' : 'asteroid'));
+  useEffect(() => {
+    if (theme !== 'dark') return;
 
-            let size = 1.2 + Math.random() * 1.5; // Larger default (asteroid)
-            let color = 'rgba(180, 180, 180,'; // Default asteroid gray
-            let radius = 80 + Math.random() * 520;
-            let baseSpeed = 0.0004 + Math.random() * 0.001;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-            if (orbType === 'planet') {
-                size = 3 + Math.random() * 4;
-                color = Math.random() > 0.5 ? 'rgba(255, 200, 100,' : 'rgba(180, 140, 80,';
-                radius = 250 + Math.random() * 400;
-            } else if (orbType === 'comet') {
-                size = 1 + Math.random();
-                color = 'rgba(255, 240, 180,';
-                radius = 150 + Math.random() * 450;
-                baseSpeed *= 1.5;
-            } else if (orbType === 'asteroid') {
-                size = 1 + Math.random() * 2;
-                color = 'rgba(180, 180, 180,';
-                radius = 200 + Math.random() * 300;
-            }
+    const context = canvas.getContext('2d');
+    if (!context) return;
 
-            return {
-                type: orbType,
-                angle: Math.random() * Math.PI * 2,
-                radius: radius,
-                baseSpeed: baseSpeed,
-                pullSpeed: 0.03 + Math.random() * 0.08,
-                size: size,
-                alpha: 0.4 + Math.random() * 0.4,
-                color: color,
-                trail: [],
-                inclination: 0.3 + Math.random() * 0.2, // Flatter disk (0.3 to 0.5)
-                direction: 1 // Unified flow
-            };
-        };
+    let animationFrameId = 0;
+    let resizeFrameId = 0;
+    let time = 0;
+    let lastFrameTime = 0;
+    let renderWidth = 0;
+    let renderHeight = 0;
+    let centerX = 0;
+    let centerY = 0;
+    let stars: Star[] = [];
+    let orbiters: Orbiter[] = [];
 
-        let lastWidth = window.innerWidth;
-        const init = () => {
-            const currentWidth = window.innerWidth;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const lowPowerDevice = (navigator.hardwareConcurrency ?? 8) <= 4;
+    const densityMultiplier =
+      QUALITY_MULTIPLIER[quality]
+      * (isMobile ? 0.72 : 1)
+      * (lowPowerDevice ? 0.78 : 1)
+      * (prefersReducedMotion ? 0.6 : 1);
+    const targetFps = prefersReducedMotion ? 20 : isMobile || lowPowerDevice ? 30 : 42;
+    const frameInterval = 1000 / targetFps;
 
-            // Check for mobile device
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const initStars = (width: number, height: number) => {
+      const starCount = Math.max(28, Math.floor((width * height) / 18000 * densityMultiplier));
+      stars = Array.from({ length: starCount }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 1.4 + 0.25,
+        brightness: Math.random() * 0.5 + 0.25,
+        twinkleSpeed: Math.random() * 0.018 + 0.004,
+        twinklePhase: Math.random() * Math.PI * 2,
+      }));
+    };
 
-            // On mobile, height changes (address bar) shouldn't trigger full re-init 
-            // completely ignore if width hasn't changed to prevent jump/flicker
-            if (isMobile && currentWidth === lastWidth && orbiters.length > 0) {
-                return;
-            }
+    const createOrbiter = (type?: OrbiterType): Orbiter => {
+      const random = Math.random();
+      const orbiterType = type ?? (random > 0.88 ? 'planet' : random > 0.7 ? 'comet' : 'asteroid');
 
-            // For mobile, we use screen height to prevent gaps when address bar hides
-            // For desktop, we use innerHeight
-            const targetHeight = isMobile ? window.screen.height : window.innerHeight;
+      let size = 1.1 + Math.random() * 1.5;
+      let color = 'rgba(180, 180, 180,';
+      let radius = 120 + Math.random() * 420;
+      let baseSpeed = 0.00045 + Math.random() * 0.0008;
 
-            lastWidth = currentWidth;
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = currentWidth * dpr;
-            canvas.height = targetHeight * dpr;
-            canvas.style.width = `${currentWidth}px`;
-            canvas.style.height = `${targetHeight}px`;
-            ctx.scale(dpr, dpr);
+      if (orbiterType === 'planet') {
+        size = 2.8 + Math.random() * 3.8;
+        color = Math.random() > 0.45 ? 'rgba(255, 204, 120,' : 'rgba(170, 130, 76,';
+        radius = 220 + Math.random() * 340;
+      } else if (orbiterType === 'comet') {
+        size = 0.9 + Math.random() * 1.2;
+        color = 'rgba(255, 235, 180,';
+        radius = 160 + Math.random() * 380;
+        baseSpeed *= 1.35;
+      }
 
-            centerX = currentWidth * 0.5;
-            centerY = targetHeight * 0.5;
+      return {
+        type: orbiterType,
+        angle: Math.random() * Math.PI * 2,
+        radius,
+        baseSpeed,
+        pullSpeed: 0.028 + Math.random() * 0.05,
+        size,
+        alpha: 0.3 + Math.random() * 0.35,
+        color,
+        trail: [],
+        inclination: 0.38 + Math.random() * 0.18,
+        direction: 1,
+        shapePoints: Array.from({ length: 6 }, () => 0.78 + Math.random() * 0.36),
+      };
+    };
 
-            initStars(currentWidth, targetHeight);
+    const init = () => {
+      renderWidth = window.innerWidth;
+      renderHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
+      centerX = renderWidth * 0.5;
+      centerY = renderHeight * 0.5;
 
-            orbiters = [];
-            const orbCount = prefersReducedMotion ? 40 : 120;
-            for (let i = 0; i < orbCount; i++) {
-                orbiters.push(createOrbiter());
-            }
+      const devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = renderWidth * devicePixelRatio;
+      canvas.height = renderHeight * devicePixelRatio;
+      canvas.style.width = `${renderWidth}px`;
+      canvas.style.height = `${renderHeight}px`;
+      context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 
-            // Paint initial background immediately
-            ctx.fillStyle = 'rgb(0, 0, 0)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        };
+      initStars(renderWidth, renderHeight);
 
-        const drawStars = (currentTime: number) => {
-            stars.forEach(star => {
-                const twinkle = Math.sin(currentTime * star.twinkleSpeed + star.twinklePhase);
-                const currentBrightness = star.brightness * (0.6 + twinkle * 0.4);
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${currentBrightness})`;
-                ctx.fill();
-            });
-        };
+      const orbiterCount = Math.max(12, Math.floor(58 * densityMultiplier));
+      orbiters = Array.from({ length: orbiterCount }, () => createOrbiter());
 
-        const drawLiquidGas = (currentTime: number) => {
-            // Draw multiple layered slow-rotating gas clouds
-            for (let i = 0; i < 3; i++) {
-                const shift = currentTime * (0.1 + i * 0.05);
-                const gasRadius = 250 + i * 100;
-                const gx = centerX + Math.cos(shift) * 20;
-                const gy = centerY + Math.sin(shift) * 10;
+      context.fillStyle = 'rgb(0, 0, 0)';
+      context.fillRect(0, 0, renderWidth, renderHeight);
+    };
 
-                const gas = ctx.createRadialGradient(gx, gy, 50, gx, gy, gasRadius);
-                gas.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                gas.addColorStop(0.4, `rgba(40, 30, 10, ${0.01 + i * 0.005})`); // Very subtle gold smoke
-                gas.addColorStop(0.7, 'rgba(0, 0, 0, 0.02)');
-                gas.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    const drawStars = (currentTime: number) => {
+      for (const star of stars) {
+        const twinkle = Math.sin(currentTime * star.twinkleSpeed + star.twinklePhase);
+        const brightness = star.brightness * (0.68 + twinkle * 0.32);
+        context.beginPath();
+        context.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        context.fillStyle = `rgba(255, 255, 255, ${brightness})`;
+        context.fill();
+      }
+    };
 
-                ctx.fillStyle = gas;
-                ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-            }
-        };
+    const drawBackdrop = (currentTime: number) => {
+      const halo = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, 360);
+      halo.addColorStop(0, 'rgba(205, 160, 92, 0.08)');
+      halo.addColorStop(0.18, 'rgba(165, 120, 54, 0.05)');
+      halo.addColorStop(0.42, 'rgba(96, 62, 20, 0.02)');
+      halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      context.fillStyle = halo;
+      context.fillRect(0, 0, renderWidth, renderHeight);
 
-        const animate = (currentFrameTime: number) => {
-            const deltaTime = currentFrameTime - lastFrameTime;
-            if (deltaTime < frameInterval) {
-                animationFrameId = requestAnimationFrame(animate);
-                return;
-            }
-            lastFrameTime = currentFrameTime - (deltaTime % frameInterval);
-            time += 0.016;
+      for (let index = 0; index < 2; index += 1) {
+        const phase = currentTime * (0.08 + index * 0.03);
+        const radius = 220 + index * 110;
+        const x = centerX + Math.cos(phase) * (18 + index * 4);
+        const y = centerY + Math.sin(phase * 0.8) * (10 + index * 3);
+        const cloud = context.createRadialGradient(x, y, 28, x, y, radius);
+        cloud.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        cloud.addColorStop(0.4, `rgba(52, 37, 14, ${0.02 + index * 0.004})`);
+        cloud.addColorStop(0.72, 'rgba(0, 0, 0, 0.018)');
+        cloud.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        context.fillStyle = cloud;
+        context.fillRect(0, 0, renderWidth, renderHeight);
+      }
+    };
 
-            // Clear with fade to allow star/trail accumulation
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
-            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    const drawOrbiter = (orbiter: Orbiter, nextX: number, nextY: number, finalSize: number, finalAlpha: number) => {
+      if (orbiter.type === 'comet') {
+        context.beginPath();
+        context.moveTo(nextX, nextY);
+        orbiter.trail.forEach((position, index) => {
+          const ratio = 1 - index / Math.max(orbiter.trail.length, 1);
+          context.strokeStyle = `${orbiter.color}${finalAlpha * ratio * 0.45})`;
+          context.lineWidth = Math.max(0.5, finalSize * ratio);
+          context.lineTo(position.x, position.y);
+        });
+        context.stroke();
 
-            drawStars(time);
+        context.beginPath();
+        context.arc(nextX, nextY, finalSize * 1.3, 0, Math.PI * 2);
+        context.fillStyle = `${orbiter.color}${finalAlpha})`;
+        context.fill();
+        return;
+      }
 
-            // Draw smooth background glow (from user snippet)
-            const glowGradient = ctx.createRadialGradient(
-                centerX, centerY, 0,
-                centerX, centerY, 400
-            );
-            glowGradient.addColorStop(0, 'rgba(200, 160, 100, 0.08)');
-            glowGradient.addColorStop(0.1, 'rgba(180, 140, 80, 0.05)');
-            glowGradient.addColorStop(0.2, 'rgba(160, 120, 60, 0.03)');
-            glowGradient.addColorStop(0.4, 'rgba(140, 100, 40, 0.015)');
-            glowGradient.addColorStop(0.6, 'rgba(120, 80, 20, 0.008)');
-            glowGradient.addColorStop(0.8, 'rgba(100, 60, 10, 0.003)');
-            glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = glowGradient;
-            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      if (orbiter.type === 'planet') {
+        const planetGradient = context.createRadialGradient(
+          nextX - finalSize / 3,
+          nextY - finalSize / 3,
+          1,
+          nextX,
+          nextY,
+          finalSize
+        );
+        planetGradient.addColorStop(0, `${orbiter.color}${finalAlpha})`);
+        planetGradient.addColorStop(1, 'rgba(0, 0, 0, 0.82)');
+        context.beginPath();
+        context.arc(nextX, nextY, finalSize, 0, Math.PI * 2);
+        context.fillStyle = planetGradient;
+        context.fill();
+        return;
+      }
 
-            // Keep subtle gas for extra texture
-            drawLiquidGas(time);
+      context.beginPath();
+      orbiter.shapePoints.forEach((shapePoint, index) => {
+        const angle = (index * Math.PI * 2) / orbiter.shapePoints.length;
+        const radius = finalSize * shapePoint;
+        const x = nextX + Math.cos(angle) * radius;
+        const y = nextY + Math.sin(angle) * radius;
 
+        if (index === 0) {
+          context.moveTo(x, y);
+        } else {
+          context.lineTo(x, y);
+        }
+      });
+      context.closePath();
+      context.fillStyle = `${orbiter.color}${finalAlpha})`;
+      context.fill();
+    };
 
-            // Physics-driven orbital animation
-            orbiters.forEach((p, index) => {
-                // PHYSICS: From classic version (sucking effect)
-                p.angle += p.baseSpeed * (300 / Math.max(p.radius, 20)) * p.direction;
-                p.radius -= p.pullSpeed * (200 / Math.max(p.radius, 20));
+    const animate = (currentFrameTime: number) => {
+      if (!isDocumentVisible) {
+        animationFrameId = window.requestAnimationFrame(animate);
+        return;
+      }
 
-                const x = centerX + Math.cos(p.angle) * p.radius;
-                const y = centerY + Math.sin(p.angle) * p.radius * p.inclination; // Use varied inclination
+      const deltaTime = currentFrameTime - lastFrameTime;
+      if (deltaTime < frameInterval) {
+        animationFrameId = window.requestAnimationFrame(animate);
+        return;
+      }
 
-                // Update trails - lengthen as they fall in
-                if (p.type === 'comet') {
-                    p.trail.unshift({ x, y });
-                    const dynamicTrailLength = 30;
-                    if (p.trail.length > dynamicTrailLength) p.trail.pop();
-                }
+      lastFrameTime = currentFrameTime - (deltaTime % frameInterval);
+      time += deltaTime / 1000;
 
-                // Render based on type - Expansion & Spaghettification
-                // Expands as it gets sucked in, then rapidly collapses to 0
-                const expansion = Math.max(1, 120 / Math.max(p.radius, 10));
-                const collapse = Math.min(1, Math.max(0, (p.radius - 22) / 30)); // Collapse starts at r=52, ends at r=22
+      context.fillStyle = 'rgba(0, 0, 0, 0.18)';
+      context.fillRect(0, 0, renderWidth, renderHeight);
 
-                const finalAlpha = Math.min(1, p.alpha * expansion * (0.5 + collapse * 0.5));
-                const finalSize = p.size * expansion * collapse;
+      drawStars(time);
+      drawBackdrop(time);
 
-                if (finalSize > 0.1 && finalAlpha > 0.01) {
-                    if (p.type === 'comet') {
-                        ctx.beginPath();
-                        ctx.moveTo(x, y);
-                        p.trail.forEach((pos, i) => {
-                            const tailAlpha = finalAlpha * (1 - i / p.trail.length) * 0.5;
-                            ctx.strokeStyle = `${p.color}${tailAlpha})`;
-                            ctx.lineWidth = finalSize * (1 - i / p.trail.length);
-                            ctx.lineTo(pos.x, pos.y);
-                        });
-                        ctx.stroke();
+      orbiters.forEach((orbiter, index) => {
+        orbiter.angle += orbiter.baseSpeed * (280 / Math.max(orbiter.radius, 26)) * orbiter.direction * deltaTime;
+        orbiter.radius -= orbiter.pullSpeed * (180 / Math.max(orbiter.radius, 28)) * (deltaTime / 16.67);
 
-                        ctx.beginPath();
-                        ctx.arc(x, y, finalSize * 1.5, 0, Math.PI * 2);
-                        ctx.fillStyle = `${p.color}${finalAlpha})`;
-                        ctx.fill();
-                    } else if (p.type === 'planet') {
-                        const gradient = ctx.createRadialGradient(x - finalSize / 3, y - finalSize / 3, 1, x, y, finalSize);
-                        gradient.addColorStop(0, `${p.color}${finalAlpha})`);
-                        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
-                        ctx.beginPath();
-                        ctx.arc(x, y, finalSize, 0, Math.PI * 2);
-                        ctx.fillStyle = gradient;
-                        ctx.fill();
-                    } else if (p.type === 'asteroid') {
-                        ctx.beginPath();
-                        ctx.moveTo(x + finalSize, y);
-                        for (let i = 1; i < 6; i++) {
-                            const ang = (i * Math.PI * 2) / 6;
-                            const r = finalSize * (0.8 + Math.random() * 0.4);
-                            ctx.lineTo(x + Math.cos(ang) * r, y + Math.sin(ang) * r);
-                        }
-                        ctx.closePath();
-                        ctx.fillStyle = `${p.color}${finalAlpha})`;
-                        ctx.fill();
-                    }
-                }
+        const nextX = centerX + Math.cos(orbiter.angle) * orbiter.radius;
+        const nextY = centerY + Math.sin(orbiter.angle) * orbiter.radius * orbiter.inclination;
 
-                if (p.radius < 22) {
-                    orbiters[index] = createOrbiter(p.type);
-                }
-            });
+        if (orbiter.type === 'comet') {
+          orbiter.trail.unshift({ x: nextX, y: nextY });
+          if (orbiter.trail.length > 16) orbiter.trail.pop();
+        }
 
-            // Photon Ring - Soft, Diffuse, Metallic Shimmer (Not Solid)
-            const ringIntensity = 0.3 + Math.sin(time * 1.5) * 0.1;
-            const ringRadius = 42;
-            const photonRing = ctx.createRadialGradient(centerX, centerY, ringRadius - 5, centerX, centerY, ringRadius + 10);
-            photonRing.addColorStop(0, 'rgba(0, 0, 0, 0)');
-            photonRing.addColorStop(0.4, `rgba(255, 230, 200, ${ringIntensity * 0.4})`); // Very faint golden-white
-            photonRing.addColorStop(0.6, `rgba(255, 255, 255, ${ringIntensity * 0.6})`); // Core highlight
-            photonRing.addColorStop(0.8, `rgba(200, 170, 140, ${ringIntensity * 0.3})`); // Faint warm spread
-            photonRing.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        const expansion = Math.max(1, 110 / Math.max(orbiter.radius, 14));
+        const collapse = Math.min(1, Math.max(0, (orbiter.radius - 24) / 28));
+        const finalAlpha = Math.min(1, orbiter.alpha * expansion * (0.55 + collapse * 0.45));
+        const finalSize = orbiter.size * expansion * collapse;
 
-            ctx.fillStyle = photonRing;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, ringRadius + 15, 0, Math.PI * 2);
-            ctx.fill();
+        if (finalSize > 0.1 && finalAlpha > 0.01) {
+          drawOrbiter(orbiter, nextX, nextY, finalSize, finalAlpha);
+        }
 
+        if (orbiter.radius < 24) {
+          orbiters[index] = createOrbiter(orbiter.type);
+        }
+      });
 
-            // Soft Singularity (from classic version)
-            const centerDark = ctx.createRadialGradient(
-                centerX, centerY, 0,
-                centerX, centerY, 60
-            );
-            centerDark.addColorStop(0, 'rgba(0, 0, 0, 0.95)');
-            centerDark.addColorStop(0.5, 'rgba(0, 0, 0, 0.5)');
-            centerDark.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = centerDark;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
-            ctx.fill();
+      const ringIntensity = 0.26 + Math.sin(time * 1.35) * 0.08;
+      const ringRadius = 40;
+      const photonRing = context.createRadialGradient(centerX, centerY, ringRadius - 6, centerX, centerY, ringRadius + 12);
+      photonRing.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      photonRing.addColorStop(0.38, `rgba(255, 230, 190, ${ringIntensity * 0.42})`);
+      photonRing.addColorStop(0.58, `rgba(255, 255, 255, ${ringIntensity * 0.62})`);
+      photonRing.addColorStop(0.8, `rgba(192, 154, 108, ${ringIntensity * 0.24})`);
+      photonRing.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      context.fillStyle = photonRing;
+      context.beginPath();
+      context.arc(centerX, centerY, ringRadius + 14, 0, Math.PI * 2);
+      context.fill();
 
-            animationFrameId = requestAnimationFrame(animate);
-        };
+      const singularity = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, 58);
+      singularity.addColorStop(0, 'rgba(0, 0, 0, 0.96)');
+      singularity.addColorStop(0.55, 'rgba(0, 0, 0, 0.52)');
+      singularity.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      context.fillStyle = singularity;
+      context.beginPath();
+      context.arc(centerX, centerY, 58, 0, Math.PI * 2);
+      context.fill();
 
-        window.addEventListener('resize', init);
-        init();
-        animationFrameId = requestAnimationFrame(animate);
+      animationFrameId = window.requestAnimationFrame(animate);
+    };
 
-        return () => {
-            window.removeEventListener('resize', init);
-            cancelAnimationFrame(animationFrameId);
-        };
-    }, [prefersReducedMotion]);
+    const handleResize = () => {
+      window.cancelAnimationFrame(resizeFrameId);
+      resizeFrameId = window.requestAnimationFrame(init);
+    };
 
-    return (
-        <canvas
-            ref={canvasRef}
-            className={`fixed inset-0 pointer-events-none z-0 ${className}`}
-            style={{ opacity }}
-        />
-    );
+    init();
+    animationFrameId = window.requestAnimationFrame(animate);
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.cancelAnimationFrame(animationFrameId);
+      window.cancelAnimationFrame(resizeFrameId);
+    };
+  }, [isDocumentVisible, prefersReducedMotion, quality, theme]);
+
+  if (theme !== 'dark') return null;
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className={`fixed inset-0 pointer-events-none z-0 ${className}`}
+      style={{ opacity }}
+    />
+  );
 };
 
 export default NebulaBackground;
