@@ -125,6 +125,16 @@ const getBookCoverTone = (title: string) => {
   return 'bg-zinc-900/70';
 };
 
+const STATUS_LABELS: Record<BookProject['status'], string> = {
+  planning: 'Planning',
+  generating_roadmap: 'Creating roadmap',
+  roadmap_completed: 'Ready to write',
+  generating_content: 'Writing',
+  assembling: 'Assembling',
+  completed: 'Completed',
+  error: 'Needs attention',
+};
+
 // ============================================================================
 // SUB-COMPONENTS
 // ============================================================================
@@ -426,19 +436,10 @@ const HomeView = ({
   const activeModel =
     getModelsForProvider(settings.selectedProvider).find(model => model.id === settings.selectedModel)?.name
     ?? settings.selectedModel;
-  const statusLabelMap: Record<BookProject['status'], string> = {
-    planning: 'Planning',
-    generating_roadmap: 'Creating roadmap',
-    roadmap_completed: 'Ready to write',
-    generating_content: 'Writing',
-    assembling: 'Assembling',
-    completed: 'Completed',
-    error: 'Needs attention',
-  };
 
   return (
     <div
-      className="relative flex-1 w-full bg-[var(--bg-base)] px-6 pb-24 pt-24"
+      className="relative w-full min-h-full bg-[var(--bg-base)] px-6 pb-24 pt-24"
       style={{ background: 'var(--bg-base)' }}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,rgba(255,255,255,0.02),transparent_70%)] -z-10" />
@@ -492,12 +493,12 @@ const HomeView = ({
                   <button
                     key={book.id}
                     onClick={() => onOpenBook(book.id)}
-                    className="workspace-card flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--workspace-soft)]"
+                      className="workspace-card flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--workspace-soft)]"
                   >
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-[var(--text-primary)]">{book.title}</div>
                       <div className="mt-1 text-xs text-[var(--text-secondary)]">
-                        {statusLabelMap[book.status]} • {new Date(book.updatedAt).toLocaleDateString()}
+                        {STATUS_LABELS[book.status]} • {new Date(book.updatedAt).toLocaleDateString()}
                       </div>
                     </div>
                     <ArrowLeft className="h-4 w-4 shrink-0 rotate-180 text-[var(--text-muted)]" />
@@ -1002,10 +1003,14 @@ export function BookView({
 
   const handleCreateRoadmap = async (session: BookSession) => {
     if (!session.goal.trim()) { showToast('Please enter a learning goal.', 'warning'); return; }
-
-    await onCreateBookRoadmap(session);
-    setFormData({ title: '', goal: '', language: 'en', targetAudience: '', complexityLevel: 'intermediate', reasoning: '', generationMode: 'stellar', preferences: { includeExamples: true, includePracticalExercises: false, includeQuizzes: false } });
-    setShowAdvanced(false);
+    try {
+      await onCreateBookRoadmap(session);
+      setFormData({ title: '', goal: '', language: 'en', targetAudience: '', complexityLevel: 'intermediate', reasoning: '', generationMode: 'stellar', preferences: { includeExamples: true, includePracticalExercises: false, includeQuizzes: false } });
+      setShowAdvanced(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create roadmap.';
+      showToast(message, 'error');
+    }
   };
 
   const handleStartGeneration = () => {
