@@ -1,4 +1,4 @@
-﻿// src/components/BookView.tsx
+// src/components/BookView.tsx
 import React, { Suspense, lazy, useEffect, ReactNode, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -133,6 +133,19 @@ const STATUS_LABELS: Record<BookProject['status'], string> = {
   assembling: 'Assembling',
   completed: 'Completed',
   error: 'Needs attention',
+};
+
+const getStatusIcon = (status: BookProject['status']) => {
+  switch (status) {
+    case 'completed': return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
+    case 'error': return <AlertTriangle className="w-4 h-4 text-red-500" />;
+    case 'planning': return <Clock className="w-4 h-4 text-[var(--text-muted)]" />;
+    default: return <Loader2 className="w-4 h-4 text-[var(--brand)] animate-spin" />;
+  }
+};
+
+const getStatusText = (status: BookProject['status']) => {
+  return STATUS_LABELS[status] || 'Unknown';
 };
 
 // ============================================================================
@@ -442,8 +455,7 @@ const HomeView = ({
       className="relative w-full min-h-full bg-[var(--bg-base)] px-6 pb-24 pt-24"
       style={{ background: 'var(--bg-base)' }}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,rgba(255,255,255,0.02),transparent_70%)] -z-10" />
-
+    >
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
           <div>

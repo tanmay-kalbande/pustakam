@@ -2668,22 +2668,7 @@ html.light .header-with-fade::after {
     overflow-x: hidden;
 }
 
-.workspace-shell .main-content::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(180deg, rgba(0, 0, 0, 0.22), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.22)),
-      radial-gradient(circle at top center, rgba(255, 255, 255, 0.045), transparent 48%);
-    z-index: 0;
-}
 
-.light .workspace-shell .main-content::before {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.2)),
-      radial-gradient(circle at top center, rgba(209, 168, 111, 0.08), transparent 48%);
-}
 
 .workspace-topbar {
     position: fixed;
