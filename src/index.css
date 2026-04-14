@@ -113,6 +113,14 @@
   html {
     scroll-behavior: smooth;
   }
+
+  /* Force black safe areas on mobile/PWA */
+  @media (max-width: 768px) {
+    html,
+    body {
+      background-color: #000000 !important;
+    }
+  }
 }
 
 /* ==========================================================================
