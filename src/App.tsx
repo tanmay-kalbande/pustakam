@@ -826,11 +826,7 @@ function App() {
                 user={user}
                 userProfile={profile}
                 onSignOut={signOut}
-                centerContent={
-                  showListInMain && !currentBookId
-                    ? <h1 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">My Books</h1>
-                    : null
-                }
+                centerContent={null}
                 quotaStatus={quotaStatus}
               />
 

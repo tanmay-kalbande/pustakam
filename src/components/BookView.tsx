@@ -451,7 +451,7 @@ const HomeView = ({
     ?? settings.selectedModel;
 
   return (
-    <div className="relative w-full min-h-full px-6 pb-24 pt-24">
+    <div className="relative w-full min-h-full px-6 pb-40 pt-24">
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
           <div>
@@ -788,7 +788,7 @@ const BookListGrid = ({
 
   return (
     <div className="min-h-full pt-24">
-      <div className="mx-auto w-full max-w-6xl px-4 pb-12 md:px-6">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-32 md:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Library</p>
@@ -799,7 +799,7 @@ const BookListGrid = ({
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+              <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
                 type="text"
                 placeholder="Search title or topic"
