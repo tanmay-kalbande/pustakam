@@ -2559,6 +2559,7 @@ html.light .header-with-fade::after {
     --workspace-soft: rgba(255, 255, 255, 0.03);
     --workspace-line: rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
+    background-color: var(--bg-base);
     display: flex;
     flex-direction: column;
     height: 100%;
