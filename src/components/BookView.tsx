@@ -452,7 +452,7 @@ const HomeView = ({
 
   return (
     <div className="relative w-full min-h-full px-6 pb-24 pt-24">
-      <div className="relative z-10 mx-auto w-full max-w-6xl pb-32 mb-12">
+      <div className="relative z-10 mx-auto w-full max-w-6xl pb-6 mb-4">
         <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
           <div>
             <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">
