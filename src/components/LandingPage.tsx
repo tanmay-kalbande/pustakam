@@ -602,7 +602,7 @@ const LandingPage = ({
 
       {/* ── Main ── */}
       <main className="relative z-10 flex flex-1 flex-col overflow-hidden md:overflow-visible md:pt-16">
-        <div className="relative flex h-full w-full flex-1 flex-col items-center justify-start pt-16 md:justify-center md:pt-0">
+        <div className="relative flex h-full w-full flex-1 flex-col items-center justify-start pt-24 md:justify-center md:pt-0">
 
           {/* Mobile layout */}
           <div className="flex h-full w-full flex-col overflow-hidden px-4 pb-4 md:hidden">
