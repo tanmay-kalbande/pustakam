@@ -665,7 +665,7 @@ const LandingPage = ({
                 initial="enter"
                 animate="center"
                 exit="exit"
-                className="flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden px-6 pt-0 pb-32"
+                className={`flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden px-6 ${activeTab === 'home' ? 'pt-20 pb-16' : 'pt-12 pb-24'}`}
               >
                 {renderDesktopContent()}
               </motion.div>
