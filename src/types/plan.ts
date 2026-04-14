@@ -1,5 +1,5 @@
 // src/types/plan.ts
-// Plan types and limits for Pustakam - Only Monthly and Yearly plans
+// Access types and limits for Pustakam - monthly and yearly access windows
 
 export type PlanType = 'monthly' | 'yearly';
 
@@ -12,23 +12,23 @@ export interface PlanLimits {
 export const PLAN_CONFIG: Record<PlanType, PlanLimits> = {
     monthly: {
         maxBooks: -1, // unlimited
-        name: 'Monthly PRO',
-        description: 'Unlimited book generation',
+        name: 'Monthly Access',
+        description: 'Unlimited book generation during the active access window',
     },
     yearly: {
         maxBooks: -1, // unlimited
-        name: 'Yearly PRO',
-        description: 'Unlimited book generation + best value',
+        name: 'Yearly Access',
+        description: 'Unlimited book generation during the active access window',
     },
 };
 
-// Duration in days for each plan
+// Duration in days for each access window
 export const PLAN_DURATION_DAYS: Record<PlanType, number> = {
     monthly: 30,
     yearly: 365,
 };
 
-// Legacy configuration
+// Legacy numeric configuration
 export const PLAN_PRICING: Record<PlanType, number> = {
     monthly: 0,
     yearly: 0,
@@ -47,12 +47,12 @@ export function isPlanActive(plan: PlanType, expiresAt: string | null): boolean 
     return new Date(expiresAt) > new Date();
 }
 
-// Get remaining books (always unlimited for paid plans)
+// Get remaining books (always unlimited for active access)
 export function getBooksRemaining(plan: PlanType, booksCreated: number): number {
     return Infinity; // Unlimited for all plans
 }
 
-// Check if user can create a book (always true for paid plans)
+// Check if user can create a book (always true for active access)
 export function canCreateBook(plan: PlanType, booksCreated: number, expiresAt: string | null): boolean {
     return isPlanActive(plan, expiresAt);
 }

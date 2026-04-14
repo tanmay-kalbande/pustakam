@@ -25,8 +25,6 @@ export default function OnboardingForm() {
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [showCustomRole, setShowCustomRole] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState('');
-  const [selectedHours, setSelectedHours] = useState('');
   const successRef = useRef<HTMLDivElement>(null);
 
   // Fire confetti on success
@@ -54,8 +52,6 @@ export default function OnboardingForm() {
 
     // Append pill-selected values that aren't native inputs
     if (selectedGender) data.set('04_gender', selectedGender);
-    if (selectedDuration) data.set('25_duration', selectedDuration);
-    if (selectedHours) data.set('26_hours', selectedHours);
     data.set('15_interest', selectedInterests.join(', '));
 
     try {
@@ -355,18 +351,26 @@ export default function OnboardingForm() {
                 </div>
               </div>
 
-              {/* Availability */}
+              {/* Open-Source Collaboration */}
               <div className="pk-card">
-                <div className="pk-section-header">Availability</div>
-                <div className="pk-row two">
-                  <div className="pk-field"><label className="pk-label">When can you start contributing? *</label><input type="date" name="25b_start_date" required /></div>
+                <div className="pk-section-header">Open-Source Collaboration</div>
+                <div className="pk-row">
                   <div className="pk-field">
-                    <label className="pk-label">Commitment Level *</label>
-                    <div className="pk-radio-group">
-                      {['Casual Contributor', 'Core Contributor', 'Just exploring'].map(d => (
-                        <RadioPill key={d} label={d} value={d} group="25_duration" selected={selectedDuration} onSelect={setSelectedDuration} />
-                      ))}
-                    </div>
+                    <label className="pk-label">How would you like to contribute?</label>
+                    <textarea
+                      name="25_collaboration_style"
+                      placeholder="e.g. async research support, code contributions, writing, design feedback, testing, or anything else you enjoy..."
+                    />
+                  </div>
+                </div>
+                <div className="pk-row">
+                  <div className="pk-field">
+                    <label className="pk-label">Anything we should know about how you like to collaborate?</label>
+                    <input
+                      type="text"
+                      name="26_collaboration_notes"
+                      placeholder="Optional note about your preferred workflow or strengths"
+                    />
                   </div>
                 </div>
               </div>
@@ -403,10 +407,10 @@ export default function OnboardingForm() {
                   <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
                 </div>
               </div>
-              <div className="pk-success-title">Welcome to the Project!</div>
+              <div className="pk-success-title">Thanks for Joining the Project!</div>
               <div className="pk-success-sub">
                 Thanks for your interest.<br />
-                We'll be in touch with how you can start contributing.<br />
+                We'll review your response and share ways to contribute.<br />
                 Let's build something great. 🚀
               </div>
               <div className="pk-success-badge">Pustakam AI  -  Open Source Contributor</div>

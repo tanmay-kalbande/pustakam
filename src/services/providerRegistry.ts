@@ -85,7 +85,7 @@ const googleAuth = (_key: string) => ({
 
 export const PROVIDER_REGISTRY: Record<ProviderID, ProviderConfig> = {
 
-  // ── Platform Providers (proxy-supported for free tier) ──────────────────
+  // Platform Providers (proxy-supported for shared access)
 
   zhipu: {
     id: 'zhipu',
@@ -263,7 +263,7 @@ export const PROVIDER_REGISTRY: Record<ProviderID, ProviderConfig> = {
     id: 'cohere',
     name: 'Cohere',
     badge: 'COH',
-    tagline: 'Command A — enterprise-grade RAG',
+    tagline: 'Command A — large-context RAG',
     endpoint: 'https://api.cohere.com/v2/chat',
     supportsProxy: false,
     supportsBYOK: true,
@@ -389,7 +389,7 @@ export function getBYOKProviders(): ProviderConfig[] {
   return Object.values(PROVIDER_REGISTRY).filter(p => p.supportsBYOK);
 }
 
-/** Get all providers that support the platform proxy (free tier) */
+/** Get all providers that support the platform proxy (shared access) */
 export function getProxyProviders(): ProviderConfig[] {
   return Object.values(PROVIDER_REGISTRY).filter(p => p.supportsProxy);
 }

@@ -23,7 +23,7 @@ export interface ProviderDisplayInfo {
   name: string;
   tagline: string;
   badge: string;
-  isProxy: boolean;       // Can use platform proxy (free tier)
+  isProxy: boolean;       // Can use platform proxy (shared access)
   supportsBYOK: boolean;  // Accepts user's own API key
 }
 
@@ -55,7 +55,7 @@ function buildProviderDisplayList(): ProviderDisplayInfo[] {
 
 export const PROVIDERS: ProviderDisplayInfo[] = buildProviderDisplayList();
 
-/** Get only the proxy-supported providers (for showing in free tier selector) */
+/** Get only the proxy-supported providers (for showing in the shared access selector) */
 export const PROXY_PROVIDERS = PROVIDERS.filter(p => p.isProxy);
 
 /** Get only the BYOK providers (for showing in API key settings) */
@@ -63,7 +63,7 @@ export const BYOK_PROVIDERS = PROVIDERS.filter(p => p.supportsBYOK);
 
 // ============================================================================
 // Orchestration map — used by the proxy for server-side model selection
-// Only relevant when using the platform proxy (free tier)
+// Only relevant when using the platform proxy (shared access)
 // ============================================================================
 
 export const ORCHESTRATION_MAP = {

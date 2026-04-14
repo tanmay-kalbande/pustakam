@@ -51,17 +51,17 @@ class BookEnhancementService {
       },
       {
         id: 'business-strategy',
-        name: 'Business Strategy & Planning',
-        description: 'Strategic thinking, market analysis, and business development',
+        name: 'Strategy & Planning',
+        description: 'Strategic thinking, market analysis, and sustainable project growth',
         category: 'business',
-        systemPrompt: 'Develop a comprehensive business strategy guide covering market analysis, competitive positioning, financial planning, and growth strategies. Include real case studies, frameworks, and actionable templates.',
+        systemPrompt: 'Develop a comprehensive strategy guide covering market analysis, competitive positioning, financial planning, and sustainable growth plans. Include real case studies, frameworks, and actionable templates.',
         preferences: {
           includeExamples: true,
           includePracticalExercises: true,
           includeQuizzes: false
         },
         estimatedModules: 10,
-        targetAudience: 'Entrepreneurs and Business Professionals'
+        targetAudience: 'Researchers, builders, and project leads'
       },
       {
         id: 'data-science',
@@ -127,7 +127,7 @@ class BookEnhancementService {
     const complexityIndicators = {
       beginner: ['basic', 'simple', 'introduction', 'getting started', 'fundamentals'],
       intermediate: ['advanced', 'complex', 'implementation', 'optimization', 'architecture'],
-      advanced: ['sophisticated', 'enterprise', 'scalable', 'theoretical', 'research']
+      advanced: ['sophisticated', 'large-scale', 'scalable', 'theoretical', 'research']
     };
 
     let complexity: 'beginner' | 'intermediate' | 'advanced' = 'beginner';

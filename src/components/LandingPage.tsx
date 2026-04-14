@@ -47,10 +47,10 @@ const DEMO_BOOKS = [
 // ── Testimonials  -  natural, real-sounding ─────────────────────
 const TESTIMONIALS = [
   { name: 'Arjun Mehta',     role: 'Software Engineer',   quote: 'Typed "learn Rust from scratch" and had a proper structured book 20 minutes later. Actually used it.' },
-  { name: 'Priya Sharma',    role: 'Content Strategist',  quote: 'The structure it generates is honestly better than most paid courses I\'ve taken.' },
+  { name: 'Priya Sharma',    role: 'Content Strategist',  quote: 'The structure it generates is honestly better than most long-form learning resources I\'ve tried.' },
   { name: 'Rohan Gupta',     role: 'CS Student',          quote: 'Used it the night before my OS exam. The roadmap alone saved me.' },
   { name: 'Ananya Iyer',     role: 'Creator',             quote: 'Street Mode genuinely slapped. Got roasted into actually understanding machine learning.' },
-  { name: 'Vikram Singh',    role: 'Freelancer',          quote: 'Client needed a training doc fast. Pustakam drafted it, I cleaned it up. Done.' },
+  { name: 'Vikram Singh',    role: 'Freelancer',          quote: 'A team needed a training doc fast. Pustakam drafted it, I cleaned it up. Done.' },
   { name: 'Sanya Verma',     role: 'Teacher',             quote: 'Made supplementary reading for my class in one afternoon. Students actually read it.' },
   { name: 'Aditya Rao',      role: 'Product Manager',     quote: 'No fluff, no filler. Just the content I needed, structured the way I\'d have done it myself.' },
   { name: 'Kavita Reddy',    role: 'Researcher',          quote: 'Finally something that organizes a topic the way my brain wants to learn it.' },
@@ -107,7 +107,7 @@ const renderHome = (
         {
           title: 'Multi-AI Engine',
           desc: '13+ providers including GPT-5.4, Claude, Gemini, Gemma, Grok & more.',
-          sub: 'Bring your own key or use the free tier',
+          sub: 'Bring your own key or use shared access',
           span: 2,
         },
         {
@@ -554,7 +554,7 @@ const LandingPage = ({
                 <img src="/white-logo.png" alt="Logo" className="h-8 w-8" />
                 <div className="flex flex-col">
                   <span className="text-sm font-bold uppercase leading-none tracking-tight text-white">Pustakam Injin</span>
-                  <span className="mt-1 text-[9px] font-black uppercase leading-none tracking-widest text-white/20">Professional Edition</span>
+                  <span className="mt-1 text-[9px] font-black uppercase leading-none tracking-widest text-white/20">Open Research Build</span>
                 </div>
               </div>
               <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-white transition-colors hover:text-white/70">

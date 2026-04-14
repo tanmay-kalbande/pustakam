@@ -1,7 +1,7 @@
 {
   "name": "Pustakam: AI Book Generation Engine",
   "short_name": "AI Injin",
-  "description": "Transform ideas into structured digital books with AI. Premium, local-first book generation engine.",
+  "description": "Transform ideas into structured digital books with AI. Local-first, open research book generation engine.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

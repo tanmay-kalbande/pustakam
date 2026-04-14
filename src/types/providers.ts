@@ -6,7 +6,7 @@
 // ============================================================================
 
 export type ProviderID =
-  // Platform providers (proxy-supported for free tier)
+  // Platform providers (proxy-supported for shared access)
   | 'zhipu'
   | 'mistral'
   // BYOK providers (user brings their own key)
@@ -54,7 +54,7 @@ export interface ProviderConfig {
   badge: string;               // Short badge for compact UI: "GPT", "CLD"
   tagline: string;             // One-liner for provider cards
   endpoint: string;            // API base URL for chat completions
-  supportsProxy: boolean;      // Can use platform proxy (free tier)
+  supportsProxy: boolean;      // Can use platform proxy (shared access)
   supportsBYOK: boolean;       // Can accept user's own API key
   models: ModelConfig[];       // Available models for this provider
   defaultModel: string;        // Default model ID
@@ -70,9 +70,9 @@ export interface ProviderConfig {
 // ============================================================================
 
 export interface QuotaStatus {
-  freeLimit: number;           // Admin-configurable via Supabase (default: 2)
+  freeLimit: number;           // Admin-configurable shared-access limit via Supabase (default: 2)
   booksUsed: number;           // From profiles.books_created
-  remaining: number;           // freeLimit - booksUsed (clamped to 0)
+  remaining: number;           // Remaining shared-access books (clamped to 0)
   hasFreeQuota: boolean;       // remaining > 0
   hasBYOK: boolean;            // User has at least one BYOK key configured
   canGenerate: boolean;        // hasFreeQuota || hasBYOK

@@ -169,9 +169,9 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <p>Pustakam is an open research project built by the Tanmay Kalbande group. Every line of code, every prompt, every design decision  -  it all comes from a desire to learn better and experiment with multi-model pedagogy.</p>
 
-                <QuoteBlock text="The best tools are built out of genuine frustration, not market research." author="Me, at 3am debugging API calls" />
+                <QuoteBlock text="The best tools are built out of genuine frustration, not trend chasing." author="Me, at 3am debugging API calls" />
 
-                <p>If you're someone who loves learning but hates how fragmented online education is, give Pustakam a try. It's free to start, local-first (your data stays on your device), and it works with multiple AI providers so you're never locked in.</p>
+                <p>If you're someone who loves learning but hates how fragmented online education is, give Pustakam a try. It works with your own API keys or verified access, stays local-first (your data stays on your device), and supports multiple AI providers so you're never locked in.</p>
 
                 <p>This is just the beginning. I have so many ideas for where to take this  -  collaborative learning, multi-language support, community-generated templates. But every journey starts with the first step, and for Pustakam, that step was admitting that the way we learn online is broken.</p>
 
@@ -231,7 +231,7 @@ const BLOG_POSTS: BlogPost[] = [
                     title="User Preference by Topic Category"
                     data={[
                         { label: 'Self-Help', value: 82, color: 'linear-gradient(90deg, #06b6d4, #0891b2)' },
-                        { label: 'Business', value: 68, color: 'linear-gradient(90deg, #06b6d4, #0891b2)' },
+                        { label: 'Strategy', value: 68, color: 'linear-gradient(90deg, #06b6d4, #0891b2)' },
                         { label: 'Programming', value: 24, color: 'linear-gradient(90deg, #8b5cf6, #7c3aed)' },
                         { label: 'Science', value: 15, color: 'linear-gradient(90deg, #8b5cf6, #7c3aed)' },
                         { label: 'Finance', value: 55, color: 'linear-gradient(90deg, #06b6d4, #0891b2)' },
@@ -345,7 +345,7 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <h3>Lesson 1: Users Don't Write Good Prompts (And That's Your Problem)</h3>
 
-                <p>When I first launched, people would type things like "coding" or "business" and expect magic. I used to think "come on, give me more to work with." But that's the wrong mindset. It's <em>my</em> job to take a vague input and make it brilliant.</p>
+                <p>When I first launched, people would type things like "coding" or "strategy" and expect magic. I used to think "come on, give me more to work with." But that's the wrong mindset. It's <em>my</em> responsibility to take a vague input and make it brilliant.</p>
 
                 <p>That's why the Enhancer exists. It transforms "coding" into "Python Fundamentals for Beginners: A Practical Guide to Building Real-World Applications." The user's effort should be minimal. The AI's should be maximal.</p>
 
@@ -374,7 +374,7 @@ const BLOG_POSTS: BlogPost[] = [
 
                 <h3>Lesson 4: Privacy Isn't a Feature, It's a Promise</h3>
 
-                <p>The zero-middleman architecture wasn't a business decision  -  it was a moral one. People share API keys, personal learning goals, and reading habits with Pustakam. I decided early on that none of that should ever touch my servers. Your keys go directly from your browser to the AI provider. Period.</p>
+                <p>The zero-middleman architecture wasn't a project decision  -  it was a moral one. People share API keys, personal learning goals, and reading habits with Pustakam. I decided early on that none of that should ever touch my servers. Your keys go directly from your browser to the AI provider. Period.</p>
 
                 <StatGrid stats={[
                     { label: 'Data on Server', value: '0', icon: Shield, color: 'text-emerald-400' },

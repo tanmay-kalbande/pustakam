@@ -57,7 +57,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                     <div className="grid grid-cols-3 gap-2 mb-6">
                         {[
                             { icon: Cpu, label: '13+ Models', sub: 'Multi-provider' },
-                            { icon: Sparkles, label: 'Free Tier', sub: 'Included' },
+                            { icon: Sparkles, label: 'Shared Access', sub: 'Included' },
                             { icon: Download, label: 'PDF Export', sub: 'Full books' },
                         ].map(({ icon: Icon, label, sub }) => (
                             <div key={label} className="group p-2.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg transition-all hover:border-[var(--brand)]/20 hover:bg-[var(--brand)]/5 flex flex-col items-center justify-center">

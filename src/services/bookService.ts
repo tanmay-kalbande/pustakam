@@ -3,7 +3,7 @@
 // NOTES:
 //   1. validateSettings()  -  auto-correct provider; never error-out in proxy mode
 //   2. generateWithAI()  -  routes through THREE paths:
-//      a) PROXY mode (free tier) → Render proxy with platform API keys
+//      a) PROXY mode (shared access) → Render proxy with platform API keys
 //      b) BYOK mode → direct API call with user's own key via providerService
 //      c) BLOCKED → user has no quota and no BYOK key
 //   3. getApiKeyForProvider()  -  reads from byokStorage for BYOK mode
@@ -83,7 +83,7 @@ class BookGenerationService {
     defaultLanguage: 'en',
   };
 
-  // Quota-driven routing mode: 'proxy' (free tier), 'byok' (user key), 'blocked'
+  // Quota-driven routing mode: 'proxy' (shared access), 'byok' (user key), 'blocked'
   private quotaMode: QuotaStatus['mode'] = 'proxy';
 
   private onProgressUpdate?: (bookId: string, updates: Partial<BookProject>) => void;
@@ -402,7 +402,7 @@ User Input: "${userInput}"`;
 
   // ============================================================================
   // SETTINGS VALIDATION
-  // - Proxy mode (free tier): zhipu/mistral route through platform proxy
+  // - Proxy mode (shared access): zhipu/mistral route through platform proxy
   // - BYOK mode: user's own key, any provider
   // - Blocked: no quota and no key
   // ============================================================================
@@ -422,7 +422,7 @@ User Input: "${userInput}"`;
 
     if (this.quotaMode === 'blocked') {
       errors.push(
-        'Free book quota exhausted. Add your own API key in Settings to continue generating.'
+        'Shared access limit reached. Add your own API key in Settings to continue generating.'
       );
       return { isValid: false, errors };
     }
@@ -533,7 +533,7 @@ User Input: "${userInput}"`;
     if (taskType === 'enhance' || taskType === 'glossary') {
       return 135_000;
     }
-    // Render free tier can cold-start in up to ~50s after 15 min idle.
+    // Shared access proxy can cold-start in up to ~50s after 15 min idle.
     // Budget = cold-start (50s) + Zhipu response time. Be generous.
     switch (taskType) {
       case 'enhance':
@@ -550,7 +550,7 @@ User Input: "${userInput}"`;
   }
 
   private getProxyModel(_taskType?: string): import('../types').ModelID | undefined {
-    // Server-side orchestration: the API picks the right model tier based on
+    // Server-side orchestration: the API picks the right model profile based on
     // task_type + provider. We intentionally do NOT pass a model hint.
     return undefined;
   }
@@ -681,9 +681,9 @@ User Input: "${userInput}"`;
       }
     }
 
-    // ── Proxy path — platform API keys (free tier) ──────────────────────
+    // Proxy path — platform API keys (shared access)
     if (useProxy && this.quotaMode === 'proxy') {
-      dbg('→ taking proxy path (free tier)');
+      dbg('taking proxy path (shared access)');
       let proxyTimeoutId: ReturnType<typeof setTimeout> | null = null;
       const resolvedTask = (taskType as ProxyTaskType) || 'module';
       const timeoutMs = this.getProxyTimeoutMs(resolvedTask);

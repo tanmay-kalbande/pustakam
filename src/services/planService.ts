@@ -1,5 +1,5 @@
 // src/services/planService.ts
-// Plan management service for Pustakam - All users have yearly plan
+// Access management service for Pustakam - all users default to yearly access
 
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { PlanType } from '../types/plan';
@@ -24,12 +24,12 @@ export interface PlanStatus {
 
 export const planService = {
     /**
-     * Get current plan status for the authenticated user
+     * Get current access status for the authenticated user
      */
     async getPlanStatus(): Promise<PlanStatus> {
         const defaultStatus: PlanStatus = {
             plan: 'yearly',
-            planName: 'Yearly PRO',
+            planName: 'Yearly Access',
             isActive: true,
             expiresAt: null,
             booksCreated: 0,
@@ -101,7 +101,7 @@ export const planService = {
     },
 
     /**
-     * Check if user can create a book - always allowed for all plans
+     * Check if the user can create a book - always allowed for active access
      */
     async checkCanCreateBook(): Promise<{ allowed: boolean; message?: string }> {
         const status = await this.getPlanStatus();
@@ -113,7 +113,7 @@ export const planService = {
         if (!status.isActive) {
             return {
                 allowed: false,
-                message: 'Your plan has expired. Please renew to continue creating books.',
+                message: 'Your access window has ended. Verify access to continue creating books.',
             };
         }
 
