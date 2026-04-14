@@ -754,9 +754,7 @@ function App() {
   // RENDER
   // ============================================================================
 
-  if (isMobile) {
-    return <MobileBlockScreen />;
-  }
+
 
   return (
     <div className="app-container">
@@ -812,6 +810,8 @@ function App() {
                 }}
               />
             </>
+          ) : isMobile ? (
+            <MobileBlockScreen />
           ) : (
             /* B. Application Main Path */
             <div className="workspace-shell">
