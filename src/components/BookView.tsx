@@ -455,7 +455,6 @@ const HomeView = ({
       className="relative w-full min-h-full bg-[var(--bg-base)] px-6 pb-24 pt-24"
       style={{ background: 'var(--bg-base)' }}
     >
-    >
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
           <div>
