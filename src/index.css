@@ -67,7 +67,7 @@
 
   /* PROFESSIONAL LIGHT THEME */
   .light {
-    --bg-base:     rgba(250, 250, 250, 0); 
+    --bg-base:     #f4f1ea; 
     --bg-surface:  rgba(255, 255, 255, 0.75); 
     --bg-elevated: rgba(255, 255, 255, 0.95);
 
@@ -1101,7 +1101,7 @@
   }
 
   .sun-background {
-    background-color: #ffffff;
+    background-color: #f4f1ea;
     opacity: 0;
     animation: fadeIn 0.5s forwards;
   }
@@ -1110,7 +1110,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: #ffffff;
+    background: #f4f1ea;
   }
 
   /* --- Parallax Background --- */
@@ -2568,7 +2568,7 @@ html.light .header-with-fade::after {
 }
 
 .light .workspace-shell {
-    --bg-base: #f5f2eb;
+    --bg-base: #f4f1ea;
     --bg-surface: rgba(255, 255, 255, 0.86);
     --bg-elevated: rgba(255, 255, 255, 0.96);
     --border-subtle: rgba(17, 24, 39, 0.08);
