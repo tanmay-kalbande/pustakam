@@ -13,7 +13,7 @@ interface ChatMessage extends LandingChatMessage {
 }
 
 const STARTER_MESSAGE =
-  'Ask about Pustakam. I will keep answers short, clear, and useful.';
+  'Ask anything about Pustakam. I will keep it short and useful ✨';
 
 const SUGGESTED_PROMPTS = [
   'Can Pustakam make a book for UPSC prep?',
@@ -174,7 +174,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
   return (
     <section
       className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[#0b0b0c]/96 shadow-[0_30px_90px_rgba(0,0,0,0.42)] backdrop-blur-2xl ${
-        compact ? 'h-[430px]' : 'h-[clamp(460px,66vh,620px)]'
+        compact ? 'h-[420px]' : 'h-[clamp(420px,58vh,540px)]'
       }`}
     >
       <div className="flex h-full min-h-0 flex-col">
@@ -184,23 +184,30 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
               <MessageSquareMore className="h-4 w-4" />
             </span>
             <div className="min-w-0">
-              <p className="truncate text-[14px] font-medium text-white/92">Pustakam Guide</p>
-              <p className="text-[12px] text-white/42">Quick product answers on the landing page</p>
+              <p
+                className="truncate text-[15px] font-medium tracking-[-0.02em] text-white/92"
+                style={{ fontFamily: "'Rubik', sans-serif" }}
+              >
+                Pustakam Guide
+              </p>
             </div>
           </div>
         </div>
 
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           {isIntroState ? (
             <div className="flex min-h-full flex-col justify-center">
-              <div className="mx-auto flex w-full max-w-[340px] flex-col items-center text-center">
+              <div className="mx-auto flex w-full max-w-[320px] flex-col items-center text-center">
                 <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.04] text-[#FECD8C] shadow-[0_20px_45px_rgba(0,0,0,0.22)]">
                   <MessageSquareMore className="h-6 w-6" />
                 </span>
-                <h3 className="text-[24px] font-medium tracking-[-0.03em] text-white">
+                <h3
+                  className="text-[23px] font-medium tracking-[-0.03em] text-white"
+                  style={{ fontFamily: "'Rubik', sans-serif" }}
+                >
                   Ask about Pustakam
                 </h3>
-                <p className="mt-2 text-[14px] leading-6 text-white/52">{STARTER_MESSAGE}</p>
+                <p className="mt-2 text-[14px] leading-6 text-white/48">{STARTER_MESSAGE}</p>
               </div>
             </div>
           ) : (
@@ -216,7 +223,10 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                     </div>
                   ) : (
                     <div className="max-w-[92%] px-1">
-                      <div className="text-[15px] leading-7 text-white/90">
+                      <div
+                        className="text-[16px] font-normal leading-[1.8] tracking-[-0.01em] text-white/90"
+                        style={{ fontFamily: "'Rubik', sans-serif" }}
+                      >
                         {message.content.trim() ? (
                           <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                             {message.content}
@@ -235,7 +245,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
           <div ref={endRef} />
         </div>
 
-        <div className="border-t border-white/8 px-4 py-4">
+        <div className="border-t border-white/8 px-4 pb-5 pt-3">
           {isIntroState ? (
             <div className="mb-3 flex flex-wrap gap-2">
               {SUGGESTED_PROMPTS.slice(0, compact ? 2 : SUGGESTED_PROMPTS.length).map(prompt => (
@@ -244,7 +254,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   type="button"
                   onClick={() => void handleSend(prompt)}
                   disabled={isSending}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-[12px] text-white/68 transition-all hover:border-white/18 hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-[12px] text-white/68 transition-all hover:border-[#FECD8C]/18 hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
                 >
                   {prompt}
                 </button>
@@ -267,6 +277,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                 rows={1}
                 placeholder="Ask anything about Pustakam..."
                 className="max-h-36 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2 text-[14px] leading-6 text-white outline-none placeholder:text-white/30"
+                style={{ fontFamily: "'Rubik', sans-serif" }}
               />
 
               {isSending ? (

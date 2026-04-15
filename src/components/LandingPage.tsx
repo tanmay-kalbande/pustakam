@@ -677,7 +677,7 @@ const LandingPage = ({
                 initial="enter"
                 animate="center"
                 exit="exit"
-                className={`flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden px-6 ${activeTab === 'home' ? 'overflow-y-auto pt-20 pb-16' : 'pt-12 pb-24'}`}
+                className={`flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden px-6 ${activeTab === 'home' ? 'overflow-y-auto pt-16 pb-24' : 'pt-12 pb-24'}`}
               >
                 {renderDesktopContent()}
               </motion.div>

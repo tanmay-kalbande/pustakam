@@ -132,7 +132,7 @@ export default function LandingHomeContent({
           </div>
         </div>
 
-        <div className="flex w-full max-w-[520px] items-center justify-center justify-self-center xl:justify-self-end">
+        <div className="flex w-full max-w-[500px] items-center justify-center justify-self-center py-4 xl:-translate-y-6 xl:justify-self-end">
           <LandingChatPanel />
         </div>
       </div>
