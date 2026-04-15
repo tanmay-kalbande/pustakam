@@ -105,6 +105,7 @@ async function openLandingChatStream(
     throw new Error(formatLandingChatError(errorMessage));
   }
 
+  console.log('[LandingChat] request successful');
   if (!response.body) {
     throw new Error('Landing chat returned an empty response stream.');
   }
@@ -193,18 +194,24 @@ export async function streamLandingChatReply(
   onChunk?: (chunk: string) => void,
 ): Promise<string> {
   const urls = getLandingChatUrls();
+  const requestStartedAt = Date.now();
   let lastError: Error | null = null;
+
+  console.log('[LandingChat] starting request', { endpoints: urls });
 
   for (const url of urls) {
     let streamedAnyContent = false;
 
     try {
+      console.log(`[LandingChat] attempting endpoint: ${url}`);
       const response = await openLandingChatStream(url, messages, signal);
+      console.log(`[LandingChat] endpoint responded in ${Date.now() - requestStartedAt}ms`);
       return await readLandingChatStream(response, chunk => {
         streamedAnyContent = true;
         onChunk?.(chunk);
       });
     } catch (error) {
+      console.warn(`[LandingChat] endpoint ${url} failed`, error);
       const normalizedError = error instanceof Error
         ? new Error(formatLandingChatError(error.message))
         : new Error('The assistant is unavailable right now.');
