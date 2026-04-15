@@ -12,13 +12,11 @@ interface ChatMessage extends LandingChatMessage {
   id: string;
 }
 
-const STARTER_MESSAGE =
-  'Ask anything about Pustakam. I will keep it short and useful ✨';
-
-const SUGGESTED_PROMPTS = [
-  'Can Pustakam make a book for UPSC prep?',
-  'How fast can I generate a book here?',
-  'What happens after I type a topic?',
+const TAGLINES = [
+  'Your Book Architect',
+  'Your Research Partner',
+  'Your Writing Companion',
+  'Ask Pustakam AI Anything',
 ];
 
 const MAX_CONTEXT_MESSAGES = 8;
@@ -78,12 +76,12 @@ function PendingReply() {
   );
 }
 
-export default function LandingChatPanel({ compact = false }: LandingChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    createMessage('assistant', STARTER_MESSAGE),
+    createMessage('assistant', 'Expert Guide'),
   ]);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [taglineIdx, setTaglineIdx] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
@@ -94,6 +92,14 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
     () => (isIntroState ? [] : messages.slice(1)),
     [isIntroState, messages],
   );
+
+  useEffect(() => {
+    if (!isIntroState) return;
+    const interval = setInterval(() => {
+      setTaglineIdx(prev => (prev + 1) % TAGLINES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isIntroState]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -201,16 +207,38 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
           {isIntroState ? (
             <div className="flex min-h-full flex-col justify-center">
               <div className="mx-auto flex w-full max-w-[320px] flex-col items-center text-center">
-                <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.22)]">
+                <motion.span
+                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className="mb-6 flex h-14 w-14 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.22)]"
+                >
                   <img src="/white-logo.png" className="h-7 w-7 opacity-90" alt="Pustakam AI" />
-                </span>
-                <h3
-                  className="text-[23px] font-medium tracking-[-0.03em] text-white"
+                </motion.span>
+                <motion.h3
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
+                  className="text-[24px] font-bold tracking-[-0.03em] text-white"
                   style={{ fontFamily: "'Rubik', sans-serif" }}
                 >
-                  Ask about Pustakam
-                </h3>
-                <p className="mt-2 text-[14px] leading-6 text-white/48">{STARTER_MESSAGE}</p>
+                  Pustakam AI
+                </motion.h3>
+                <div className="mt-2 h-6 overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={taglineIdx}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={{ duration: 0.4, ease: 'easeInOut' }}
+                      className="text-[14px] font-medium leading-relaxed text-white/40"
+                      style={{ fontFamily: "'Rubik', sans-serif" }}
+                    >
+                      {TAGLINES[taglineIdx]}
+                    </motion.p>
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
           ) : (
@@ -255,22 +283,6 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
         </div>
 
         <div className="px-4 pb-5 pt-3">
-          {isIntroState ? (
-            <div className="mb-3 flex flex-wrap gap-2">
-              {SUGGESTED_PROMPTS.slice(0, compact ? 2 : SUGGESTED_PROMPTS.length).map(prompt => (
-                <button
-                  key={prompt}
-                  type="button"
-                  onClick={() => void handleSend(prompt)}
-                  disabled={isSending}
-                  className="rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-[12px] text-white/68 transition-all hover:border-[#FECD8C]/18 hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-1.5 pl-4">
             <div className="flex items-center gap-2">
               <textarea
@@ -284,8 +296,8 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   }
                 }}
                 rows={1}
-                placeholder="Ask about Pustakam..."
-                className="max-h-36 min-h-[38px] flex-1 resize-none bg-transparent py-2 text-[13px] leading-relaxed text-white outline-none placeholder:text-white/25"
+                placeholder="Message Pustakam AI..."
+                className="max-h-36 min-h-[38px] flex-1 resize-none bg-transparent py-2 text-[13px] font-semibold leading-relaxed text-white outline-none placeholder:text-white/20"
                 style={{ fontFamily: "'Rubik', sans-serif" }}
               />
 
