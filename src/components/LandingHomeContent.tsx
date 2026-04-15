@@ -67,7 +67,7 @@ export default function LandingHomeContent({
                 key={item.title}
                 className={`rounded-[14px] border p-4 text-left backdrop-blur-xl transition-all duration-300 ${
                   idx < 2
-                    ? 'border-amber-400/22 bg-black/50 hover:border-amber-400/45 hover:bg-black/60 md:col-span-2'
+                    ? 'border-amber-400/22 bg-black/50 hover:border-amber-400/45 hover:bg-black/60 md:col-span-1'
                     : 'border-white/5 bg-black/40 hover:border-amber-400/20 hover:bg-black/60 md:col-span-1'
                 }`}
               >

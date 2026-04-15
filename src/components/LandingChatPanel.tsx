@@ -218,18 +218,19 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.role === 'user' ? (
-                    <div className="flex items-start gap-3 max-w-[86%]">
-                      <div className="max-w-full rounded-lg bg-white/[0.12] px-4 py-2 text-[14px] leading-6 text-white">
-                        <p className="whitespace-pre-wrap break-words">{message.content}</p>
-                      </div>
-                      <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/30">
+                    <div className="flex items-start gap-2.5 max-w-[88%]">
+                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-white/40">
                         <Smile size={14} />
+                      </div>
+                      <div className="rounded-[20px] bg-white/[0.06] px-4 py-2.5 text-[14px] leading-relaxed text-white/90">
+                        <p className="whitespace-pre-wrap break-words">{message.content}</p>
                       </div>
                     </div>
                   ) : (
-                    <div className="max-w-[92%] px-1">
+                    <div className="flex w-full flex-col gap-1.5 px-1 py-1">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">Pustakam AI</p>
                       <div
-                        className="text-[16px] font-normal leading-[1.8] tracking-[-0.01em] text-white/90"
+                        className="text-[15px] font-normal leading-[1.65] text-white/85"
                         style={{ fontFamily: "'Rubik', sans-serif" }}
                       >
                         {message.content.trim() ? (
@@ -267,8 +268,8 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
             </div>
           ) : null}
 
-          <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-2">
-            <div className="flex items-end gap-2">
+          <div className="rounded-full border border-white/10 bg-white/[0.03] p-1.5 pl-4">
+            <div className="flex items-center gap-2">
               <textarea
                 ref={textAreaRef}
                 value={input}
@@ -280,8 +281,8 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   }
                 }}
                 rows={1}
-                placeholder="Ask anything about Pustakam..."
-                className="max-h-36 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2 text-[14px] leading-6 text-white outline-none placeholder:text-white/30"
+                placeholder="Ask about Pustakam..."
+                className="max-h-36 min-h-[38px] flex-1 resize-none bg-transparent py-2 text-[13px] leading-relaxed text-white outline-none placeholder:text-white/25"
                 style={{ fontFamily: "'Rubik', sans-serif" }}
               />
 
@@ -289,17 +290,17 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                 <button
                   type="button"
                   onClick={handleStop}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.05] text-white/72 transition-all hover:bg-white/[0.1] hover:text-white"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/60 transition-all hover:bg-white/[0.1] hover:text-white"
                   title="Stop response"
                 >
-                  <Square className="h-4 w-4 fill-current" />
+                  <Square className="h-3.5 w-3.5 fill-current" />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => void handleSend()}
                   disabled={!input.trim()}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FECD8C] text-black transition-all hover:bg-[#FFD9A0] disabled:cursor-not-allowed disabled:opacity-45"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FECD8C] text-black transition-all hover:bg-[#FFD9A0] disabled:cursor-not-allowed disabled:opacity-45"
                   title="Send message"
                 >
                   <ArrowUp className="h-4 w-4" />
