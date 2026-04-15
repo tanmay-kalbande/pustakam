@@ -184,7 +184,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
 
   return (
     <section
-      className={`relative w-full overflow-hidden rounded-xl border border-white/10 bg-[#0b0b0c]/96 shadow-[0_30px_90px_rgba(0,0,0,0.42)] backdrop-blur-2xl ${
+      className={`relative w-full overflow-hidden rounded-xl border border-white/10 bg-[#0b0b0c] shadow-[0_30px_90px_rgba(0,0,0,0.42)] ${
         compact ? 'h-[420px]' : 'h-[clamp(520px,78vh,740px)]'
       }`}
     >
@@ -320,7 +320,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
         </div>
 
         <div className="px-4 pb-5 pt-3">
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-1.5 pl-4">
+          <div className="rounded-xl border border-white/10 bg-[#121213] p-1.5 pl-4">
             <div className="flex items-center gap-2">
               <textarea
                 ref={textAreaRef}
