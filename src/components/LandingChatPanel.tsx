@@ -188,24 +188,31 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
         compact ? 'h-[420px]' : 'h-[clamp(520px,78vh,740px)]'
       }`}
     >
-      <div className="flex h-full min-h-0 flex-col">
-        <div className="px-5 py-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
-              <img src="/white-logo.png" className="h-5 w-5 opacity-90" alt="Pustakam AI" />
-            </span>
-            <div className="min-w-0">
-              <p
-                className="truncate text-[15px] font-medium tracking-[-0.02em] text-white/92"
-                style={{ fontFamily: "'Rubik', sans-serif" }}
-              >
-                Pustakam AI
-              </p>
-            </div>
+      {/* TOP HEADER - Fixed with Fade */}
+      <div className="absolute left-0 right-0 top-0 z-20 px-5 py-4 bg-gradient-to-b from-[#0b0b0c] via-[#0b0b0c]/90 to-transparent">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
+            <img src="/white-logo.png" className="h-5 w-5 opacity-90" alt="Pustakam AI" />
+          </span>
+          <div className="min-w-0">
+            <p
+              className="truncate text-[15px] font-medium tracking-[-0.02em] text-white/92"
+              style={{ fontFamily: "'Rubik', sans-serif" }}
+            >
+              Pustakam AI
+            </p>
           </div>
         </div>
+      </div>
 
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+      <div
+        ref={scrollRef}
+        className="absolute inset-0 overflow-y-auto px-5 pt-20 pb-24 custom-scrollbar"
+        style={{
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)',
+        }}
+      >
           {isIntroState ? (
             <motion.div
               initial="hidden"
@@ -319,8 +326,9 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
           <div ref={endRef} />
         </div>
 
-        <div className="px-4 pb-5 pt-3">
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-1.5 pl-4">
+        {/* BOTTOM INPUT - Fixed with Fade */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 px-4 pb-5 pt-8 bg-gradient-to-t from-[#0b0b0c] via-[#0b0b0c]/90 to-transparent">
+          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-1.5 pl-4 backdrop-blur-md">
             <div className="flex items-center gap-2">
               <textarea
                 ref={textAreaRef}
@@ -362,7 +370,6 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
             </div>
           </div>
         </div>
-      </div>
     </section>
   );
 }
