@@ -76,6 +76,7 @@ function PendingReply() {
   );
 }
 
+export default function LandingChatPanel({ compact = false }: LandingChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     createMessage('assistant', 'Expert Guide'),
   ]);
