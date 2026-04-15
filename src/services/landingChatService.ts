@@ -11,13 +11,42 @@ function getLandingChatUrl(): string {
   throw new Error('Landing chat is enabled but VITE_PROXY_URL is missing. Point it to the proxy base URL.');
 }
 
+function extractTextContent(value: unknown): string {
+  if (typeof value === 'string') return value;
+
+  if (Array.isArray(value)) {
+    return value
+      .map(part => {
+        if (typeof part === 'string') return part;
+        if (part && typeof part === 'object') {
+          const textPart = (part as { text?: unknown }).text;
+          if (typeof textPart === 'string') return textPart;
+        }
+        return '';
+      })
+      .join('');
+  }
+
+  return '';
+}
+
 function extractStreamContent(payload: Record<string, unknown>): string {
   const choices = Array.isArray(payload.choices) ? payload.choices : [];
   const firstChoice = choices[0];
   if (!firstChoice || typeof firstChoice !== 'object') return '';
 
-  const delta = (firstChoice as { delta?: { content?: string } }).delta;
-  return typeof delta?.content === 'string' ? delta.content : '';
+  const delta = (firstChoice as { delta?: { content?: unknown } }).delta;
+  const message = (firstChoice as { message?: { content?: unknown } }).message;
+
+  return extractTextContent(delta?.content) || extractTextContent(message?.content);
+}
+
+function splitSseFrames(buffer: string): { frames: string[]; remainder: string } {
+  const frames = buffer.split(/\r?\n\r?\n/);
+  return {
+    frames: frames.slice(0, -1),
+    remainder: frames.at(-1) ?? '',
+  };
 }
 
 export async function streamLandingChatReply(
@@ -27,7 +56,10 @@ export async function streamLandingChatReply(
 ): Promise<string> {
   const response = await fetch(getLandingChatUrl(), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Accept': 'text/event-stream',
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({ messages }),
     signal,
   });
@@ -62,7 +94,7 @@ export async function streamLandingChatReply(
     let eventType = 'message';
     const dataParts: string[] = [];
 
-    for (const line of trimmedFrame.split('\n')) {
+    for (const line of trimmedFrame.split(/\r?\n/)) {
       const trimmedLine = line.trim();
       if (!trimmedLine || trimmedLine.startsWith(':')) continue;
       if (trimmedLine.startsWith('event:')) {
@@ -103,15 +135,16 @@ export async function streamLandingChatReply(
     if (done) break;
 
     buffer += decoder.decode(value, { stream: true });
-    const frames = buffer.split('\n\n');
-    buffer = frames.pop() || '';
+    const split = splitSseFrames(buffer);
+    const frames = split.frames;
+    buffer = split.remainder;
 
     for (const frame of frames) processFrame(frame);
   }
 
   buffer += decoder.decode();
   if (buffer.trim()) {
-    for (const frame of buffer.split('\n\n')) processFrame(frame);
+    for (const frame of buffer.split(/\r?\n\r?\n/)) processFrame(frame);
   }
 
   if (!fullContent.trim()) {

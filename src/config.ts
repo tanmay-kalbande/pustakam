@@ -17,6 +17,11 @@ export const config = {
         supportEmail: import.meta.env.VITE_SUPPORT_EMAIL || 'hello@tanmaysk.in',
     },
 
+    // AI Providers
+    ai: {
+        landingChatModel: import.meta.env.VITE_LANDING_CHAT_MODEL || 'Cerebras / Qwen 3 32B',
+    },
+
     // Computed
     get isSupabaseConfigured() {
         return !!(this.supabase.url && this.supabase.anonKey);
