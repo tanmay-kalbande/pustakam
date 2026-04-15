@@ -207,42 +207,77 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
 
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           {isIntroState ? (
-            <div className="flex min-h-full flex-col justify-center">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.12, delayChildren: 0.1 },
+                },
+              }}
+              className="flex min-h-full flex-col justify-center"
+            >
               <div className="mx-auto flex w-full max-w-[320px] flex-col items-center text-center">
-                <motion.span
-                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                  className="mb-6 flex h-14 w-14 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.22)]"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 15, scale: 0.8 },
+                    visible: { opacity: 1, y: 0, scale: 1 },
+                  }}
+                  className="relative mb-8"
                 >
-                  <img src="/white-logo.png" className="h-7 w-7 opacity-90" alt="Pustakam AI" />
-                </motion.span>
+                  <motion.div
+                    animate={{
+                      opacity: [0.15, 0.35, 0.15],
+                      scale: [1, 1.25, 1],
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    className="absolute inset-0 -m-8 scale-150 rounded-full bg-white/10 blur-[40px]"
+                  />
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] shadow-2xl backdrop-blur-md">
+                    <img src="/white-logo.png" className="h-8 w-8 opacity-90" alt="Pustakam AI" />
+                  </div>
+                </motion.div>
+
                 <motion.h3
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-                  className="text-[24px] font-bold tracking-[-0.03em] text-white"
+                  variants={{
+                    hidden: { opacity: 0, y: 12 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  className="text-[26px] font-bold tracking-[-0.035em] text-white"
                   style={{ fontFamily: "'Rubik', sans-serif" }}
                 >
                   Pustakam AI
                 </motion.h3>
-                <div className="mt-2 h-6 overflow-hidden">
+
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 8 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  className="mt-2.5 h-6 overflow-hidden"
+                >
                   <AnimatePresence mode="wait">
                     <motion.p
                       key={taglineIdx}
-                      initial={{ opacity: 0, y: 12 }}
+                      initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -12 }}
-                      transition={{ duration: 0.4, ease: 'easeInOut' }}
-                      className="text-[14px] font-medium leading-relaxed text-white/40"
+                      exit={{ opacity: 0, y: -14 }}
+                      transition={{ duration: 0.45, ease: 'easeInOut' }}
+                      className="text-[14.5px] font-medium leading-relaxed tracking-tight text-white/35"
                       style={{ fontFamily: "'Rubik', sans-serif" }}
                     >
                       {TAGLINES[taglineIdx]}
                     </motion.p>
                   </AnimatePresence>
-                </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           ) : (
             <div className="space-y-5">
               {visibleMessages.map(message => (
@@ -289,6 +324,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
             <div className="flex items-center gap-2">
               <textarea
                 ref={textAreaRef}
+                autoFocus
                 value={input}
                 onChange={event => setInput(event.target.value)}
                 onKeyDown={event => {
