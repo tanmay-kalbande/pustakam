@@ -173,14 +173,14 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
 
   return (
     <section
-      className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[#0b0b0c]/96 shadow-[0_30px_90px_rgba(0,0,0,0.42)] backdrop-blur-2xl ${
-        compact ? 'h-[420px]' : 'h-[clamp(420px,58vh,540px)]'
+      className={`relative w-full overflow-hidden rounded-xl border border-white/10 bg-[#0b0b0c]/96 shadow-[0_30px_90px_rgba(0,0,0,0.42)] backdrop-blur-2xl ${
+        compact ? 'h-[420px]' : 'h-[clamp(450px,64vh,590px)]'
       }`}
     >
       <div className="flex h-full min-h-0 flex-col">
         <div className="px-5 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
               <img src="/white-logo.png" className="h-5 w-5 opacity-90" alt="Pustakam AI" />
             </span>
             <div className="min-w-0">
@@ -198,7 +198,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
           {isIntroState ? (
             <div className="flex min-h-full flex-col justify-center">
               <div className="mx-auto flex w-full max-w-[320px] flex-col items-center text-center">
-                <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.22)]">
+                <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.22)]">
                   <img src="/white-logo.png" className="h-7 w-7 opacity-90" alt="Pustakam AI" />
                 </span>
                 <h3
@@ -215,14 +215,14 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
               {visibleMessages.map(message => (
                 <div
                   key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className="flex justify-start"
                 >
                   {message.role === 'user' ? (
-                    <div className="flex items-start gap-2.5 max-w-[88%]">
-                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-white/40">
-                        <Smile size={14} />
-                      </div>
-                      <div className="rounded-[20px] bg-white/[0.06] px-4 py-2.5 text-[14px] leading-relaxed text-white/90">
+                    <div className="flex max-w-[88%] items-start">
+                      <div className="flex items-start gap-2.5 rounded-lg bg-white/[0.06] px-3.5 py-2.5 text-[14px] leading-relaxed text-white/90">
+                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-white/40">
+                          <Smile size={12} />
+                        </div>
                         <p className="whitespace-pre-wrap break-words">{message.content}</p>
                       </div>
                     </div>
@@ -260,7 +260,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   type="button"
                   onClick={() => void handleSend(prompt)}
                   disabled={isSending}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-[12px] text-white/68 transition-all hover:border-[#FECD8C]/18 hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-[12px] text-white/68 transition-all hover:border-[#FECD8C]/18 hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
                 >
                   {prompt}
                 </button>
@@ -268,7 +268,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
             </div>
           ) : null}
 
-          <div className="rounded-full border border-white/10 bg-white/[0.03] p-1.5 pl-4">
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-1.5 pl-4">
             <div className="flex items-center gap-2">
               <textarea
                 ref={textAreaRef}
@@ -290,7 +290,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                 <button
                   type="button"
                   onClick={handleStop}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/60 transition-all hover:bg-white/[0.1] hover:text-white"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-white/60 transition-all hover:bg-white/[0.1] hover:text-white"
                   title="Stop response"
                 >
                   <Square className="h-3.5 w-3.5 fill-current" />
@@ -300,7 +300,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   type="button"
                   onClick={() => void handleSend()}
                   disabled={!input.trim()}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FECD8C] text-black transition-all hover:bg-[#FFD9A0] disabled:cursor-not-allowed disabled:opacity-45"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FECD8C] text-black transition-all hover:bg-[#FFD9A0] disabled:cursor-not-allowed disabled:opacity-45"
                   title="Send message"
                 >
                   <ArrowUp className="h-4 w-4" />
