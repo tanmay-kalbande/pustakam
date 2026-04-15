@@ -217,7 +217,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   transition: { staggerChildren: 0.12, delayChildren: 0.1 },
                 },
               }}
-              className="flex min-h-full flex-col justify-center"
+              className="flex min-h-full flex-col justify-center pb-16"
             >
               <div className="mx-auto flex w-full max-w-[320px] flex-col items-center text-center">
                 <motion.div
