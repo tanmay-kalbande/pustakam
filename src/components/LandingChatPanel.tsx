@@ -222,8 +222,8 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                 >
                   {message.role === 'user' ? (
                     <div className="flex max-w-[88%] items-start">
-                      <div className="flex items-start gap-2.5 rounded-lg bg-white/[0.06] px-3.5 py-2.5 text-[15px] font-bold leading-relaxed text-white/90" style={{ fontFamily: "'Supermercado One', cursive" }}>
-                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-white/40">
+                      <div className="flex items-start gap-2.5 rounded-lg border border-white/[0.05] bg-[#1a1a1b] px-3.5 py-2.5 text-[14px] font-semibold leading-relaxed text-white/90" style={{ fontFamily: "'Rubik', sans-serif" }}>
+                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-white/30">
                           <Smile size={12} />
                         </div>
                         <p className="whitespace-pre-wrap break-words">{message.content}</p>
@@ -233,8 +233,8 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                     <div className="flex w-full flex-col gap-1.5 px-1 py-1">
                       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20" style={{ fontFamily: "'Rubik', sans-serif" }}>Pustakam AI</p>
                       <div
-                        className="text-[16px] font-bold leading-[1.6] text-white/85"
-                        style={{ fontFamily: "'Supermercado One', cursive" }}
+                        className="text-[15px] font-semibold leading-[1.6] text-white/85"
+                        style={{ fontFamily: "'Rubik', sans-serif" }}
                       >
                         {message.content.trim() ? (
                           <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
