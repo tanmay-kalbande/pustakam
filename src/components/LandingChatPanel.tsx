@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUp, MessageSquareMore, Sparkles, Square } from 'lucide-react';
-import config from '../config';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { ArrowUp, Loader2, MessageSquareMore, Square } from 'lucide-react';
 import { LandingChatMessage, streamLandingChatReply } from '../services/landingChatService';
 
 interface LandingChatPanelProps {
@@ -12,7 +13,7 @@ interface ChatMessage extends LandingChatMessage {
 }
 
 const STARTER_MESSAGE =
-  'Hey, ask anything about Pustakam. I will keep it short, useful, and easy to scan.';
+  'Ask about Pustakam. I will keep answers short, clear, and useful.';
 
 const SUGGESTED_PROMPTS = [
   'Can Pustakam make a book for UPSC prep?',
@@ -21,6 +22,37 @@ const SUGGESTED_PROMPTS = [
 ];
 
 const MAX_CONTEXT_MESSAGES = 8;
+
+const markdownComponents = {
+  p: ({ children }: any) => <p className="m-0 whitespace-pre-wrap">{children}</p>,
+  ul: ({ children }: any) => <ul className="m-0 list-disc space-y-1 pl-5">{children}</ul>,
+  ol: ({ children }: any) => <ol className="m-0 list-decimal space-y-1 pl-5">{children}</ol>,
+  li: ({ children }: any) => <li className="pl-1">{children}</li>,
+  strong: ({ children }: any) => <strong className="font-semibold text-white">{children}</strong>,
+  a: ({ children, href }: any) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="text-[#FECD8C] underline decoration-[#FECD8C]/40 underline-offset-4 transition-colors hover:text-[#FFD9A0]"
+    >
+      {children}
+    </a>
+  ),
+  code: ({ inline, children }: any) =>
+    inline ? (
+      <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[0.95em] text-[#FECD8C]">
+        {children}
+      </code>
+    ) : (
+      <pre className="my-2 overflow-x-auto rounded-2xl border border-white/10 bg-black/35 p-3 text-[12px] text-white/82">
+        <code>{children}</code>
+      </pre>
+    ),
+  blockquote: ({ children }: any) => (
+    <blockquote className="my-2 border-l-2 border-white/12 pl-4 text-white/72">{children}</blockquote>
+  ),
+};
 
 function createMessage(role: ChatMessage['role'], content: string): ChatMessage {
   const id = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
@@ -37,32 +69,50 @@ function buildConversationPayload(messages: ChatMessage[]): LandingChatMessage[]
     .map(({ role, content }) => ({ role, content }));
 }
 
+function PendingReply() {
+  return (
+    <div className="flex items-center gap-2 text-white/46">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      <span>Thinking...</span>
+    </div>
+  );
+}
+
 export default function LandingChatPanel({ compact = false }: LandingChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     createMessage('assistant', STARTER_MESSAGE),
   ]);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
-
-  const modelLabel = useMemo(
-    () => config.ai.landingChatModel || 'Cerebras / Qwen 3 32B',
-    [],
-  );
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const isIntroState = messages.length === 1;
+  const visibleMessages = useMemo(
+    () => (isIntroState ? [] : messages.slice(1)),
+    [isIntroState, messages],
+  );
 
   useEffect(() => {
     const endNode = endRef.current;
-    if (!scrollRef.current || !endNode) return;
+    const container = scrollRef.current;
+    if (!endNode || !container) return;
 
     requestAnimationFrame(() => {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
       endNode.scrollIntoView({ block: 'end' });
     });
-  }, [messages, isSending]);
+  }, [visibleMessages, isSending]);
+
+  useEffect(() => {
+    const textArea = textAreaRef.current;
+    if (!textArea) return;
+
+    textArea.style.height = '0px';
+    textArea.style.height = `${Math.min(textArea.scrollHeight, 144)}px`;
+  }, [input]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -82,7 +132,6 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
 
     setMessages(nextMessages);
     setInput('');
-    setError(null);
     setIsSending(true);
 
     const controller = new AbortController();
@@ -103,13 +152,12 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
         },
       );
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'The chat is unavailable right now.';
+      const message = err instanceof Error ? err.message : 'The assistant is unavailable right now.';
       const fallback =
         message.toLowerCase().includes('abort')
-          ? 'Stopped. Ask again whenever you want.'
-          : 'I hit a connection snag. Try again in a moment.';
+          ? 'Stopped.'
+          : 'I could not reach the assistant just now. Please try again in a moment.';
 
-      setError(message.toLowerCase().includes('abort') ? null : message);
       setMessages(current =>
         current.map(item =>
           item.id === assistantMessage.id
@@ -125,77 +173,58 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
 
   return (
     <section
-      className={`relative overflow-hidden rounded-[30px] border border-white/10 bg-[#0a0a0b]/94 shadow-[0_30px_90px_rgba(0,0,0,0.42)] backdrop-blur-2xl ${
-        compact ? 'min-h-[470px]' : 'min-h-[580px]'
+      className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[#0b0b0c]/96 shadow-[0_30px_90px_rgba(0,0,0,0.42)] backdrop-blur-2xl ${
+        compact ? 'h-[430px]' : 'h-[clamp(460px,66vh,620px)]'
       }`}
     >
-
-      <div className="relative flex h-full flex-col">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-white/8 px-5 py-4">
-          <div />
-          <div className="flex items-center gap-2 justify-self-center">
-            <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-[#FECD8C]/16 bg-[#FECD8C]/8 text-[#FECD8C]">
-              <Sparkles className="h-4 w-4" />
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="border-b border-white/8 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-[#FECD8C]">
+              <MessageSquareMore className="h-4 w-4" />
             </span>
-            <p className="text-[18px] font-medium tracking-[-0.02em] text-white">Pustakam</p>
-          </div>
-          <div className="justify-self-end rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-medium text-white/56">
-            {modelLabel}
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-medium text-white/92">Pustakam Guide</p>
+              <p className="text-[12px] text-white/42">Quick product answers on the landing page</p>
+            </div>
           </div>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
           {isIntroState ? (
-            <div className="flex min-h-full flex-col justify-center px-2 py-4">
-              <div className="mx-auto flex w-full max-w-[360px] flex-col">
-                <div className="mb-8 inline-flex w-fit items-center gap-4 rounded-[28px] bg-white/[0.12] px-5 py-4">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f4efe6] text-[#2b2b2b]">
-                    <MessageSquareMore className="h-7 w-7" />
-                  </span>
-                  <span className="text-[24px] font-medium tracking-[-0.03em] text-white">Hello</span>
-                </div>
-
-                <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/42">
-                  {modelLabel}
-                </p>
-                <p className="mt-4 text-[26px] font-normal leading-[1.45] tracking-[-0.03em] text-white/92">
-                  {messages[0]?.content}
-                </p>
-
-                <div className="mt-8 flex w-full flex-col gap-2">
-                  {SUGGESTED_PROMPTS.slice(0, compact ? 2 : SUGGESTED_PROMPTS.length).map(prompt => (
-                    <button
-                      key={prompt}
-                      type="button"
-                      onClick={() => void handleSend(prompt)}
-                      disabled={isSending}
-                      className="rounded-[18px] border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-[12px] text-white/68 transition-all hover:border-[#FECD8C]/24 hover:bg-white/[0.05] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
+            <div className="flex min-h-full flex-col justify-center">
+              <div className="mx-auto flex w-full max-w-[340px] flex-col items-center text-center">
+                <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.04] text-[#FECD8C] shadow-[0_20px_45px_rgba(0,0,0,0.22)]">
+                  <MessageSquareMore className="h-6 w-6" />
+                </span>
+                <h3 className="text-[24px] font-medium tracking-[-0.03em] text-white">
+                  Ask about Pustakam
+                </h3>
+                <p className="mt-2 text-[14px] leading-6 text-white/52">{STARTER_MESSAGE}</p>
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              {messages.map(message => (
+            <div className="space-y-5">
+              {visibleMessages.map(message => (
                 <div
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.role === 'user' ? (
-                    <div className="max-w-[86%] rounded-[24px] bg-white/[0.12] px-4 py-3 text-[14px] leading-6 text-white">
+                    <div className="max-w-[86%] rounded-[22px] bg-white/[0.12] px-4 py-3 text-[14px] leading-6 text-white">
                       <p className="whitespace-pre-wrap break-words">{message.content}</p>
                     </div>
                   ) : (
-                    <div className="max-w-[92%] px-1 py-2">
-                      <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-white/42">
-                        {modelLabel}
-                      </p>
-                      <p className="whitespace-pre-wrap break-words text-[25px] font-normal leading-[1.5] tracking-[-0.03em] text-white/92">
-                        {message.content || (isSending ? 'Thinking...' : '')}
-                      </p>
+                    <div className="max-w-[92%] px-1">
+                      <div className="text-[15px] leading-7 text-white/90">
+                        {message.content.trim() ? (
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                            {message.content}
+                          </ReactMarkdown>
+                        ) : (
+                          <PendingReply />
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -207,9 +236,26 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
         </div>
 
         <div className="border-t border-white/8 px-4 py-4">
-          <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-2">
+          {isIntroState ? (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {SUGGESTED_PROMPTS.slice(0, compact ? 2 : SUGGESTED_PROMPTS.length).map(prompt => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => void handleSend(prompt)}
+                  disabled={isSending}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-[12px] text-white/68 transition-all hover:border-white/18 hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-2">
             <div className="flex items-end gap-2">
               <textarea
+                ref={textAreaRef}
                 value={input}
                 onChange={event => setInput(event.target.value)}
                 onKeyDown={event => {
@@ -218,9 +264,9 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                     void handleSend();
                   }
                 }}
-                rows={compact ? 2 : 3}
-                placeholder="Type your question..."
-                className="min-h-[52px] flex-1 resize-none bg-transparent px-3 py-2 text-[13px] leading-6 text-white outline-none placeholder:text-white/28"
+                rows={1}
+                placeholder="Ask anything about Pustakam..."
+                className="max-h-36 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2 text-[14px] leading-6 text-white outline-none placeholder:text-white/30"
               />
 
               {isSending ? (
@@ -245,10 +291,6 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
               )}
             </div>
           </div>
-
-          {error ? (
-            <p className="mt-3 text-[11px] leading-5 text-rose-300/85">{error}</p>
-          ) : null}
         </div>
       </div>
     </section>
