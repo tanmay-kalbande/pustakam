@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { BookOpen, Compass, HardDriveDownload, Home, Menu, MoveRight, Shield, X, Github } from 'lucide-react';
 import NebulaBackground from './NebulaBackground';
+import LandingChatPanel from './LandingChatPanel';
+import LandingHomeContent from './LandingHomeContent';
 
 interface LandingPageProps {
   onLogin: () => void;
   onGetStarted: () => void;
+  onSubscribe?: () => void;
   onShowAbout?: () => void;
   onShowTerms?: () => void;
   onShowPrivacy?: () => void;
@@ -356,7 +359,15 @@ const LandingPage = ({
     switch (activeTab) {
       case 'process': return renderProcess();
       case 'demo':    return renderDemo(activeDemoIdx, setActiveDemoIdx, handleTabChange, onGetStarted);
-      default:        return renderHome(onGetStarted, handleTabChange, currentTestimonialIdx);
+      default:
+        return (
+          <LandingHomeContent
+            onGetStarted={onGetStarted}
+            onOpenDemo={() => handleTabChange('demo')}
+            currentTestimonialIdx={currentTestimonialIdx}
+            testimonials={TESTIMONIALS}
+          />
+        );
     }
   };
 
@@ -449,6 +460,7 @@ const LandingPage = ({
               Start Building
               <MoveRight className="h-4 w-4" />
             </button>
+            <LandingChatPanel onGetStarted={onGetStarted} compact />
           </section>
         );
     }
@@ -665,7 +677,7 @@ const LandingPage = ({
                 initial="enter"
                 animate="center"
                 exit="exit"
-                className={`flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden px-6 ${activeTab === 'home' ? 'pt-20 pb-16' : 'pt-12 pb-24'}`}
+                className={`flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden px-6 ${activeTab === 'home' ? 'overflow-y-auto pt-20 pb-16' : 'pt-12 pb-24'}`}
               >
                 {renderDesktopContent()}
               </motion.div>

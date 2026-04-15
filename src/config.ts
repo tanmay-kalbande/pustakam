@@ -19,7 +19,7 @@ export const config = {
 
     // AI Providers
     ai: {
-        // Reserved for future provider keys
+        landingChatModel: import.meta.env.VITE_LANDING_CHAT_MODEL || 'Cerebras / Qwen 3 32B',
     },
 
     // Computed
