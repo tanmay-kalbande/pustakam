@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowUp, Loader2, MessageSquareMore, Square } from 'lucide-react';
+import { ArrowUp, Loader2, MessageSquareMore, Smile, Square } from 'lucide-react';
 import { LandingChatMessage, streamLandingChatReply } from '../services/landingChatService';
 
 interface LandingChatPanelProps {
@@ -178,17 +178,17 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
       }`}
     >
       <div className="flex h-full min-h-0 flex-col">
-        <div className="border-b border-white/8 px-5 py-4">
+        <div className="px-5 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-[#FECD8C]">
-              <MessageSquareMore className="h-4 w-4" />
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05]">
+              <img src="/white-logo.png" className="h-5 w-5 opacity-90" alt="Pustakam AI" />
             </span>
             <div className="min-w-0">
               <p
                 className="truncate text-[15px] font-medium tracking-[-0.02em] text-white/92"
                 style={{ fontFamily: "'Rubik', sans-serif" }}
               >
-                Pustakam Guide
+                Pustakam AI
               </p>
             </div>
           </div>
@@ -198,8 +198,8 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
           {isIntroState ? (
             <div className="flex min-h-full flex-col justify-center">
               <div className="mx-auto flex w-full max-w-[320px] flex-col items-center text-center">
-                <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.04] text-[#FECD8C] shadow-[0_20px_45px_rgba(0,0,0,0.22)]">
-                  <MessageSquareMore className="h-6 w-6" />
+                <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.22)]">
+                  <img src="/white-logo.png" className="h-7 w-7 opacity-90" alt="Pustakam AI" />
                 </span>
                 <h3
                   className="text-[23px] font-medium tracking-[-0.03em] text-white"
@@ -218,8 +218,13 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.role === 'user' ? (
-                    <div className="max-w-[86%] rounded-[22px] bg-white/[0.12] px-4 py-3 text-[14px] leading-6 text-white">
-                      <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                    <div className="flex items-start gap-3 max-w-[86%]">
+                      <div className="max-w-full rounded-lg bg-white/[0.12] px-4 py-2 text-[14px] leading-6 text-white">
+                        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                      </div>
+                      <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/30">
+                        <Smile size={14} />
+                      </div>
                     </div>
                   ) : (
                     <div className="max-w-[92%] px-1">
@@ -245,7 +250,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
           <div ref={endRef} />
         </div>
 
-        <div className="border-t border-white/8 px-4 pb-5 pt-3">
+        <div className="px-4 pb-5 pt-3">
           {isIntroState ? (
             <div className="mb-3 flex flex-wrap gap-2">
               {SUGGESTED_PROMPTS.slice(0, compact ? 2 : SUGGESTED_PROMPTS.length).map(prompt => (

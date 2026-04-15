@@ -50,7 +50,7 @@ export default function LandingHomeContent({
             </motion.p>
           </div>
 
-          <div className="mb-4 grid w-full max-w-[920px] grid-cols-1 gap-2.5 md:grid-cols-4">
+          <div className="mb-4 grid w-full max-w-[920px] grid-cols-1 gap-2.5 md:grid-cols-2">
             {[
               {
                 title: 'Multi-AI Engine',
@@ -61,16 +61,6 @@ export default function LandingHomeContent({
                 title: 'Built-In Guide',
                 desc: 'A live landing-page assistant answers product questions without extra clicks.',
                 sub: 'Fast, crisp, low-friction onboarding',
-              },
-              {
-                title: 'Clean Output',
-                desc: 'Roadmap, chapters, summary, glossary.',
-                sub: null,
-              },
-              {
-                title: 'No Setup Needed',
-                desc: 'Sign up and start generating instantly. No API key required.',
-                sub: null,
               },
             ].map((item, idx) => (
               <div
@@ -132,7 +122,7 @@ export default function LandingHomeContent({
           </div>
         </div>
 
-        <div className="flex w-full max-w-[500px] items-center justify-center justify-self-center py-4 xl:-translate-y-6 xl:justify-self-end">
+        <div className="flex w-full max-w-[500px] items-center justify-center justify-self-center py-4 xl:-translate-y-12 xl:justify-self-end">
           <LandingChatPanel />
         </div>
       </div>
