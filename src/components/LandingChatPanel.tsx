@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUp, Loader2, MessageSquareMore, Sparkles, Square } from 'lucide-react';
-import config from '../config';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowUp, Loader2, MessageSquareMore, Square } from 'lucide-react';
 import { LandingChatMessage, streamLandingChatReply } from '../services/landingChatService';
 
 interface LandingChatPanelProps {
@@ -13,7 +12,7 @@ interface ChatMessage extends LandingChatMessage {
 }
 
 const STARTER_MESSAGE =
-  'Ask me anything about Pustakam. I keep it short, clear, and useful so you can decide fast.';
+  'Hey, ask anything about Pustakam. I will keep it short, useful, and easy to scan.';
 
 const SUGGESTED_PROMPTS = [
   'Can Pustakam make a book for UPSC prep?',
@@ -47,11 +46,6 @@ export default function LandingChatPanel({ onGetStarted, compact = false }: Land
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  const modelLabel = useMemo(
-    () => config.ai.landingChatModel || 'Cerebras chat',
-    [],
-  );
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -119,29 +113,22 @@ export default function LandingChatPanel({ onGetStarted, compact = false }: Land
   };
 
   return (
-    <section className={`group relative overflow-hidden rounded-[30px] border border-white/12 bg-[#0b0b0c]/90 shadow-[0_30px_100px_rgba(0,0,0,0.38)] backdrop-blur-2xl ${compact ? 'min-h-[560px]' : 'min-h-[620px]'}`}>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(254,205,140,0.16),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0))]" />
-      <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-
+    <section className={`overflow-hidden rounded-[26px] border border-white/10 bg-[#0f1012] ${compact ? 'min-h-[540px]' : 'min-h-[610px]'}`}>
       <div className="relative flex h-full flex-col">
-        <div className="flex items-start justify-between gap-4 border-b border-white/8 px-5 py-4">
+        <div className="border-b border-white/8 px-5 py-4">
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-[#FECD8C]">
-                <Sparkles className="h-4 w-4" />
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/70">
+                <MessageSquareMore className="h-4 w-4" />
               </span>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-white/45">Pustakam Guide</p>
-                <h3 className="text-[15px] font-semibold text-white">Built-in chat on the landing page</h3>
+                <p className="text-[11px] font-medium tracking-[0.02em] text-white/86">Pustakam guide</p>
+                <h3 className="text-[12px] font-normal text-white/46">Always open for quick product questions</h3>
               </div>
             </div>
-            <p className="mt-3 max-w-sm text-[12px] leading-5 text-white/48">
-              Short answers. Fast clarity. Designed to help visitors understand the product without leaving the page.
+            <p className="mt-3 max-w-sm text-[12px] leading-5 text-white/44">
+              Short replies, clean guidance, and no extra clicks.
             </p>
-          </div>
-
-          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/52">
-            {modelLabel}
           </div>
         </div>
 
@@ -152,13 +139,13 @@ export default function LandingChatPanel({ onGetStarted, compact = false }: Land
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[88%] rounded-[24px] px-4 py-3 text-[13px] leading-6 ${
+                className={`max-w-[88%] rounded-[20px] px-4 py-3 text-[13px] leading-6 ${
                   message.role === 'user'
-                    ? 'bg-[#FECD8C] text-black shadow-[0_10px_30px_rgba(254,205,140,0.24)]'
-                    : 'border border-white/8 bg-white/[0.04] text-white/80'
+                    ? 'bg-white text-black'
+                    : 'border border-white/8 bg-[#17181b] text-white/80'
                 }`}
               >
-                <div className="mb-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] opacity-60">
+                <div className="mb-1.5 flex items-center gap-2 text-[10px] font-medium tracking-[0.02em] opacity-55">
                   {message.role === 'assistant' ? <MessageSquareMore className="h-3.5 w-3.5" /> : null}
                   <span>{message.role === 'assistant' ? 'Pustakam' : 'You'}</span>
                 </div>
@@ -178,14 +165,14 @@ export default function LandingChatPanel({ onGetStarted, compact = false }: Land
                 type="button"
                 onClick={() => void handleSend(prompt)}
                 disabled={isSending}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-left text-[11px] font-medium text-white/66 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full border border-white/10 bg-[#17181b] px-3 py-2 text-left text-[11px] font-normal text-white/62 transition-all hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {prompt}
               </button>
             ))}
           </div>
 
-          <div className="rounded-[26px] border border-white/10 bg-black/30 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          <div className="rounded-[22px] border border-white/10 bg-[#17181b] p-2">
             <div className="flex items-end gap-2">
               <textarea
                 value={input}
@@ -198,14 +185,14 @@ export default function LandingChatPanel({ onGetStarted, compact = false }: Land
                 }}
                 rows={compact ? 2 : 3}
                 placeholder="Ask what Pustakam can do for you..."
-                className="min-h-[54px] flex-1 resize-none bg-transparent px-3 py-2 text-[13px] leading-6 text-white outline-none placeholder:text-white/26"
+                className="min-h-[54px] flex-1 resize-none bg-transparent px-3 py-2 text-[13px] leading-6 text-white outline-none placeholder:text-white/24"
               />
 
               {isSending ? (
                 <button
                   type="button"
                   onClick={handleStop}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.05] text-white/72 transition-all hover:bg-white/[0.1] hover:text-white"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.04] text-white/72 transition-all hover:bg-white/[0.08] hover:text-white"
                   title="Stop response"
                 >
                   <Square className="h-4 w-4 fill-current" />
@@ -215,7 +202,7 @@ export default function LandingChatPanel({ onGetStarted, compact = false }: Land
                   type="button"
                   onClick={() => void handleSend()}
                   disabled={!input.trim()}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FECD8C] text-black transition-all hover:bg-[#ffd9a0] disabled:cursor-not-allowed disabled:opacity-45"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-black transition-all hover:bg-white/92 disabled:cursor-not-allowed disabled:opacity-45"
                   title="Send message"
                 >
                   <ArrowUp className="h-4 w-4" />
@@ -232,7 +219,7 @@ export default function LandingChatPanel({ onGetStarted, compact = false }: Land
             <button
               type="button"
               onClick={onGetStarted}
-              className="rounded-full border border-[#FECD8C]/30 bg-[#FECD8C]/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#FECD8C] transition-all hover:bg-[#FECD8C]/18"
+              className="rounded-full border border-white/12 px-3 py-1.5 text-[10px] font-medium tracking-[0.02em] text-white/76 transition-all hover:border-white/24 hover:text-white"
             >
               Start building
             </button>
