@@ -240,7 +240,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                     className="absolute inset-0 -m-8 scale-150 rounded-full bg-white/10 blur-[40px]"
                   />
                   <div className="relative flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] shadow-2xl backdrop-blur-md">
-                    <img src="/white-logo.png" className="h-8 w-8 opacity-90" alt="Pustakam AI" />
+                    <img src="/white-logo.png" className="h-11 w-11 opacity-90" alt="Pustakam AI" />
                   </div>
                 </motion.div>
 
