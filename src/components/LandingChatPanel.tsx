@@ -96,13 +96,16 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
   );
 
   useEffect(() => {
-    const endNode = endRef.current;
     const container = scrollRef.current;
-    if (!endNode || !container) return;
+    if (!container) return;
+
+    const scrollOptions: ScrollToOptions = {
+      top: container.scrollHeight,
+      behavior: isSending ? 'auto' : 'smooth',
+    };
 
     requestAnimationFrame(() => {
-      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
-      endNode.scrollIntoView({ block: 'end' });
+      container.scrollTo(scrollOptions);
     });
   }, [visibleMessages, isSending]);
 
