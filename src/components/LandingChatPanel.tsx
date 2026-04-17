@@ -289,16 +289,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   </AnimatePresence>
                 </motion.div>
 
-                <motion.p
-                  variants={{
-                    hidden: { opacity: 0, y: 8 },
-                    visible: { opacity: 1, y: 0 },
-                  }}
-                  className="mt-3 max-w-[290px] text-[12.5px] leading-6 text-white/46"
-                  style={{ fontFamily: "'Rubik', sans-serif" }}
-                >
-                  Short product answers only. This chat can explain the app, pitch book ideas, and clarify limits, but it cannot see your books or progress.
-                </motion.p>
+
 
                 <motion.div
                   variants={{
@@ -363,10 +354,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
         </div>
 
         <div className="px-4 pb-5 pt-3">
-          <div className="mb-2 flex items-center justify-between px-1 text-[10px] font-medium tracking-[0.04em] text-white/24">
-            <span>Fast, short answers</span>
-            <span>Cannot view books or progress</span>
-          </div>
+
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-1.5 pl-4">
             <div className="flex items-center gap-2">
               <textarea
@@ -381,7 +369,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   }
                 }}
                 rows={1}
-                placeholder="Ask about the app, modes, or your next book idea..."
+                placeholder="Ask about the app, modes..."
                 className="max-h-36 min-h-[38px] flex-1 resize-none bg-transparent py-2 text-[13px] font-semibold leading-relaxed text-white outline-none placeholder:text-white/20"
                 style={{ fontFamily: "'Rubik', sans-serif" }}
               />
