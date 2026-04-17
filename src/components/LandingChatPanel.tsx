@@ -24,8 +24,6 @@ const MAX_CONTEXT_MESSAGES = 8;
 const STARTER_PROMPTS = [
   'What can Pustakam do for me?',
   'Explain Stellar, Blackhole, and Desi.',
-  'Can you see my book or progress?',
-  'Pitch me a machine learning book idea.',
 ];
 
 const markdownComponents = {
