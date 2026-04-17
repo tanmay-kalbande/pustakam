@@ -14,13 +14,19 @@ interface ChatMessage extends LandingChatMessage {
 }
 
 const TAGLINES = [
-  'Your Book Architect',
-  'Your Research Partner',
-  'Your Writing Companion',
-  'Ask Pustakam AI Anything',
+  'Pitch Your Next Book',
+  'Find Your Best Mode',
+  'Ask Before You Build',
+  'Short Answers, Real Scope',
 ];
 
 const MAX_CONTEXT_MESSAGES = 8;
+const STARTER_PROMPTS = [
+  'What can Pustakam do for me?',
+  'Explain Stellar, Blackhole, and Desi.',
+  'Can you see my book or progress?',
+  'Pitch me a machine learning book idea.',
+];
 
 const markdownComponents = {
   p: ({ children }: any) => <p className="m-0 whitespace-pre-wrap">{children}</p>,
@@ -190,17 +196,23 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
     >
       <div className="flex h-full min-h-0 flex-col">
         <div className="px-5 py-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
-              <img src="/white-logo.png" className="h-5 w-5 opacity-90" alt="Pustakam AI" />
-            </span>
-            <div className="min-w-0">
-              <p
-                className="truncate text-[15px] font-medium tracking-[-0.02em] text-white/92"
-                style={{ fontFamily: "'Rubik', sans-serif" }}
-              >
-                Pustakam AI
-              </p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
+                <img src="/white-logo.png" className="h-5 w-5 opacity-90" alt="Pustakam AI" />
+              </span>
+              <div className="min-w-0">
+                <p
+                  className="truncate text-[15px] font-medium tracking-[-0.02em] text-white/92"
+                  style={{ fontFamily: "'Rubik', sans-serif" }}
+                >
+                  Pustakam AI
+                </p>
+              </div>
+            </div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/38">
+              <MessageSquareMore className="h-3.5 w-3.5" />
+              Product guide
             </div>
           </div>
         </div>
@@ -276,6 +288,37 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                     </motion.p>
                   </AnimatePresence>
                 </motion.div>
+
+                <motion.p
+                  variants={{
+                    hidden: { opacity: 0, y: 8 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  className="mt-3 max-w-[290px] text-[12.5px] leading-6 text-white/46"
+                  style={{ fontFamily: "'Rubik', sans-serif" }}
+                >
+                  Short product answers only. This chat can explain the app, pitch book ideas, and clarify limits, but it cannot see your books or progress.
+                </motion.p>
+
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  className="mt-6 flex w-full flex-wrap justify-center gap-2"
+                >
+                  {STARTER_PROMPTS.map(prompt => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => void handleSend(prompt)}
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-[11px] font-semibold leading-tight text-white/62 transition-all hover:border-[#FECD8C]/40 hover:bg-[#FECD8C]/10 hover:text-white"
+                      style={{ fontFamily: "'Rubik', sans-serif" }}
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </motion.div>
               </div>
             </motion.div>
           ) : (
@@ -320,6 +363,10 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
         </div>
 
         <div className="px-4 pb-5 pt-3">
+          <div className="mb-2 flex items-center justify-between px-1 text-[10px] font-medium tracking-[0.04em] text-white/24">
+            <span>Fast, short answers</span>
+            <span>Cannot view books or progress</span>
+          </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-1.5 pl-4">
             <div className="flex items-center gap-2">
               <textarea
@@ -334,7 +381,7 @@ export default function LandingChatPanel({ compact = false }: LandingChatPanelPr
                   }
                 }}
                 rows={1}
-                placeholder="Message Pustakam AI..."
+                placeholder="Ask about the app, modes, or your next book idea..."
                 className="max-h-36 min-h-[38px] flex-1 resize-none bg-transparent py-2 text-[13px] font-semibold leading-relaxed text-white outline-none placeholder:text-white/20"
                 style={{ fontFamily: "'Rubik', sans-serif" }}
               />

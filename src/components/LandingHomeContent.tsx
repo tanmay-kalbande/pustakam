@@ -59,8 +59,8 @@ export default function LandingHomeContent({
               },
               {
                 title: 'Built-In Guide',
-                desc: 'A live landing-page assistant answers product questions without extra clicks.',
-                sub: 'Fast, crisp, low-friction onboarding',
+                desc: 'A live landing-page guide gives short, product-aware answers and clearly tells you what it cannot see.',
+                sub: 'Faster onboarding, cleaner expectations, higher intent',
               },
             ].map((item, idx) => (
               <div
