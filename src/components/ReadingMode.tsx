@@ -323,11 +323,11 @@ export function ReadingMode({
   };
 
   return (
-    <div className="relative space-y-5">
+    <div className="workspace-stack">
       {/* Mobile chapter selector */}
       {isMobile ? (
         <div className="overflow-x-auto pb-1">
-          <div className="flex gap-2">
+          <div className="workspace-chip-row min-w-max">
             {orderedModules.map((module, index) => (
               <button
                 key={module.id}
@@ -350,11 +350,11 @@ export function ReadingMode({
 
       {/* Reader container */}
       <div
-        className="reading-container overflow-hidden rounded-[20px] border border-[var(--workspace-line)] shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+        className="workspace-reader-shell reading-container"
         style={{ backgroundColor: currentTheme.contentBg, color: currentTheme.text }}
       >
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--workspace-line)] px-4 py-3" style={{ backgroundColor: currentTheme.contentBg }}>
+        <div className="workspace-reader-toolbar" style={{ backgroundColor: currentTheme.contentBg }}>
           <div className="flex flex-wrap items-center gap-3">
             {/* Theme switcher */}
             <div className="flex items-center gap-1 rounded-full p-1" style={{ backgroundColor: currentTheme.contentBg }}>
@@ -438,9 +438,9 @@ export function ReadingMode({
         </div>
 
         {/* Content */}
-        <div className="px-4 py-5 sm:px-7">
+        <div className="workspace-reader-content">
           {readerSurface === 'module' ? (
-            <div className="mb-5 rounded-[18px] border border-[var(--workspace-line)] bg-white/[0.02] p-4">
+            <div className="workspace-card mb-5 p-4">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -463,7 +463,7 @@ export function ReadingMode({
               {roadmapModule?.objectives?.length ? (
                 <div className="mt-4 grid gap-2.5 md:grid-cols-2">
                   {roadmapModule.objectives.slice(0, 4).map(objective => (
-                    <div key={objective} className="rounded-[16px] border border-[var(--workspace-line)] bg-white/[0.02] px-3.5 py-3 text-sm leading-6 text-[var(--text-secondary)]">
+                    <div key={objective} className="workspace-card-muted px-3.5 py-3 text-sm leading-6 text-[var(--text-secondary)]">
                       <div className="flex items-start gap-3">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--brand)]" />
                         <span>{objective}</span>
@@ -474,7 +474,7 @@ export function ReadingMode({
               ) : null}
             </div>
           ) : (
-            <div className="mb-5 rounded-[18px] border border-[var(--workspace-line)] bg-white/[0.02] p-4 text-sm leading-7 text-[var(--text-secondary)]">
+            <div className="workspace-card-muted mb-5 p-4 text-sm leading-7 text-[var(--text-secondary)]">
               Full book view keeps the entire draft in one scrollable surface.
             </div>
           )}

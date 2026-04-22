@@ -307,7 +307,7 @@ export function SettingsModal({
         onClick={onClose}
       >
         <div
-          className="relative my-auto flex max-h-[calc(100vh-24px)] w-full max-w-5xl flex-col overflow-hidden rounded-[20px] border border-[var(--workspace-line)] bg-[var(--bg-base)] shadow-[0_24px_60px_rgba(0,0,0,0.3)] md:max-h-[calc(100vh-40px)]"
+          className="workspace-settings-dialog relative my-auto flex max-h-[calc(100vh-24px)] w-full max-w-5xl flex-col overflow-hidden md:max-h-[calc(100vh-40px)]"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent)]" />
@@ -333,7 +333,7 @@ export function SettingsModal({
 
           <div className="relative z-10 flex min-h-0 flex-1 overflow-hidden flex-col md:flex-row">
             {/* Sidebar */}
-            <div className="flex w-full flex-col overflow-hidden border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/50 md:w-[260px] md:border-b-0 md:border-r">
+            <div className="workspace-settings-sidebar flex w-full flex-col overflow-hidden border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/50 md:w-[260px] md:border-b-0 md:border-r">
               <div className="flex flex-1 items-center overflow-x-auto p-4 whitespace-nowrap custom-scrollbar md:flex-col md:items-start md:overflow-x-hidden md:overflow-y-auto md:p-6 md:whitespace-normal">
                 <div className="flex items-center gap-2 mb-0 md:mb-8 mr-6 md:mr-0 shrink-0">
                   <div className="h-6 w-1 rounded-full bg-[var(--brand)]" />
@@ -407,18 +407,18 @@ export function SettingsModal({
             </div>
 
             {/* Content area */}
-            <div className="flex-1 overflow-y-auto p-5 text-[var(--color-text-primary)] scroll-smooth md:p-6">
+            <div className="workspace-settings-content flex-1 overflow-y-auto p-5 text-[var(--color-text-primary)] scroll-smooth md:p-6">
 
               {/* â”€â”€ PERSONALITY TAB â”€â”€ */}
               {activeTab === 'personality' && (
-                <div className="space-y-8">
-                  <header>
+                <div className="workspace-stack">
+                  <header className="workspace-settings-section">
                     <h3 className="mb-1 text-lg font-bold text-[var(--text-primary)]">Persona & Identity</h3>
                     <p className="text-sm text-[var(--text-secondary)]">Customize appearance and generation behaviors.</p>
                   </header>
 
                   {/* Theme */}
-                  <section className="space-y-4">
+                  <section className="workspace-settings-section space-y-4">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Theme Preference</label>
                     <div className="grid grid-cols-2 gap-2 rounded-md border border-[var(--border-subtle)] bg-white/5 p-1">
                       {(['light', 'dark'] as const).map((t) => (
@@ -439,7 +439,7 @@ export function SettingsModal({
                   </section>
 
                   {/* Generation mode */}
-                  <section className="space-y-4 pt-6 border-t border-[var(--border-subtle)]">
+                  <section className="workspace-settings-section space-y-4">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Default Generation Mode</label>
                     <div className="grid grid-cols-2 gap-2 rounded-md border border-[var(--border-subtle)] bg-white/5 p-1">
                       {[
@@ -465,7 +465,7 @@ export function SettingsModal({
                   </section>
 
                   {/* Language */}
-                  <section className="space-y-4 pt-6 border-t border-[var(--border-subtle)]">
+                  <section className="workspace-settings-section space-y-4">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Default Language</label>
                     <div className="grid grid-cols-1 gap-2 rounded-md border border-[var(--border-subtle)] bg-white/5 p-1 md:grid-cols-3">
                       {[
@@ -501,15 +501,15 @@ export function SettingsModal({
 
               {/* â”€â”€ API KEYS TAB â”€â”€ */}
               {activeTab === 'apikeys' && (
-                <div className="space-y-8">
-                  <header>
+                <div className="workspace-stack">
+                  <header className="workspace-settings-section">
                     <h3 className="mb-1 text-lg font-bold text-[var(--text-primary)]">API Keys & Provider</h3>
                     <p className="text-sm text-[var(--text-secondary)]">Manage your AI provider keys and select your preferred model.</p>
                   </header>
 
                   {/* â”€â”€ Quota Status â”€â”€ */}
                   {quotaStatus && (
-                    <section className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)]/50 p-5">
+                    <section className="workspace-settings-section">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <Zap size={16} className="text-[var(--brand)]" />
@@ -545,7 +545,7 @@ export function SettingsModal({
                   )}
 
                   {/* â”€â”€ Active Provider & Model Selector â”€â”€ */}
-                  <section className="space-y-4 pt-2">
+                  <section className="workspace-settings-section space-y-4">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Active Provider</label>
                     <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
                       {/* Show proxy providers when user has free quota */}
@@ -614,7 +614,7 @@ export function SettingsModal({
                   </section>
 
                   {/* â”€â”€ BYOK Key Management â”€â”€ */}
-                  <section className="space-y-4 pt-6 border-t border-[var(--border-subtle)]">
+                  <section className="workspace-settings-section space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Your API Keys</label>
@@ -725,13 +725,13 @@ export function SettingsModal({
 
               {/* â”€â”€ DATA TAB â”€â”€ */}
               {activeTab === 'data' && (
-                <div className="space-y-8">
-                  <header>
+                <div className="workspace-stack">
+                  <header className="workspace-settings-section">
                     <h3 className="mb-1 text-lg font-bold text-[var(--text-primary)]">Data Management</h3>
                     <p className="text-sm text-[var(--text-secondary)]">Control your local library and archives.</p>
                   </header>
 
-                  <section className="space-y-4">
+                  <section className="workspace-settings-section space-y-4">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Backup Operations</h4>
                     <div className="grid grid-cols-2 gap-3">
                       <button
@@ -747,7 +747,7 @@ export function SettingsModal({
                     </div>
                   </section>
 
-                  <section className="pt-8 space-y-3">
+                  <section className="workspace-settings-section space-y-3">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">Danger Zone</h4>
                     <div className="p-4 rounded-md border border-red-500/20 bg-red-500/5">
                       <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed">
@@ -766,8 +766,8 @@ export function SettingsModal({
 
               {/* â”€â”€ ABOUT TAB â”€â”€ */}
               {activeTab === 'about' && (
-                <div className="space-y-10">
-                  <div className="flex items-start gap-6">
+                <div className="workspace-stack">
+                  <div className="workspace-settings-section flex items-start gap-6">
                     <div className="w-16 h-16 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-center border border-[var(--border-subtle)] shrink-0">
                       <img src="/white-logo.png" alt="Logo" className="w-10 h-10 opacity-70" />
                     </div>
@@ -781,7 +781,7 @@ export function SettingsModal({
                   </div>
 
                   {/* Stats grid */}
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                  <div className="workspace-settings-section grid grid-cols-2 gap-x-8 gap-y-6">
                     {[
                       { label: 'AI Model',     val: localSettings.selectedModel },
                       { label: 'Providers',    val: `${PROVIDERS.length} providers supported` },
@@ -795,7 +795,7 @@ export function SettingsModal({
                     ))}
                   </div>
 
-                  <div className="space-y-4 pt-10 border-t border-[var(--border-subtle)]">
+                  <div className="workspace-settings-section space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Developer</p>
                       <a
@@ -908,4 +908,3 @@ export function SettingsModal({
     </>
   );
 }
-

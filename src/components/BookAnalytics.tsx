@@ -44,30 +44,40 @@ export function BookAnalytics({ book }: BookAnalyticsProps) {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div className="workspace-panel p-6">
-        <div className="mb-6 flex items-center gap-3">
-          <BarChart3 className="h-5 w-5 text-[var(--brand)]" />
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Analytics</p>
-            <h3 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">Book overview</h3>
+      <div className="workspace-hero">
+        <div className="workspace-hero__content">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="workspace-eyebrow">Analytics</p>
+              <h3 className="mt-4 text-[clamp(1.6rem,2.8vw,2.25rem)] font-bold tracking-[-0.05em] text-[var(--text-primary)]">
+                Book overview
+              </h3>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">
+                Inspect the shape of this draft before you export or study it.
+              </p>
+            </div>
+            <div className="workspace-chip workspace-chip--accent hidden md:inline-flex">
+              <BarChart3 className="h-4 w-4" />
+              Learning intelligence
+            </div>
           </div>
-        </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="workspace-metric-grid">
           {[
             { label: 'Total words', value: analytics.totalWords.toLocaleString(), icon: Hash },
             { label: 'Reading time', value: analytics.readingTime, icon: Clock },
             { label: 'Complexity', value: complexityLabel[analytics.complexity], icon: Brain },
             { label: 'Chapters', value: book.modules.length, icon: BookOpen },
           ].map(({ label, value, icon: Icon }) => (
-            <div key={label} className="workspace-card p-4">
+            <div key={label} className="workspace-metric-card">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{label}</p>
+                <span className="workspace-metric-card__label">{label}</span>
                 <Icon className="h-4 w-4 text-[var(--brand)]" />
               </div>
-              <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">{value}</p>
+              <span className="workspace-metric-card__value">{value}</span>
             </div>
           ))}
+          </div>
         </div>
       </div>
 
@@ -78,7 +88,7 @@ export function BookAnalytics({ book }: BookAnalyticsProps) {
         </div>
         <div className="flex flex-wrap gap-2.5">
           {analytics.topics.map((topic, index) => (
-            <span key={index} className="rounded-full border border-[var(--workspace-line)] bg-white/[0.02] px-3 py-1.5 text-sm text-[var(--text-secondary)]">
+            <span key={index} className="workspace-chip">
               {topic}
             </span>
           ))}
@@ -91,7 +101,10 @@ export function BookAnalytics({ book }: BookAnalyticsProps) {
           <h4 className="text-lg font-semibold text-[var(--text-primary)]">Study materials</h4>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <button onClick={downloadProgressTracker} className="workspace-card flex items-center gap-3 p-4 text-left transition-colors hover:bg-white/[0.04]">
+          <button
+            onClick={downloadProgressTracker}
+            className="workspace-card flex items-center gap-3 p-4 text-left transition-colors hover:bg-[var(--workspace-soft)]"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--workspace-line)] bg-white/[0.02]">
               <Download className="h-4 w-4 text-[var(--brand)]" />
             </div>
@@ -100,7 +113,10 @@ export function BookAnalytics({ book }: BookAnalyticsProps) {
               <div className="mt-1 text-sm text-[var(--text-secondary)]">Checklist for chapters and completion</div>
             </div>
           </button>
-          <button onClick={downloadStudySummary} className="workspace-card flex items-center gap-3 p-4 text-left transition-colors hover:bg-white/[0.04]">
+          <button
+            onClick={downloadStudySummary}
+            className="workspace-card flex items-center gap-3 p-4 text-left transition-colors hover:bg-[var(--workspace-soft)]"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--workspace-line)] bg-white/[0.02]">
               <Download className="h-4 w-4 text-[var(--brand)]" />
             </div>

@@ -1014,8 +1014,8 @@ export function StudyModePage({
     <div
       className="flex min-h-screen flex-col"
       style={{
-        background: 'radial-gradient(circle at top left, rgba(254,205,140,0.09), transparent 24%), radial-gradient(circle at 85% 12%, rgba(96,165,250,0.08), transparent 22%), #080808',
-        color: 'rgba(255,255,255,0.84)',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.02), transparent 180px), var(--bg-base)',
+        color: 'var(--text-primary)',
       }}
     >
 
@@ -1023,25 +1023,31 @@ export function StudyModePage({
       <header
         className="sticky top-0 z-50 flex h-[64px] shrink-0 items-center justify-between gap-4 px-5"
         style={{
-          background: 'rgba(8,8,8,0.82)',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          background: 'color-mix(in srgb, var(--bg-elevated) 92%, transparent)',
+          borderBottom: '1px solid var(--workspace-line)',
           backdropFilter: 'blur(20px)',
+          boxShadow: '0 14px 28px rgba(0,0,0,0.14)',
         }}
       >
         {/* Left */}
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onBack}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[11px] font-medium text-white/52 transition-all hover:border-white/[0.14] hover:text-white/82"
+            className="flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-medium transition-all"
+            style={{
+              borderColor: 'var(--workspace-line)',
+              background: 'var(--workspace-soft)',
+              color: 'var(--text-secondary)',
+            }}
           >
             <ArrowLeft size={12} /> Back
           </button>
 
           <div className="hidden sm:block min-w-0">
-            <p className="text-[9px] font-bold uppercase tracking-[0.24em]" style={{ color: 'rgba(254,205,140,0.6)' }}>
+            <p className="text-[9px] font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--brand)' }}>
               Study Workspace
             </p>
-            <h1 className="text-[14px] font-semibold truncate" style={{ color: 'rgba(255,255,255,0.84)' }}>
+            <h1 className="text-[14px] font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
               {book.title}
             </h1>
           </div>
@@ -1052,10 +1058,10 @@ export function StudyModePage({
           {/* Chapter / progress badge */}
           <div
             className="hidden h-10 items-center gap-1.5 rounded-[16px] border px-3.5 text-[11px] sm:flex"
-            style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}
+            style={{ background: 'var(--workspace-soft)', borderColor: 'var(--workspace-line)' }}
           >
-            <span style={{ color: 'rgba(255,255,255,0.28)' }}>Ch.</span>
-            <span className="font-semibold" style={{ color: 'rgba(255,255,255,0.68)' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Ch.</span>
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
               {selModIdx + 1}/{orderedModules.length}
             </span>
           </div>
@@ -1065,9 +1071,9 @@ export function StudyModePage({
               onClick={() => setSidebarOpen(p => !p)}
               className="flex h-10 w-10 items-center justify-center rounded-[16px] border transition-all"
               style={{
-                background: sidebarOpen ? 'rgba(255,255,255,0.06)' : 'transparent',
-                color: sidebarOpen ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)',
-                borderColor: 'rgba(255,255,255,0.06)',
+                background: sidebarOpen ? 'var(--workspace-soft-strong)' : 'transparent',
+                color: sidebarOpen ? 'var(--text-primary)' : 'var(--text-muted)',
+                borderColor: 'var(--workspace-line)',
               }}
               title="Toggle chapters"
             >
@@ -1080,10 +1086,10 @@ export function StudyModePage({
               onClick={() => setPanelOpen(p => !p)}
               className="flex h-10 items-center gap-1.5 rounded-[16px] border px-3.5 text-[11px] font-semibold transition-all"
               style={{
-                background: panelOpen ? 'rgba(254,205,140,0.09)' : 'rgba(255,255,255,0.04)',
-                borderColor: panelOpen ? 'rgba(254,205,140,0.2)' : 'rgba(255,255,255,0.08)',
-                color: panelOpen ? '#FECD8C' : 'rgba(255,255,255,0.38)',
-                boxShadow: panelOpen ? '0 12px 28px rgba(254,205,140,0.08)' : 'none',
+                background: panelOpen ? 'color-mix(in srgb, var(--brand) 12%, var(--workspace-soft))' : 'var(--workspace-soft)',
+                borderColor: panelOpen ? 'color-mix(in srgb, var(--brand) 28%, var(--workspace-line))' : 'var(--workspace-line)',
+                color: panelOpen ? 'var(--brand)' : 'var(--text-secondary)',
+                boxShadow: panelOpen ? '0 12px 28px rgba(0,0,0,0.14)' : 'none',
               }}
             >
               <MessageCircle size={12} />
@@ -1105,11 +1111,11 @@ export function StudyModePage({
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: 'easeInOut' }}
               className="shrink-0 flex flex-col overflow-hidden"
-              style={{ borderRight: '1px solid rgba(255,255,255,0.06)', background: '#0a0a0a' }}
+              style={{ borderRight: '1px solid var(--workspace-line)', background: 'color-mix(in srgb, var(--bg-surface) 92%, transparent)' }}
             >
               {/* Sidebar header â€” height matches reader toolbar ~44px */}
-              <div className="flex items-center px-4" style={{ height: 44, borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <div className="flex items-center px-4" style={{ height: 44, borderBottom: '1px solid var(--workspace-line)', flexShrink: 0 }}>
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
                   Chapters
                 </p>
               </div>
@@ -1124,35 +1130,35 @@ export function StudyModePage({
                       onClick={() => { setSelModIdx(idx); setSurface('module'); setSelectedText(''); }}
                       className="w-full text-left px-4 py-3 transition-all relative"
                       style={{
-                        background: active ? 'rgba(254,205,140,0.05)' : 'transparent',
-                        borderLeft: `2px solid ${active ? '#FECD8C' : 'transparent'}`,
+                        background: active ? 'color-mix(in srgb, var(--brand) 10%, transparent)' : 'transparent',
+                        borderLeft: `2px solid ${active ? 'var(--brand)' : 'transparent'}`,
                       }}
-                      onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; }}
+                      onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--workspace-soft)'; }}
                       onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
                     >
                       <div className="flex items-start gap-2.5">
                         <span
                           className="shrink-0 text-[10px] font-bold mt-0.5 w-4 text-right"
-                          style={{ color: active ? 'rgba(254,205,140,0.65)' : 'rgba(255,255,255,0.2)', fontFamily: 'monospace' }}
+                          style={{ color: active ? 'var(--brand)' : 'var(--text-muted)', fontFamily: 'monospace' }}
                         >
                           {String(idx + 1).padStart(2, '0')}
                         </span>
                         <div className="min-w-0 flex-1">
                           <p
                             className="text-[12px] font-medium leading-snug"
-                            style={{ color: active ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.46)' }}
+                            style={{ color: active ? 'var(--text-primary)' : 'var(--text-secondary)' }}
                           >
                             {mod.title}
                           </p>
                           {prog > 0 && (
                             <div className="mt-1.5 flex items-center gap-1.5">
-                              <div className="flex-1 h-px overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                              <div className="flex-1 h-px overflow-hidden" style={{ background: 'var(--workspace-line)' }}>
                                 <div
                                   className="h-full transition-all"
-                                  style={{ width: `${prog}%`, background: active ? '#FECD8C' : 'rgba(255,255,255,0.15)' }}
+                                  style={{ width: `${prog}%`, background: active ? 'var(--brand)' : 'var(--text-muted)' }}
                                 />
                               </div>
-                              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)', fontFamily: 'monospace' }}>{prog}%</span>
+                              <span className="text-[9px]" style={{ color: 'var(--text-muted)', fontFamily: 'monospace' }}>{prog}%</span>
                             </div>
                           )}
                         </div>
@@ -1175,7 +1181,7 @@ export function StudyModePage({
           {isMobile && (
             <div
               className="shrink-0 flex gap-2 overflow-x-auto px-4 py-3 custom-scrollbar"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#0a0a0a' }}
+              style={{ borderBottom: '1px solid var(--workspace-line)', background: 'color-mix(in srgb, var(--bg-surface) 92%, transparent)' }}
             >
               {orderedModules.map((mod, idx) => (
                 <button
@@ -1183,9 +1189,9 @@ export function StudyModePage({
                   onClick={() => { setSelModIdx(idx); setSurface('module'); }}
                   className="shrink-0 px-3 py-1.5 text-[11px] font-semibold whitespace-nowrap transition-all"
                   style={{
-                    background: idx === selModIdx ? '#FECD8C' : 'rgba(255,255,255,0.04)',
-                    color: idx === selModIdx ? '#000' : 'rgba(255,255,255,0.4)',
-                    border: `1px solid ${idx === selModIdx ? 'transparent' : 'rgba(255,255,255,0.08)'}`,
+                    background: idx === selModIdx ? 'var(--brand)' : 'var(--workspace-soft)',
+                    color: idx === selModIdx ? '#000' : 'var(--text-secondary)',
+                    border: `1px solid ${idx === selModIdx ? 'transparent' : 'var(--workspace-line)'}`,
                     borderRadius: 20,
                   }}
                 >

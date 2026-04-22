@@ -384,9 +384,11 @@ const EmbeddedProgressPanel = ({
 const DetailTabButton = ({ label, Icon, isActive, onClick }: { label: ReactNode; Icon: React.ElementType; isActive: boolean; onClick: () => void; }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${isActive
-      ? 'border-[var(--brand)]/20 bg-[var(--brand)]/10 text-[var(--text-primary)]'
-      : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]'}`}
+    className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-200 ${
+      isActive
+        ? 'border-[var(--brand)]/25 bg-[var(--brand)]/12 text-[var(--text-primary)] shadow-[0_14px_28px_rgba(0,0,0,0.12)]'
+        : 'border-[var(--workspace-line)] bg-[var(--workspace-soft)] text-[var(--text-secondary)] hover:border-[var(--workspace-line-strong)] hover:bg-[var(--workspace-soft-strong)] hover:text-[var(--text-primary)]'
+    }`}
   >
     <Icon className="w-3.5 h-3.5" /> {label}
   </button>
@@ -451,57 +453,67 @@ const HomeView = ({
     ?? settings.selectedModel;
 
   return (
-    <div className="relative w-full min-h-full px-6 pb-24 pt-24">
-      <div className="relative z-10 mx-auto w-full max-w-6xl pb-6 mb-4">
-        <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-          <div>
-            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">
-              Create a Book
-            </p>
-            <h1 className="max-w-3xl text-3xl font-bold tracking-[-0.05em] text-[var(--text-primary)] md:text-5xl md:leading-[1.02]">
-              Start with a topic.
-              <span className="mt-2 block text-[var(--text-secondary)]">Build the roadmap first, then generate the full book.</span>
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--text-secondary)] md:text-[15px]">
-              Write the learning goal clearly, tune the brief if needed, and start the roadmap. Existing drafts and completed books stay available in your library.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {[
-                { label: 'Provider', value: activeProvider.name, hint: activeProvider.tagline },
-                { label: 'Model', value: activeModel, hint: 'You can change this from the top bar anytime' },
-                { label: 'Library', value: `${bookCount} ${bookCount === 1 ? 'book' : 'books'}`, hint: bookCount > 0 ? 'Open your drafts and completed exports' : 'Your created books will appear here' },
-              ].map((item) => (
-                <div key={item.label} className="inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--workspace-line)] bg-[var(--workspace-soft)] px-3 py-2">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</span>
-                  <span className="truncate text-sm font-semibold text-[var(--text-primary)]">{item.value}</span>
-                </div>
-              ))}
+    <div className="workspace-page workspace-stack">
+      <section className="workspace-hero workspace-hero--split">
+        <div className="workspace-hero__content">
+          <div className="workspace-stack">
+            <div>
+              <p className="workspace-eyebrow">Create a book</p>
+              <h1 className="workspace-title">
+                Start with a topic.
+                <span className="mt-3 block text-[0.56em] font-semibold tracking-[-0.04em] text-[var(--text-secondary)]">
+                  Shape the roadmap first, then let the workspace write the full draft.
+                </span>
+              </h1>
+              <p className="workspace-body mt-4">
+                Write the learning goal clearly, refine the brief if needed, and launch the roadmap. Existing drafts and finished books stay available in your library so you can return to them anytime.
+              </p>
+            </div>
+
+            <div className="workspace-chip-row">
+              <div className="workspace-chip">
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Provider</span>
+                <span className="workspace-chip__value">{activeProvider.name}</span>
+              </div>
+              <div className="workspace-chip">
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Model</span>
+                <span className="workspace-chip__value">{activeModel}</span>
+              </div>
+              <div className="workspace-chip workspace-chip--accent">
+                <BookOpen size={14} />
+                <strong>{bookCount}</strong> {bookCount === 1 ? 'book' : 'books'} in library
+              </div>
             </div>
           </div>
 
-          <div className="workspace-panel p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Recent Books</p>
-                <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
-                  {bookCount > 0 ? 'Pick up where you left off' : 'Library is empty'}
-                </h2>
+            <aside className="workspace-card p-5 md:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Recent books</p>
+                  <h2 className="mt-3 text-[1.35rem] font-bold tracking-[-0.04em] text-[var(--text-primary)]">
+                    {bookCount > 0 ? 'Pick up where you left off' : 'Library is empty'}
+                  </h2>
+                <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+                  {bookCount > 0
+                    ? 'Open a draft, continue writing, or jump into study mode.'
+                    : 'Your created books will appear here once the first roadmap is generated.'}
+                </p>
               </div>
               {bookCount > 0 ? (
-                <button onClick={onShowList} className="btn btn-secondary px-3 py-2 text-[11px]">
+                <button onClick={onShowList} className="btn btn-secondary px-3">
                   <BookOpen size={14} />
-                  View Library
+                  View library
                 </button>
               ) : null}
             </div>
 
             {recentBooks.length > 0 ? (
-              <div className="mt-5 space-y-3">
+              <div className="workspace-stack mt-5">
                 {recentBooks.map((book) => (
                   <button
                     key={book.id}
                     onClick={() => onOpenBook(book.id)}
-                      className="workspace-card flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--workspace-soft)]"
+                    className="workspace-card-muted flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--workspace-soft)]"
                   >
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-[var(--text-primary)]">{book.title}</div>
@@ -513,16 +525,12 @@ const HomeView = ({
                   </button>
                 ))}
               </div>
-            ) : (
-              <div className="mt-5 rounded-2xl border border-dashed border-[var(--workspace-line)] px-4 py-6 text-sm leading-6 text-[var(--text-secondary)]">
-                Your created books will show here once the first roadmap is generated.
-              </div>
-            )}
-          </div>
+            ) : null}
+          </aside>
         </div>
+      </section>
 
-        {/* Input bar */}
-        <div className="relative w-full overflow-hidden rounded-[26px] border border-[var(--workspace-line)] bg-[var(--workspace-panel)] shadow-[0_24px_48px_rgba(0,0,0,0.16)]">
+      <section className="workspace-input-shell">
           <textarea
             value={formData.goal}
             onChange={e => {
@@ -558,15 +566,17 @@ const HomeView = ({
               }
             }}
             placeholder="Describe the book you want to create"
-            className="w-full resize-none border-none bg-transparent px-5 py-5 text-[15px] leading-7 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
+            className="outline-none"
             rows={1}
-            style={{ minHeight: '148px', maxHeight: '260px' }}
+            style={{ maxHeight: '260px' }}
           />
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--workspace-line)] px-4 py-3">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
-              <span>Press Enter to start</span>
+          <div className="workspace-input-shell__footer">
+            <div className="workspace-kbd-row">
+              <span className="workspace-kbd">Enter</span>
+              <span>Start the roadmap</span>
               <span className="h-1 w-1 rounded-full bg-[var(--workspace-line)]" />
-              <span>Shift + Enter adds a new line</span>
+              <span className="workspace-kbd">Shift + Enter</span>
+              <span>New line</span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -591,165 +601,172 @@ const HomeView = ({
               </button>
             </div>
           </div>
+      </section>
+
+      {enhanceError && (
+        <div className="animate-fade-in-up">
+          <HighDemandNotice compact />
         </div>
+      )}
 
-        {enhanceError && (
-          <div className="mt-4 animate-fade-in-up">
-            <HighDemandNotice compact />
-          </div>
-        )}
-
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <button onClick={() => setShowAdvanced(!showAdvanced)} className="btn btn-secondary px-4 py-2 text-xs">
-            <List size={14} /> Build Settings
-            <ChevronDown size={12} className={`transition-transform opacity-50 ${showAdvanced ? 'rotate-180' : ''}`} />
+      <div className="workspace-toolbar-row">
+        <button onClick={() => setShowAdvanced(!showAdvanced)} className="btn btn-secondary px-4">
+          <List size={14} /> Build settings
+          <ChevronDown size={12} className={`transition-transform opacity-50 ${showAdvanced ? 'rotate-180' : ''}`} />
+        </button>
+        {bookCount > 0 && (
+          <button onClick={onShowList} className="btn btn-secondary px-4">
+            <BookOpen size={14} /> View created books <span className="opacity-40">({bookCount})</span>
           </button>
-          {bookCount > 0 && (
-            <button onClick={onShowList} className="btn btn-secondary px-4 py-2 text-xs">
-              <BookOpen size={14} /> View Created Books <span className="opacity-40">({bookCount})</span>
+        )}
+      </div>
+
+      {quotaStatus && (
+        <div className="workspace-chip-row">
+          <div className={`workspace-chip ${quotaStatus.remaining > 0 || quotaStatus.hasBYOK ? 'workspace-chip--accent' : 'workspace-chip--warning'}`}>
+            {quotaStatus.remaining > 0 ? (
+              <>
+                <Zap size={14} className="text-[var(--brand)]" />
+                <span>{quotaStatus.remaining} free {quotaStatus.remaining === 1 ? 'book' : 'books'} remaining</span>
+              </>
+            ) : quotaStatus.hasBYOK ? (
+              <>
+                <Key size={14} className="text-[var(--brand)]" />
+                <span>Using your own API key</span>
+              </>
+            ) : (
+              <>
+                <AlertTriangle size={14} className="text-amber-400" />
+                <span>Free quota used</span>
+              </>
+            )}
+          </div>
+          {!quotaStatus.hasBYOK && !quotaStatus.remaining && (
+            <button onClick={onOpenSettings} className="btn btn-secondary px-4">
+              <Key size={14} />
+              Add API key
             </button>
           )}
         </div>
+      )}
 
-        {quotaStatus && (
-          <div className="mt-4 flex flex-wrap gap-3">
-            <div className="workspace-card inline-flex items-center gap-2 px-4 py-3 text-sm text-[var(--text-secondary)]">
-              {quotaStatus.remaining > 0 ? (
-                <>
-                  <Zap size={14} className="text-[var(--brand)]" />
-                  <span>{quotaStatus.remaining} free {quotaStatus.remaining === 1 ? 'book' : 'books'} remaining</span>
-                </>
-              ) : quotaStatus.hasBYOK ? (
-                <>
-                  <Key size={14} className="text-[var(--brand)]" />
-                  <span>Using your own API key</span>
-                </>
-              ) : (
-                <>
-                  <AlertTriangle size={14} className="text-amber-400" />
-                  <span>Free quota used</span>
-                </>
-              )}
+      {showAdvanced && (
+        <section
+          className="workspace-panel p-6 md:p-7"
+          style={{ animation: 'dropdownSlideIn 0.2s cubic-bezier(0.16,1,0.3,1)', transformOrigin: 'top center' }}
+        >
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Build settings</p>
+              <h2 className="mt-3 text-2xl font-bold tracking-[-0.04em] text-[var(--text-primary)]">Tune the brief before generation</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">
+                Add audience context, set the learning level, and choose the generation personality for this run.
+              </p>
             </div>
-            {!quotaStatus.hasBYOK && !quotaStatus.remaining && (
-              <button onClick={onOpenSettings} className="btn btn-secondary px-4 py-2 text-xs">
-                <Key size={14} />
-                Add API key
-              </button>
-            )}
           </div>
-        )}
 
-        {/* Advanced options */}
-        {showAdvanced && (
-          <div
-            className="mt-6 p-6 home-options-panel rounded-[24px]"
-            style={{ animation: 'dropdownSlideIn 0.2s cubic-bezier(0.16,1,0.3,1)', transformOrigin: 'top center' }}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Audience</label>
-                <input
-                  type="text"
-                  value={formData.targetAudience}
-                  onChange={e => setFormData(p => ({ ...p, targetAudience: e.target.value }))}
-                  placeholder="Beginners, operators, analysts..."
-                  className="w-full h-10 glass-input rounded-md px-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-all shadow-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Complexity Level</label>
-                <CustomSelect
-                  value={formData.complexityLevel || 'intermediate'}
-                  onChange={val => setFormData(p => ({ ...p, complexityLevel: val as any }))}
-                  options={[
-                    { value: 'beginner',     label: 'Beginner' },
-                    { value: 'intermediate', label: 'Intermediate' },
-                    { value: 'advanced',     label: 'Advanced' },
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="mb-4">
-                <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Extra Context</label>
-              <textarea
-                value={formData.reasoning}
-                onChange={e => setFormData(p => ({ ...p, reasoning: e.target.value }))}
-                placeholder="What outcome should the reader reach by the end of the book?"
-                className="w-full glass-input rounded-md p-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none resize-none transition-all"
-                rows={3}
+          <div className="workspace-grid mt-6 md:grid-cols-2">
+            <div className="workspace-field">
+              <label className="workspace-field__label">Audience</label>
+              <input
+                type="text"
+                value={formData.targetAudience}
+                onChange={e => setFormData(p => ({ ...p, targetAudience: e.target.value }))}
+                placeholder="Beginners, operators, analysts..."
+                className="h-11 px-4 text-sm outline-none"
               />
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pt-4 border-t border-[var(--border-subtle)]">
-              <div>
-                <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Generation Mode</label>
-                <div className="relative flex p-1 card rounded-2xl h-12 overflow-hidden">
-                  {[
-                    { value: 'stellar',   label: 'Stellar', icon: Sparkles },
-                    { value: 'blackhole', label: 'Street',  icon: Crown },
-                  ].map(({ value, label, icon: Icon }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setFormData((p: BookSession) => ({
-                        ...p,
-                        generationMode: value as any,
-                        language: value === 'stellar' ? 'en' : p.language,
-                      }))}
-                      className={`relative z-10 flex-1 flex items-center justify-center gap-2 rounded-[1rem] px-3 text-[10px] font-bold transition-colors duration-200 ${
-                        formData.generationMode === value
-                          ? 'text-white'
-                          : 'text-white/50 hover:text-white/80'
-                      }`}
-                    >
-                      {formData.generationMode === value && (
-                        <motion.div
-                          layoutId="activeMode"
-                          className="absolute inset-0 rounded-[1rem] border border-white/8 bg-white/10 shadow-[0_10px_24px_rgba(255,255,255,0.06)]"
-                          transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
-                      <Icon size={14} className="relative z-10" />
-                      <span className="relative z-10">{label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold mb-2 text-[var(--text-secondary)] uppercase tracking-wider">Output Language</label>
-                <CustomSelect
-                  value={formData.language || 'en'}
-                  onChange={val => setFormData((p: BookSession) => ({ ...p, language: val as any }))}
-                  options={[
-                    { value: 'en', label: 'English (Standard)' },
-                    ...(formData.generationMode === 'blackhole' ? [
-                      { value: 'hi', label: 'Hindi (Tapori)' },
-                      { value: 'mr', label: 'Marathi (Tapori)' },
-                    ] : []),
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="mt-8 pt-4 border-t border-[var(--border-subtle)]">
-              <button
-                onClick={() => canGenerate ? handleCreateRoadmap(formData) : onOpenSettings()}
-                disabled={!formData.goal.trim() || localIsGenerating}
-                className="btn btn-primary w-full justify-center py-3"
-              >
-                {localIsGenerating ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> Building roadmap</>
-                ) : (
-                  <><Sparkles className="w-5 h-5" /> Create roadmap</>
-                )}
-              </button>
+            <div className="workspace-field">
+              <label className="workspace-field__label">Complexity level</label>
+              <CustomSelect
+                value={formData.complexityLevel || 'intermediate'}
+                onChange={val => setFormData(p => ({ ...p, complexityLevel: val as any }))}
+                options={[
+                  { value: 'beginner',     label: 'Beginner' },
+                  { value: 'intermediate', label: 'Intermediate' },
+                  { value: 'advanced',     label: 'Advanced' },
+                ]}
+              />
             </div>
           </div>
-        )}
 
-      </div>
+          <div className="workspace-field mt-5">
+            <label className="workspace-field__label">Extra context</label>
+            <textarea
+              value={formData.reasoning}
+              onChange={e => setFormData(p => ({ ...p, reasoning: e.target.value }))}
+              placeholder="What outcome should the reader reach by the end of the book?"
+              className="p-4 text-sm outline-none"
+              rows={4}
+            />
+          </div>
+
+          <div className="workspace-grid mt-6 border-t border-[var(--workspace-line)] pt-6 md:grid-cols-2">
+            <div className="workspace-field">
+              <label className="workspace-field__label">Generation mode</label>
+              <div className="relative flex h-12 overflow-hidden rounded-[18px] border border-[var(--workspace-line)] bg-[var(--workspace-soft)] p-1">
+                {[
+                  { value: 'stellar',   label: 'Stellar', icon: Sparkles },
+                  { value: 'blackhole', label: 'Street',  icon: Crown },
+                ].map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFormData((p: BookSession) => ({
+                      ...p,
+                      generationMode: value as any,
+                      language: value === 'stellar' ? 'en' : p.language,
+                    }))}
+                    className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-[14px] px-3 text-[11px] font-bold transition-colors duration-200 ${
+                      formData.generationMode === value
+                        ? 'text-[#14100b]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    {formData.generationMode === value && (
+                      <motion.div
+                        layoutId="activeMode"
+                        className="absolute inset-0 rounded-[14px] bg-[var(--brand)] shadow-[0_14px_24px_rgba(0,0,0,0.12)]"
+                        transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <Icon size={14} className="relative z-10" />
+                    <span className="relative z-10">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="workspace-field">
+              <label className="workspace-field__label">Output language</label>
+              <CustomSelect
+                value={formData.language || 'en'}
+                onChange={val => setFormData((p: BookSession) => ({ ...p, language: val as any }))}
+                options={[
+                  { value: 'en', label: 'English (Standard)' },
+                  ...(formData.generationMode === 'blackhole' ? [
+                    { value: 'hi', label: 'Hindi (Tapori)' },
+                    { value: 'mr', label: 'Marathi (Tapori)' },
+                  ] : []),
+                ]}
+              />
+            </div>
+          </div>
+
+          <div className="mt-8 border-t border-[var(--workspace-line)] pt-5">
+            <button
+              onClick={() => canGenerate ? handleCreateRoadmap(formData) : onOpenSettings()}
+              disabled={!formData.goal.trim() || localIsGenerating}
+              className="btn btn-primary w-full justify-center py-3"
+            >
+              {localIsGenerating ? (
+                <><Loader2 className="w-5 h-5 animate-spin" /> Building roadmap</>
+              ) : (
+                <><Sparkles className="w-5 h-5" /> Create roadmap</>
+              )}
+            </button>
+          </div>
+        </section>
+      )}
     </div>
   );
 };
@@ -787,88 +804,91 @@ const BookListGrid = ({
   const inProgressCount = books.filter(book => ['planning', 'generating_roadmap', 'roadmap_completed', 'generating_content', 'assembling'].includes(book.status)).length;
 
   return (
-    <div className="min-h-full pt-24">
-      <div className="mx-auto w-full max-w-6xl px-4 pb-12 md:px-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Library</p>
-            <h2 className="text-3xl font-bold tracking-[-0.05em] text-[var(--text-primary)] md:text-5xl">Your books</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">
-              Open any draft, review the finished exports, or start another run from the builder.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)] z-10 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search title or topic"
-                value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                className="glass-input h-11 w-64 rounded-full pl-10 pr-4 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
-              />
-            </div>
-            <button onClick={() => setShowListInMain(false)} className="btn btn-secondary px-4 py-2 text-xs">
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to Builder
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_320px]">
-          <div className="workspace-panel p-6">
-            <div className="flex items-center justify-between gap-4">
+    <div className="workspace-page workspace-stack">
+        <section className="workspace-hero">
+          <div className="workspace-hero__content">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Featured</p>
-                <h3 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
-                  {featuredBook ? featuredBook.title : 'No matching books'}
-                </h3>
+                <p className="workspace-eyebrow">Library</p>
+                <h2 className="workspace-title">Your books</h2>
+                <p className="workspace-body mt-4">
+                  Open a draft, review the finished export, or jump back to the builder to start another run.
+                </p>
               </div>
-              {featuredBook ? getStatusIcon(featuredBook.status) : null}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="workspace-search">
+                  <Search className="h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="Search title or topic"
+                    value={searchQuery}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                    className="text-sm outline-none"
+                  />
+                </div>
+                <button onClick={() => setShowListInMain(false)} className="btn btn-secondary px-4">
+                  <ArrowLeft className="w-3.5 h-3.5" /> Back to builder
+                </button>
+              </div>
             </div>
-            {featuredBook ? (
-              <>
-                <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">{featuredBook.goal}</p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+
+            <div className="workspace-grid workspace-grid--sidebar">
+              <div className="workspace-card p-5 md:p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Featured</p>
+                    <h3 className="mt-3 text-2xl font-bold tracking-[-0.04em] text-[var(--text-primary)]">
+                      {featuredBook ? featuredBook.title : 'No matching books'}
+                    </h3>
+                  </div>
+                  {featuredBook ? getStatusIcon(featuredBook.status) : null}
+                </div>
+                {featuredBook ? (
+                  <>
+                    <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">{featuredBook.goal}</p>
+                    <div className="workspace-metric-grid mt-6">
+                      {[
+                        { label: 'Status', value: STATUS_LABELS[featuredBook.status] },
+                        { label: 'Updated', value: new Date(featuredBook.updatedAt).toLocaleDateString() },
+                        { label: 'Words', value: `${(featuredBook.modules.reduce((a, m) => a + (m.wordCount || 0), 0) || featuredBook.totalWords || 0).toLocaleString()}` },
+                      ].map((item) => (
+                        <div key={item.label} className="workspace-metric-card">
+                          <span className="workspace-metric-card__label">{item.label}</span>
+                          <span className="workspace-metric-card__value">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-6">
+                      <GradientProgressBar progress={Math.min(100, Math.round(featuredBook.progress || 0))} />
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-4 rounded-2xl border border-dashed border-[var(--workspace-line)] px-4 py-6 text-sm text-[var(--text-secondary)]">
+                    Nothing matches that search yet.
+                  </div>
+                )}
+              </div>
+
+              <div className="workspace-card p-5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Overview</p>
+                <div className="workspace-metric-grid mt-4">
                   {[
-                    { label: 'Status', value: STATUS_LABELS[featuredBook.status] },
-                    { label: 'Updated', value: new Date(featuredBook.updatedAt).toLocaleDateString() },
-                    { label: 'Words', value: `${(featuredBook.modules.reduce((a, m) => a + (m.wordCount || 0), 0) || featuredBook.totalWords || 0).toLocaleString()}` },
+                    { label: 'Total books', value: books.length },
+                    { label: 'Completed', value: completedCount },
+                    { label: 'In progress', value: inProgressCount },
                   ].map((item) => (
-                    <div key={item.label} className="workspace-card px-4 py-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</p>
-                      <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{item.value}</p>
+                    <div key={item.label} className="workspace-metric-card">
+                      <span className="workspace-metric-card__label">{item.label}</span>
+                      <span className="workspace-metric-card__value">{item.value}</span>
                     </div>
                   ))}
                 </div>
-                <div className="mt-6">
-                  <GradientProgressBar progress={Math.min(100, Math.round(featuredBook.progress || 0))} />
-                </div>
-              </>
-            ) : (
-              <div className="mt-4 rounded-2xl border border-dashed border-[var(--workspace-line)] px-4 py-6 text-sm text-[var(--text-secondary)]">
-                Nothing matches that search yet.
               </div>
-            )}
-          </div>
-
-          <div className="workspace-panel p-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Overview</p>
-            <div className="mt-4 grid gap-3">
-              {[
-                { label: 'Total books', value: books.length },
-                { label: 'Completed', value: completedCount },
-                { label: 'In progress', value: inProgressCount },
-              ].map((item) => (
-                <div key={item.label} className="workspace-card px-4 py-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{item.label}</p>
-                  <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">{item.value}</p>
-                </div>
-              ))}
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="workspace-panel mt-8 overflow-hidden">
+        <section className="workspace-panel workspace-list-shell">
           {filtered.length === 0 ? (
             <div className="px-6 py-12 text-center">
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-[var(--workspace-line)] bg-white/[0.02]">
@@ -885,12 +905,16 @@ const BookListGrid = ({
               )}
             </div>
           ) : (
-            <div className="divide-y divide-[var(--workspace-line)]">
+            <div className="workspace-list">
               {filtered.map(book => {
                 const wordCount = book.modules.reduce((a, m) => a + (m.wordCount || 0), 0) || book.totalWords || 0;
                 const Icon = getBookIcon(book.title);
                 return (
-                  <div key={book.id} onClick={() => onSelectBook(book.id)} className="group flex cursor-pointer items-center gap-4 px-6 py-5 transition-colors hover:bg-white/[0.02]">
+                  <div
+                    key={book.id}
+                    onClick={() => onSelectBook(book.id)}
+                    className="workspace-list-row group cursor-pointer"
+                  >
                     <div className={`relative flex h-16 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--workspace-line)] ${getBookCoverTone(book.title)}`}>
                       <Icon className="h-4 w-4 text-white/45" />
                     </div>
@@ -900,21 +924,25 @@ const BookListGrid = ({
                         <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">{getStatusIcon(book.status)}{STATUS_LABELS[book.status]}</span>
                       </div>
                       <p className="mt-1 line-clamp-1 text-sm text-[var(--text-secondary)]">{book.goal}</p>
+                      <div className="workspace-list-row__meta mt-2">
+                        <span>{wordCount.toLocaleString()} words</span>
+                        <span>{new Date(book.updatedAt).toLocaleDateString()}</span>
+                      </div>
                     </div>
-                    <div className="hidden text-right text-[11px] text-[var(--text-muted)] md:block">
-                      <div>{wordCount.toLocaleString()} words</div>
-                      <div className="mt-1">{new Date(book.updatedAt).toLocaleDateString()}</div>
+                    <div className="workspace-list-row__actions">
+                      <button
+                        onClick={(e: React.MouseEvent) => { e.stopPropagation(); onDeleteBook(book.id); }}
+                        className="rounded-full p-2 text-[var(--text-muted)] opacity-0 transition-all hover:bg-red-500/10 hover:text-red-300 group-hover:opacity-100"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
-                    <button onClick={(e: React.MouseEvent) => { e.stopPropagation(); onDeleteBook(book.id); }} className="rounded-full p-2 text-[var(--text-muted)] opacity-0 transition-all hover:bg-red-500/10 hover:text-red-300 group-hover:opacity-100">
-                      <Trash2 size={13} />
-                    </button>
                   </div>
                 );
               })}
             </div>
           )}
-        </div>
-      </div>
+        </section>
     </div>
   );
 };
@@ -1165,53 +1193,65 @@ export function BookView({
     const estimatedReadTime = Math.max(10, Math.round(totalWords / 220));
 
     return (
-      <div className="min-h-[calc(100vh-48px)] bg-[var(--bg-base)]">
-        <div className="w-full max-w-6xl mx-auto px-6 pt-24 pb-10">
-          <div className="mb-8">
-            <button onClick={() => { setView('list'); onSelectBook(null); setShowListInMain(true); }}
-              className="mb-5 flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-widest">
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to Library
+      <div className="workspace-page workspace-page--detail workspace-stack">
+          <div className="workspace-stack">
+            <button
+              onClick={() => { setView('list'); onSelectBook(null); setShowListInMain(true); }}
+              className="flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to library
             </button>
 
-            <div className="workspace-panel overflow-hidden">
-              <div className="relative overflow-hidden border-b border-[var(--workspace-line)] p-7 md:p-8">
-                <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
+            <section className="workspace-hero">
+              <div className="workspace-hero__content">
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,360px)] lg:items-end">
                   <div>
-                    <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--text-muted)]">Book Workspace</p>
-                    <h1 className="mb-3 text-3xl font-bold tracking-[-0.04em] text-[var(--text-primary)] md:text-5xl md:leading-[1.02]">{currentBook.title}</h1>
-                    <p className="max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">{currentBook.goal}</p>
-                    <div className="mt-5 flex flex-wrap gap-2">
+                    <p className="workspace-eyebrow">Book workspace</p>
+                    <h1 className="workspace-title">{currentBook.title}</h1>
+                    <p className="workspace-body mt-4 max-w-3xl">{currentBook.goal}</p>
+                    <div className="workspace-chip-row mt-5">
                       {[
                         { icon: FileText, text: `${totalModuleCount} chapters` },
                         { icon: Sparkles, text: `${totalWords.toLocaleString()} words` },
                         { icon: Clock, text: `${estimatedReadTime} min read` },
                       ].map(({ icon: Icon, text }) => (
-                        <span key={text} className="inline-flex items-center gap-2 rounded-full border border-[var(--workspace-line)] bg-white/[0.02] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
-                          <Icon className="h-3 w-3" /> {text}
+                        <span key={text} className="workspace-chip">
+                          <Icon className="h-3.5 w-3.5 text-[var(--brand)]" />
+                          {text}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="workspace-metric-grid">
                     {[
-                      { label: 'Status', value: <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">{getStatusIcon(currentBook.status)}{getStatusText(currentBook.status)}</div> },
-                      { label: 'Progress', value: `${completedModules.length}/${totalModuleCount} chapters` },
-                      { label: 'Updated', value: new Date(currentBook.updatedAt).toLocaleDateString() },
-                      { label: 'Mode', value: currentBook.generationMode === 'blackhole' ? 'Street' : 'Stellar' },
-                    ].map(({ label, value }) => (
-                      <div key={label} className="workspace-card p-3">
-                        <p className="text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{label}</p>
-                        <div className="mt-1.5 text-xs font-semibold text-[var(--text-secondary)]">{value}</div>
+                      {
+                        label: 'Status',
+                        value: (
+                          <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+                            {getStatusIcon(currentBook.status)}
+                            {getStatusText(currentBook.status)}
+                          </div>
+                        ),
+                        meta: 'Current run state',
+                      },
+                      { label: 'Progress', value: `${completedModules.length}/${totalModuleCount}`, meta: 'Completed chapters' },
+                      { label: 'Updated', value: new Date(currentBook.updatedAt).toLocaleDateString(), meta: 'Most recent activity' },
+                      { label: 'Mode', value: currentBook.generationMode === 'blackhole' ? 'Street' : 'Stellar', meta: 'Generation personality' },
+                    ].map(({ label, value, meta }) => (
+                      <div key={label} className="workspace-metric-card">
+                        <span className="workspace-metric-card__label">{label}</span>
+                        <span className="workspace-metric-card__value">{value}</span>
+                        <span className="workspace-metric-card__meta">{meta}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-            </div>
+            </section>
           </div>
 
           {currentBook.status === 'completed' && (
-            <div className="mb-8 flex flex-wrap items-center gap-3">
+            <div className="workspace-toolbar-row">
               <DetailTabButton label="Overview"  Icon={ListChecks} isActive={detailTab === 'overview'}  onClick={() => setDetailTab('overview')} />
               <DetailTabButton label="Analytics" Icon={BarChart3}  isActive={detailTab === 'analytics'} onClick={() => setDetailTab('analytics')} />
               <DetailTabButton label="Read Book" Icon={BookText}   isActive={detailTab === 'read'}      onClick={() => setDetailTab('read')} />
@@ -1263,7 +1303,7 @@ export function BookView({
                 </div>
               )}
 
-              <div className="grid gap-10 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+              <div className="workspace-grid workspace-grid--sidebar">
                 {currentBook.roadmap && (
                   <div className="workspace-panel p-6">
                     <div className="mb-6 flex items-center justify-between gap-4">
@@ -1437,11 +1477,9 @@ export function BookView({
               </div>
             </>
           )}
-        </div>
       </div>
     );
   }
 
   return null;
 }
-

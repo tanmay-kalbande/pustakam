@@ -82,6 +82,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   const currentModelName = providerModels[currentModelIndex]?.name ?? settings.selectedModel;
   const activeProvider = PROVIDERS.find(provider => provider.id === settings.selectedProvider);
   const availableProviders = PROVIDERS.filter(provider => provider.isProxy || byokStorage.hasKey(provider.id));
+  const workspaceStatus = currentBook
+    ? currentBook.title
+    : 'Builder ready for your next roadmap';
 
   const cycleModel = (direction: 'up' | 'down') => {
     if (providerModels.length <= 1) return;
@@ -102,12 +105,14 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   return (
     <header className="workspace-topbar">
       <div className="workspace-topbar__inner">
-        <div className="flex min-w-0 items-center gap-3">
-          <img
-            src={theme === 'light' ? '/black-logo.png' : '/white-logo.png'}
-            alt="Pustakam"
-            className="h-7 w-7 shrink-0 opacity-95"
-          />
+        <div className="workspace-topbar__brand">
+          <div className="workspace-topbar__brandmark">
+            <img
+              src={theme === 'light' ? '/black-logo.png' : '/white-logo.png'}
+              alt="Pustakam"
+              className="h-7 w-7 shrink-0 opacity-95"
+            />
+          </div>
           <div className="min-w-0">
             <span className="workspace-topbar__label">{AI_SUITE_NAME}</span>
             <span className="workspace-topbar__title">
@@ -116,23 +121,24 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           </div>
         </div>
 
-        <div className="hidden min-w-0 flex-1 items-center justify-center px-4 lg:flex">
+        <div className="workspace-topbar__center">
           {centerContent ?? (
-            currentBook ? (
-              <div className="max-w-[320px] truncate text-sm font-medium text-[var(--text-secondary)]">
-                {currentBook.title}
-              </div>
-            ) : null
+            <div className="workspace-topbar__status">
+              <BookOpen size={14} className="text-[var(--brand)]" />
+              <span className="truncate">
+                <strong>{currentBook ? 'Open book:' : 'Workspace:'}</strong> {workspaceStatus}
+              </span>
+            </div>
           )}
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="workspace-topbar__actions">
           {showModelSelector && (
             <div className="hidden items-center gap-2 md:flex">
               <div className="relative">
                 <button
                   onClick={() => setShowProviderMenu(open => !open)}
-                  className="workspace-topbar__pill h-[54px] w-[210px] justify-between text-left"
+                  className="workspace-topbar__pill h-[48px] w-[218px] justify-between text-left"
                 >
                   <span className="min-w-0">
                     <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
@@ -151,7 +157,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 {showProviderMenu && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowProviderMenu(false)} />
-                    <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-[var(--workspace-line)] bg-[rgba(10,10,10,0.96)] p-2 shadow-[0_24px_48px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+                    <div className="workspace-topbar__menu absolute right-0 top-full z-50 mt-2 w-72 p-2">
                       <div className="border-b border-[var(--workspace-line)] px-3 py-3">
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                           Choose provider
@@ -176,10 +182,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                               className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors ${
                                 isActive
                                   ? 'border-[var(--brand)]/25 bg-[var(--brand)]/10'
-                                  : 'border-transparent bg-transparent hover:border-[var(--workspace-line)] hover:bg-white/[0.03]'
+                                  : 'border-transparent bg-transparent hover:border-[var(--workspace-line)] hover:bg-[var(--workspace-soft)]'
                               }`}
                             >
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/[0.03]">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--workspace-line)] bg-[var(--workspace-soft)]">
                                 <img
                                   src={`/providers/${provider.id}.svg`}
                                   alt={provider.name}
@@ -212,7 +218,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 )}
               </div>
 
-              <div className="workspace-topbar__section h-[54px] w-[250px] justify-between">
+              <div className="workspace-topbar__section h-[48px] w-[248px] justify-between">
                 <div className="min-w-0 flex-1 px-2">
                   <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                     Model
@@ -221,11 +227,11 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                     {currentModelName}
                   </span>
                 </div>
-                <div className="flex flex-col overflow-hidden rounded-[10px] border border-[var(--workspace-line)]">
+                <div className="flex flex-col overflow-hidden rounded-[12px] border border-[var(--workspace-line)] bg-[var(--workspace-soft)]">
                   <button
                     onClick={() => cycleModel('up')}
                     disabled={providerModels.length <= 1}
-                    className="flex h-[20px] w-8 items-center justify-center text-[var(--text-secondary)] transition-colors hover:bg-white/[0.04] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-25"
+                    className="flex h-[19px] w-8 items-center justify-center text-[var(--text-secondary)] transition-colors hover:bg-[var(--workspace-soft-strong)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-25"
                     title="Previous model"
                   >
                     <ChevronUp size={12} />
@@ -234,7 +240,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   <button
                     onClick={() => cycleModel('down')}
                     disabled={providerModels.length <= 1}
-                    className="flex h-[20px] w-8 items-center justify-center text-[var(--text-secondary)] transition-colors hover:bg-white/[0.04] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-25"
+                    className="flex h-[19px] w-8 items-center justify-center text-[var(--text-secondary)] transition-colors hover:bg-[var(--workspace-soft-strong)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-25"
                     title="Next model"
                   >
                     <ChevronDown size={12} />
@@ -245,7 +251,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           )}
 
           {quotaStatus ? (
-            <div className="workspace-topbar__pill hidden md:inline-flex">
+            <div className="workspace-topbar__pill hidden lg:inline-flex">
               <Zap size={14} className="text-[var(--brand)]" />
               <span className="text-xs font-semibold text-[var(--text-primary)]">
                 {quotaStatus.hasBYOK
@@ -254,6 +260,14 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               </span>
             </div>
           ) : null}
+
+          <button
+            onClick={onOpenSettings}
+            className="hidden md:inline-flex workspace-topbar__ghost"
+            title="Open settings"
+          >
+            <Settings size={16} />
+          </button>
 
           {theme === 'dark' ? (
             <button
@@ -296,7 +310,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               {showUserMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-                  <div className={`absolute right-0 top-full z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-[var(--workspace-line)] ${theme === 'light' ? 'bg-white/95 shadow-[0_20px_40px_rgba(0,0,0,0.08)]' : 'bg-[rgba(10,10,10,0.96)] shadow-[0_24px_48px_rgba(0,0,0,0.35)]'} backdrop-blur-xl`}>
+                  <div className="workspace-topbar__menu absolute right-0 top-full z-50 mt-2 w-60">
                     <div className="border-b border-[var(--workspace-line)] px-4 py-3">
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                         Signed in
@@ -310,7 +324,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                             onOpenDocs();
                             setShowUserMenu(false);
                           }}
-                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${theme === 'light' ? 'text-gray-600 hover:bg-gray-100' : 'text-[var(--text-secondary)] hover:bg-white/[0.03] hover:text-[var(--text-primary)]'}`}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--workspace-soft)] hover:text-[var(--text-primary)]"
                         >
                           <BookOpen size={15} />
                           Guide
@@ -322,7 +336,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                             onOpenAPIDocs();
                             setShowUserMenu(false);
                           }}
-                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${theme === 'light' ? 'text-gray-600 hover:bg-gray-100' : 'text-[var(--text-secondary)] hover:bg-white/[0.03] hover:text-[var(--text-primary)]'}`}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--workspace-soft)] hover:text-[var(--text-primary)]"
                         >
                           <Shield size={15} />
                           API Reference
@@ -333,7 +347,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                           onOpenSettings();
                           setShowUserMenu(false);
                         }}
-                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${theme === 'light' ? 'text-gray-600 hover:bg-gray-100 focus:bg-gray-100' : 'text-[var(--text-secondary)] hover:bg-white/[0.03] hover:text-[var(--text-primary)] focus:bg-white/[0.03]'}`}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--workspace-soft)] hover:text-[var(--text-primary)] focus:bg-[var(--workspace-soft)]"
                       >
                         <Settings size={15} />
                         Workspace settings
